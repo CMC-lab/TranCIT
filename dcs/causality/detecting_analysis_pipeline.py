@@ -1,7 +1,7 @@
 import pickle
 
 import numpy as np
-from BIC_Code.multi_trial_bic import multi_trial_BIC
+from src.bic import multi_trial_BIC
 from causality.time_varying import time_varying_causality
 from utils.finding_best_shrinked_locs import (find_best_shrinked_locs,
                                               shrink_locs_resample_uniform)
