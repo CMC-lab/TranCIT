@@ -130,7 +130,7 @@ def cs_nonzero_mean(X, morder, time_mode, diag_flag):
         if time_mode == 'inhomo':
             TE_residual_cov = np.zeros((T, 2))
             TE = np.zeros((T, 2))
-            Cs = np.zeros((T, 2))
+            CS = np.zeros((T, 2))
             GC = np.zeros((T, 2))
 
             for t in range(T):
@@ -156,15 +156,16 @@ def cs_nonzero_mean(X, morder, time_mode, diag_flag):
                     - c.T @ C_YXp[t] @ np.linalg.inv(cov_Xp_reg) @ C_YXp[t].T @ c
                 )
                 
-                epsilon = 1e-8
+                epsilon = 1e-6
                 cov_Yp[t] += epsilon * np.eye(cov_Yp[t].shape[0])
                 cov_Xp[t] += epsilon * np.eye(cov_Xp[t].shape[0])
 
                 # TE[t, 1] = 0.5 * np.log(TE_residual_cov[t, 1] / sigy)
                 # TE[t, 0] = 0.5 * np.log(TE_residual_cov[t, 0] / sigx)
             
-                TE[t, 1] = 0.5 * np.log(sigy + b.T @ cov_Xp[t] @ b - b.T @ C_XYp[t] @ np.linalg.inv(cov_Yp[t]) @ C_XYp[t].T @ b / sigy)
-                TE[t, 0] = 0.5 * np.log(sigx + c.T @ cov_Yp[t] @ c - c.T @ C_YXp[t] @ np.linalg.inv(cov_Xp[t]) @ C_YXp[t].T @ c / sigx)
+                
+                TE[t, 1] = 0.5 * np.log((sigy + b.T @ cov_Xp[t] @ b - b.T @ C_XYp[t] @ np.linalg.inv(cov_Yp[t]) @ C_XYp[t].T @ b) / sigy)
+                TE[t, 0] = 0.5 * np.log((sigx + c.T @ cov_Yp[t] @ c - c.T @ C_YXp[t] @ np.linalg.inv(cov_Xp[t]) @ C_YXp[t].T @ c) / sigx)
                 
                 # if not diag_flag:
                 #     Cs[t, 1] = 0.5 * np.log((sigy + b.T @ cov_Xp[t] @ b) / sigy)
@@ -174,11 +175,11 @@ def cs_nonzero_mean(X, morder, time_mode, diag_flag):
                 #     Cs[t, 0] = 0.5 * np.log((sigx + c.T @ np.diag(np.diag(cov_Yp[t])) @ c) / sigx)
                 
                 if not diag_flag:
-                    Cs[t, 1] = 0.5 * np.log((sigy + b.T @ cov_Xp_reg @ b) / sigy)
-                    Cs[t, 0] = 0.5 * np.log((sigx + c.T @ cov_Yp_reg @ c) / sigx)
+                    CS[t, 1] = 0.5 * np.log((sigy + b.T @ cov_Xp_reg @ b) / sigy)
+                    CS[t, 0] = 0.5 * np.log((sigx + c.T @ cov_Yp_reg @ c) / sigx)
                 else:
-                    Cs[t, 1] = 0.5 * np.log((sigy + b.T @ np.diag(np.diag(cov_Xp_reg)) @ b) / sigy)
-                    Cs[t, 0] = 0.5 * np.log((sigx + c.T @ np.diag(np.diag(cov_Yp_reg)) @ c) / sigx)
+                    CS[t, 1] = 0.5 * np.log((sigy + b.T @ np.diag(np.diag(cov_Xp_reg)) @ b) / sigy)
+                    CS[t, 0] = 0.5 * np.log((sigx + c.T @ np.diag(np.diag(cov_Yp_reg)) @ c) / sigx)
                     
                 GC[t, 1] = np.log(sigy_r / sigy)
                 GC[t, 0] = np.log(sigx_r / sigx)
@@ -208,16 +209,16 @@ def cs_nonzero_mean(X, morder, time_mode, diag_flag):
         epsilon = 1e-8
         cov_Yp += epsilon * np.eye(cov_Yp.shape[0])
         
-        TE[0, 1] = 0.5 * np.log(sigy + b.T @ Sig_Xp @ b - b.T @ C_XYp @ np.linalg.inv(Sig_Yp) @ C_XYp.T @ b / sigy)
-        TE[0, 0] = 0.5 * np.log(sigx + c.T @ Sig_Yp @ c - c.T @ C_YXp @ np.linalg.inv(Sig_Xp) @ C_YXp.T @ c / sigx)
+        TE[0, 1] = 0.5 * np.log((sigy + b.T @ Sig_Xp @ b - b.T @ C_XYp @ np.linalg.inv(Sig_Yp) @ C_XYp.T @ b) / sigy)
+        TE[0, 0] = 0.5 * np.log((sigx + c.T @ Sig_Yp @ c - c.T @ C_YXp @ np.linalg.inv(Sig_Xp) @ C_YXp.T @ c) / sigx)
         
-        Cs = np.zeros((1, 2))
+        CS = np.zeros((1, 2))
         if not diag_flag:
-            Cs[0, 1] = 0.5 * np.log((sigy + b.T @ cov_Xp @ b) / sigy)
-            Cs[0, 0] = 0.5 * np.log((sigx + c.T @ cov_Yp @ c) / sigx)
+            CS[0, 1] = 0.5 * np.log((sigy + b.T @ cov_Xp @ b) / sigy)
+            CS[0, 0] = 0.5 * np.log((sigx + c.T @ cov_Yp @ c) / sigx)
         else:
-            Cs[0, 1] = 0.5 * np.log((sigy + b.T @ np.diag(np.diag(cov_Xp)) @ b) / sigy)
-            Cs[0, 0] = 0.5 * np.log((sigx + c.T @ np.diag(np.diag(cov_Yp)) @ c) / sigx)
+            CS[0, 1] = 0.5 * np.log((sigy + b.T @ np.diag(np.diag(cov_Xp)) @ b) / sigy)
+            CS[0, 0] = 0.5 * np.log((sigx + c.T @ np.diag(np.diag(cov_Yp)) @ c) / sigx)
         
         GC = np.zeros((1, 2))
         GC[0, 1] = np.log(sigy_r / sigy)
@@ -231,6 +232,6 @@ def cs_nonzero_mean(X, morder, time_mode, diag_flag):
         # Concatenating along the first axis (equivalent to stacking rows)
         GC = np.vstack([nan_block, GC])
         TE = np.vstack([nan_block, TE])
-        Cs = np.vstack([nan_block, Cs])
+        CS = np.vstack([nan_block, CS])
 
-    return abs(Cs), abs(TE), abs(GC)
+    return CS, TE, GC, coeff_t, TE_residual_cov
