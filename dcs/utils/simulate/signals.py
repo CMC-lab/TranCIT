@@ -32,24 +32,42 @@ def generate_signals(T, Ntrial, h, gamma1, gamma2, Omega1, Omega2, apply_morlet=
     return X, ns_x, ns_y
 
 def morlet(start, end, num_points):
+    """
+    Generate a Morlet wavelet.
+    
+    Args:
+    start: Start frequency for the Morlet wavelet.
+    end: End frequency for the Morlet wavelet.
+    num_points: Length of the perturbation.
+    
+    Returns:
+    Morlet wavelet.
+    """
     t = np.linspace(start, end, num_points)
     w0 = 5
-    sigma = 1.0
-    return np.cos(w0 * t) * np.exp(-t**2 / (2 * sigma**2))
+    sigma = 1
+    # sigma = end / (2 * np.pi)  # Standard deviation for Gaussian
+    # sigma = (end - start) / (2 * pi);
+    
+    wavelet = np.exp(1j * w0 * t) * np.exp(-t ** 2 / (2 * (sigma ** 2)))
+    return np.real(wavelet)
 
 
-    # x = np.zeros(T + 1)
-    # y = np.zeros(T + 1)
-    # x[:2] = np.random.rand(2)  # Random initial values
-    # y[:2] = np.random.rand(2)  # Random initial values
-        
-    # Loop to update x and y over time
-    # for t in range(1, T-1):
-    #     # Update x and y using the given equations
-    #     x[t+1] = (2 - gamma1 * h) * x[t] + (-1 + gamma1 * h - h**2 * Omega1**2) * x[t-1] + h**2 * ns_x[t] * np.random.randn() + h**2 * c2 * y[t-1]
-    #     y[t+1] = (2 - gamma2 * h) * y[t] + (-1 + gamma2 * h - h**2 * Omega2**2) * y[t-1] + h**2 * ns_y[t] * np.random.randn() + h**2 * c1 * x[t-1]
-        
-    # Extract the relevant part of x and y (after t=500)
-    # u = np.array([x[501:], y[501:]])
-    # u = np.array([x[1:], y[1:]])
-    # X[:, :, N] = u  # Store in X array
+
+##  Numpy implementation of generate_signals
+
+# x = np.zeros(T + 1)
+# y = np.zeros(T + 1)
+# x[:2] = np.random.rand(2)  # Random initial values
+# y[:2] = np.random.rand(2)  # Random initial values
+    
+# Loop to update x and y over time
+# for t in range(1, T-1):
+#     # Update x and y using the given equations
+#     x[t+1] = (2 - gamma1 * h) * x[t] + (-1 + gamma1 * h - h**2 * Omega1**2) * x[t-1] + h**2 * ns_x[t] * np.random.randn() + h**2 * c2 * y[t-1]
+#     y[t+1] = (2 - gamma2 * h) * y[t] + (-1 + gamma2 * h - h**2 * Omega2**2) * y[t-1] + h**2 * ns_y[t] * np.random.randn() + h**2 * c1 * x[t-1]
+    
+# Extract the relevant part of x and y (after t=500)
+# u = np.array([x[501:], y[501:]])
+# u = np.array([x[1:], y[1:]])
+# X[:, :, N] = u  # Store in X array

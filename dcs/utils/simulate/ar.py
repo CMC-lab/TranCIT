@@ -100,3 +100,27 @@ def simul_AR_event(simobj, Yt_stats):
             Yt_event[nvar * delay:nvar * (delay + 1), :, n] = y[:, morder - delay:L - delay + morder]
 
     return Yt_event
+
+def simul_AR_kaidi_nonstat_innomean(A, SIG, innomean, morder):
+    """
+    Simulate a non-stationary autoregressive (AR) process with innovations.
+    
+    Args:
+    A: Coefficient matrix of the AR process.
+    SIG: Covariance matrix of the innovations.
+    innomean: Innovations (input mean).
+    morder: Number of lags in the AR model.
+    
+    Returns:
+    y: Simulated AR process (nvar x L).
+    """
+    
+    nvar, L = innomean.shape
+    y = np.random.multivariate_normal(mean=np.zeros(2), cov=SIG, size=L).T
+    y += innomean
+
+    for t in range(morder+1, L):
+        temp = np.flip(y[:, t - morder:t], axis=1).flatten()
+        y[:, t] += A @ temp
+    
+    return y

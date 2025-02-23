@@ -1,10 +1,26 @@
 import numpy as np
-# from causality.detecting_analysis_pipeline import \
-#     snapshot_detect_analysis_pipeline
-from utils.core.getting_Yt import get_Yt_stats
+from dcs.utils.core.getting_Yt import get_Yt_stats
 
 
 def BIC_compare(Yt_events, morder, BICParser):
+    """
+    Compare Bayesian Information Criterion (BIC) for biased and debiased models.
+    
+    Args:
+    Yt_events : np.ndarray
+        The event data with shape (nvar * (morder + 1), nobs, ntrials).
+    morder : int
+        The model order.
+    BICParser : object
+        An object containing BIC parameters.
+    
+    Returns:
+    logL : float
+        Log-likelihood.
+    sum_detHess : float
+        Sum of the log determinant of Hessian.
+    """
+    
     temp, nobs, ntrials = Yt_events.shape
     nvar = temp // (morder + 1)
 
@@ -29,16 +45,34 @@ def BIC_compare(Yt_events, morder, BICParser):
             DSIG[t] = np.prod(np.diag(np.squeeze(Yt_stats['OLS']['Sigma_Et'][t, :, :])))
         elif BICParser['EstimMode'] == 'RLS':
             DSIG[t] = np.prod(np.diag(np.squeeze(Yt_stats['RLS']['Sigma_Et'][t, :, :])))
-        log_detHess[t] = morder * nvar**2 * np.log(ntrials) + nvar * np.log(np.linalg.det(C_0)) - nvar * morder * np.log(DSIG[t])
+        log_detHess[t] = (morder * nvar**2 * np.log(ntrials) + 
+                          nvar * np.log(np.linalg.det(C_0)) - 
+                          nvar * morder * np.log(DSIG[t]))
 
-    logL = -0.5 * nobs * nvar * np.log(2 * np.pi) - 0.5 * np.sum(np.log(DSIG)) - 0.5 * nobs * nvar
+    logL = (-0.5 * nobs * nvar * np.log(2 * np.pi) - 
+            0.5 * np.sum(np.log(DSIG)) -
+            0.5 * nobs * nvar)
     sum_detHess = np.sum(log_detHess)
 
     return logL, sum_detHess
 
 
 def multi_trial_BIC(Yt_events_momax, BICParser):
-    momax = BICParser['Params']['BIC']['momax']
+    """
+    Calculate BIC (Bayesian Information Criterion) for multiple trial event data and model orders.
+    
+    Args:
+    Yt_events_momax : np.ndarray
+        The time series data with shape (nvar * (mo + 1), nobs, ntrials)
+    BICParser : object
+        The object containing the BIC parameters (including model order, `Params.BIC.momax`)
+    
+    Returns:
+    BICoutputs : dict
+        Dictionary containing BIC values and associated metrics
+    """
+    
+    momax = BICParser.Params.BIC.momax
     temp, nobs, ntrials = Yt_events_momax.shape
     nvar = temp // (momax + 1)
 
@@ -46,7 +80,8 @@ def multi_trial_BIC(Yt_events_momax, BICParser):
         'bic': np.full((momax, 4), np.nan),
         'pt_bic': np.full((momax, 4), np.nan),
         'logL': np.full(momax, np.nan),
-        'sum_detHess': np.full(momax, np.nan)
+        'sum_detHess': np.full(momax, np.nan),
+        'mobic': None
     }
 
     for mo in range(1, momax + 1):
@@ -55,10 +90,10 @@ def multi_trial_BIC(Yt_events_momax, BICParser):
 
         BICoutputs['logL'][mo - 1], BICoutputs['sum_detHess'][mo - 1] = BIC_compare(X, mo, BICParser)
 
-        BICoutputs['pt_bic'][mo - 1, 0] = 0.5 * nobs * mo * nvar * nvar * np.log(ntrials)
+        BICoutputs['pt_bic'][mo - 1, 0] = 0.5 * nobs * mo * nvar**2 * np.log(ntrials)
         BICoutputs['pt_bic'][mo - 1, 1] = 0.5 * BICoutputs['sum_detHess'][mo - 1]
-        BICoutputs['pt_bic'][mo - 1, 2] = 0.5 * nobs * mo * nvar * nvar * np.log(ntrials * nobs)
-        BICoutputs['pt_bic'][mo - 1, 3] = 0.5 * mo * nvar * nvar * np.log(ntrials * nobs)
+        BICoutputs['pt_bic'][mo - 1, 2] = 0.5 * nobs * mo * nvar**2 * np.log(ntrials * nobs)
+        BICoutputs['pt_bic'][mo - 1, 3] = 0.5 * mo * nvar**2 * np.log(ntrials * nobs)
 
         BICoutputs['bic'][mo - 1, 0] = - BICoutputs['logL'][mo - 1] * ntrials + BICoutputs['pt_bic'][mo - 1, 0]
         BICoutputs['bic'][mo - 1, 1] = - BICoutputs['logL'][mo - 1] * ntrials + BICoutputs['pt_bic'][mo - 1, 1]

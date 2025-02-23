@@ -1,6 +1,6 @@
 import numpy as np
-# from extracting_events import extract_events
-from utils.estimating_residuals import estimate_residuals
+from .residuals import estimate_residuals
+
 
 def get_Yt_stats_cond(Yt_event, mo):
     """
@@ -44,29 +44,6 @@ def get_Yt_stats_cond(Yt_event, mo):
     return Yt_stats_cond
 
 
-# def extract_events(A, cumP, L_start, L):
-#     A_event = np.full((L, len(cumP)), np.nan)
-    
-#     for i in range(len(cumP)):
-#         idx = np.arange(cumP[i] - L_start + 1, cumP[i] + L - L_start + 1).astype(int)  # Ensure idx is integer
-#         A_event[:, i] = A[idx]
-    
-#     return A_event
-
-def extract_events(A, cumP, L_start, L):
-    A_event = np.full((L, len(cumP)), np.nan)
-    
-    for i in range(len(cumP)):
-        start_idx = int(np.round(cumP[i] - L_start + 1))
-        end_idx = int(np.round(cumP[i] + L - L_start + 1))
-        idx = np.arange(start_idx, end_idx).astype(int)
-
-        if np.any(idx < 0) or np.any(idx >= len(A)):
-            raise IndexError(f"Index out of bounds: {idx} for array of length {len(A)}")
-        A_event[:, i] = A[idx]
-    
-    return A_event
-
 def get_Yt(y, loc, mo, tau, L_start, L_extract):
     nvar = y.shape[0]
     Yt = np.full((nvar * (mo + 1), L_extract, len(loc)), np.nan)
@@ -79,6 +56,23 @@ def get_Yt(y, loc, mo, tau, L_start, L_extract):
         Yt[idx1[n], :, :] = extract_events(y[idx2[n], :], loc - delay[n], L_start, L_extract)
     
     return Yt
+
+
+def extract_events(A, cumP, L_start, L):
+    A_event = np.full((L, len(cumP)), np.nan)
+    
+    for i in range(len(cumP)):
+        start_idx = int(np.round(cumP[i] - L_start + 1))
+        end_idx = int(np.round(cumP[i] + L - L_start + 1))
+        idx = np.arange(start_idx, end_idx).astype(int)
+
+        if np.any(idx < 0) or np.any(idx >= len(A)):
+            raise IndexError(f"Index out of bounds: {idx} for array of length {len(A)}")
+        
+        A_event[:, i] = A[idx]
+    
+    return A_event
+
 
 # def get_Yt_stats(Yt_event, mo):
 #     nvar = Yt_event.shape[0] // (mo + 1)
