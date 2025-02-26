@@ -74,31 +74,6 @@ def extract_events(A, cumP, L_start, L):
     return A_event
 
 
-# def get_Yt_stats(Yt_event, mo):
-#     nvar = Yt_event.shape[0] // (mo + 1)
-#     Yt_stats_cond = {}
-
-#     Yt_stats_cond['mean'] = np.mean(Yt_event, axis=2)
-#     Yt_stats_cond['Ntrials'] = Yt_event.shape[2]
-
-#     Yt_stats_cond['Sigma'] = np.zeros((Yt_event.shape[1], nvar * (mo + 1), nvar * (mo + 1)))
-#     Yt_stats_cond['OLS'] = {'At': np.zeros((Yt_event.shape[1], nvar, nvar * mo))}
-
-#     for t in range(Yt_event.shape[1]):
-#         temp = Yt_event[:, t, :] - Yt_stats_cond['mean'][:, t][:, np.newaxis]
-#         Yt_stats_cond['Sigma'][t, :, :] = np.dot(temp, temp.T) / Yt_event.shape[2]
-#         Yt_stats_cond['OLS']['At'][t, :, :] = np.reshape(
-#             np.linalg.solve(
-#                 Yt_stats_cond['Sigma'][t, nvar:nvar * (mo + 1), nvar:nvar * (mo + 1)],
-#                 Yt_stats_cond['Sigma'][t, :nvar, nvar:nvar * (mo + 1)]
-#             ).T,
-#             (nvar, nvar * mo)
-#         )
-
-#     Yt_stats_cond['OLS']['bt'], Yt_stats_cond['OLS']['Sigma_Et'], Yt_stats_cond['OLS']['sigma_Et'] = estimate_residuals(Yt_stats_cond)
-
-#     return Yt_stats_cond
-
 def get_Yt_stats(Yt_event, mo):
     nvar = Yt_event.shape[0] // (mo + 1)
     Yt_stats_cond = {}
@@ -129,3 +104,28 @@ def get_Yt_stats(Yt_event, mo):
     Yt_stats_cond['OLS']['bt'], Yt_stats_cond['OLS']['Sigma_Et'], Yt_stats_cond['OLS']['sigma_Et'] = estimate_residuals(Yt_stats_cond)
 
     return Yt_stats_cond
+
+# def get_Yt_stats(Yt_event, mo):
+#     nvar = Yt_event.shape[0] // (mo + 1)
+#     Yt_stats_cond = {}
+
+#     Yt_stats_cond['mean'] = np.mean(Yt_event, axis=2)
+#     Yt_stats_cond['Ntrials'] = Yt_event.shape[2]
+
+#     Yt_stats_cond['Sigma'] = np.zeros((Yt_event.shape[1], nvar * (mo + 1), nvar * (mo + 1)))
+#     Yt_stats_cond['OLS'] = {'At': np.zeros((Yt_event.shape[1], nvar, nvar * mo))}
+
+#     for t in range(Yt_event.shape[1]):
+#         temp = Yt_event[:, t, :] - Yt_stats_cond['mean'][:, t][:, np.newaxis]
+#         Yt_stats_cond['Sigma'][t, :, :] = np.dot(temp, temp.T) / Yt_event.shape[2]
+#         Yt_stats_cond['OLS']['At'][t, :, :] = np.reshape(
+#             np.linalg.solve(
+#                 Yt_stats_cond['Sigma'][t, nvar:nvar * (mo + 1), nvar:nvar * (mo + 1)],
+#                 Yt_stats_cond['Sigma'][t, :nvar, nvar:nvar * (mo + 1)]
+#             ).T,
+#             (nvar, nvar * mo)
+#         )
+
+#     Yt_stats_cond['OLS']['bt'], Yt_stats_cond['OLS']['Sigma_Et'], Yt_stats_cond['OLS']['sigma_Et'] = estimate_residuals(Yt_stats_cond)
+
+#     return Yt_stats_cond
