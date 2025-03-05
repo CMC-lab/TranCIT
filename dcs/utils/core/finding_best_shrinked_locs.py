@@ -13,7 +13,7 @@ def find_best_shrinked_locs(D, shrinked_locs, all_locs):
         distance[n] = euclidean(Nfull, Ntemp)
 
     best_n = np.nanargmin(distance)
-    best_locs = shrinked_locs[:best_n + 1]
+    best_locs = shrinked_locs[:best_n]
 
     return best_locs, distance
 
