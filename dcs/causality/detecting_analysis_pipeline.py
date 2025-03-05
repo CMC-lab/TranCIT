@@ -1,16 +1,14 @@
-import pickle
-
 import numpy as np
-from src.bic import multi_trial_BIC
-from causality.time_varying import time_varying_causality
-from utils.finding_best_shrinked_locs import (find_best_shrinked_locs,
-                                              shrink_locs_resample_uniform)
-from utils.finding_peak_loc import find_peak_loc
-from utils.getting_Yt import get_Yt, get_Yt_stats
-from utils.removing_artif_trials import remove_artif_trials
-from utils.getting_residuals import get_residuals
-from utils.simulate_ar_event import simul_AR_event_btsp, simul_AR_event
-from utils.simulate_timefreq import get_simul_timefreq
+from dcs.causality.time_varying import time_varying_causality
+from dcs.src.bic import multi_trial_BIC
+from dcs.utils.core.finding_best_shrinked_locs import (
+    find_best_shrinked_locs, shrink_locs_resample_uniform)
+from dcs.utils.core.finding_peak_loc import find_peak_loc
+from dcs.utils.core.getting_Yt import get_Yt, get_Yt_stats
+from dcs.utils.core.residuals import get_residuals
+from dcs.utils.preprocessing.removing_artif_trials import remove_artif_trials
+from dcs.utils.simulate.ar import simul_AR_event, simul_AR_event_btsp
+from dcs.utils.simulate.timefreq import get_simul_timefreq
 
 
 def snapshot_detect_analysis_pipeline(OriSignal, DetSignal, Params):
@@ -60,6 +58,7 @@ def snapshot_detect_analysis_pipeline(OriSignal, DetSignal, Params):
 
     # EXTRACT EVENT SNAPSHOTS
     Yt_events = get_Yt(OriSignal, locs, morder, Params['BIC']['tau'], Params['Detection']['L_start'], Params['Detection']['L_extract'])
+
     if Params['Detection']['remove_artif']:
         Yt_events, locs = remove_artif_trials(Yt_events, locs, -15000)
 
@@ -105,19 +104,16 @@ def snapshot_detect_analysis_pipeline(OriSignal, DetSignal, Params):
             Params['PSD']['simobj']['morder'] = morder
             Yt_events_mc = simul_AR_event(Params['PSD']['simobj'], Yt_stats)
             Yt_stats = get_simul_timefreq(Yt_events_mc, Yt_stats, Params['PSD'])
-            
-    # SAVE RESULTS
-    if Params['Options']['Detection']:
-        SnapAnalyOutput['d0'] = d0
     
+    # SAVE RESULTS    
+    
+    SnapAnalyOutput["d0"] = d0 if Params["Options"]["Detection"] else None
     SnapAnalyOutput['locs'] = locs
     SnapAnalyOutput['morder'] = morder
     SnapAnalyOutput['Yt_stats'] = Yt_stats
     
-    if Params["Options"]["CausalAnalysis"]:
-        SnapAnalyOutput['CausalOutput'] = CausalOutput
-    if Params['Options']['BIC']:
-        SnapAnalyOutput['BICoutputs'] = BICoutputs
+    SnapAnalyOutput['CausalOutput'] = CausalOutput if Params["Options"]["CausalAnalysis"] else None
+    SnapAnalyOutput['BICoutputs']   = BICoutputs if Params['Options']['BIC'] else None
 
     # OUTPUT
     if Params['Options']['save_flag']:
@@ -128,11 +124,18 @@ def snapshot_detect_analysis_pipeline(OriSignal, DetSignal, Params):
         file_keyword = Params['Output']['FileKeyword']
         if Params['Options']['PSD']:
             PSD = Yt_stats['spectr']
-            np.savez_compressed(f"{file_keyword}_psd.npz", Params=Params, PSD=PSD)
+            np.savez_compressed(f"{file_keyword}_psd.npz", 
+                                Params=Params, 
+                                PSD=PSD)
         else:
             if Params["Options"]["CausalAnalysis"]:
-                np.savez_compressed(f"{file_keyword}_model_causality.npz", Params=Params, Yt_stats=Yt_stats, CausalOutput=CausalOutput)
+                np.savez_compressed(f"{file_keyword}_model_causality.npz", 
+                                    Params=Params, 
+                                    Yt_stats=Yt_stats, 
+                                    CausalOutput=CausalOutput)
             else:
-                np.savez_compressed(f"{file_keyword}_model.npz", Params=Params, Yt_stats=Yt_stats)
+                np.savez_compressed(f"{file_keyword}_model.npz", 
+                                    Params=Params, 
+                                    Yt_stats=Yt_stats)
 
     return SnapAnalyOutput, Params, Yt_events
