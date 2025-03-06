@@ -9,8 +9,9 @@ def time_varying_causality(Yt_event, Yt_stats, CausalParams):
     # Yt = Yt - mean_Yt
     # diag_flag = 0
 
-    CausalOutput = {'TE': np.zeros((nobs, 2)), 'DCS': np.zeros(
-        (nobs, 2)), 'rDCS': np.zeros((nobs, 2))}
+    CausalOutput = {'TE': np.zeros((nobs, 2)),
+                    'DCS': np.zeros((nobs, 2)),
+                    'rDCS': np.zeros((nobs, 2))}
 
     for t in range(nobs):
         Xt = Yt_event[0:1, t, :]
@@ -41,6 +42,12 @@ def time_varying_causality(Yt_event, Yt_stats, CausalParams):
         mean_Xp = Yt_stats['mean'][3::2, t]
         mean_Yp = Yt_stats['mean'][2::2, t]
 
+        if sigy == 0:
+            # Smallest positive float to avoid divide by zero
+            sigy = np.finfo(float).eps
+        if sigx == 0:
+            sigx = np.finfo(float).eps
+            
         CausalOutput['TE'][t, 1] = 0.5 * np.log(
             (sigy + b.T @ cov_Xp @ b - b.T @ C_XYp @ np.linalg.inv(cov_Yp) @ C_XYp.T @ b) / sigy)
         CausalOutput['TE'][t, 0] = 0.5 * np.log(
@@ -62,12 +69,6 @@ def time_varying_causality(Yt_event, Yt_stats, CausalParams):
         cov_Xp_lag = np.dot(Xp - np.mean(Yt_stats['mean'][2:, ref_time], axis=1)[:, np.newaxis],
                             (Xp - np.mean(Yt_stats['mean'][2:, ref_time], axis=1)[:, np.newaxis]).T) / ntrials
 
-        if sigy == 0:
-            # Smallest positive float to avoid divide by zero
-            sigy = np.finfo(float).eps
-        if sigx == 0:
-            sigx = np.finfo(float).eps
-
         if not CausalParams['diag_flag']:
             CausalOutput['DCS'][t, 1] = 0.5 * \
                 np.log((sigy + b.T @ cov_Xp @ b) / sigy)
@@ -76,7 +77,7 @@ def time_varying_causality(Yt_event, Yt_stats, CausalParams):
 
             if CausalParams['old_version']:
                 CausalOutput['rDCS'][t, 1] = 0.5 * np.log((sigy + b.T @ np.mean(Yt_stats['Sigma'][ref_time, 3::2, 3::2], axis=0) @ b) / sigy) - 0.5 + \
-                    0.5 * (sigy + b.T @ cov_Xp_lag[1::2, 1::2] @ b) / (
+                        0.5 * (sigy + b.T @ cov_Xp_lag[1::2, 1::2] @ b) / (
                         sigy + b.T @ np.mean(Yt_stats['Sigma'][ref_time, 3::2, 3::2], axis=0) @ b)
 
                 CausalOutput['rDCS'][t, 0] = 0.5 * np.log((sigx + c.T @ np.mean(Yt_stats['Sigma'][ref_time, 2::2, 2::2], axis=0) @ c) / sigx) - 0.5 + \
