@@ -85,7 +85,7 @@ def simul_AR_event(simobj, Yt_stats):
             y[:, t] = np.random.multivariate_normal(Yt_stats['OLS']['bt'][:, t], sigma)
 
         # Initialize with a random starting point from Yt_stats mean and covariance
-        rand_Yt0 = np.random.multivariate_normal(Yt_stats['mean'][:, 0], Yt_stats['Sigma'][0])
+        rand_Yt0 = np.random.multivariate_normal(Yt_stats['mean'][:, 0], Yt_stats['Sigma'][0, :, :])
         y = np.hstack([np.flipud(rand_Yt0[nvar:].reshape(nvar, morder)), y])
 
         # Apply AR process
