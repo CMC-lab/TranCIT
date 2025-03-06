@@ -120,7 +120,8 @@ def simul_AR_kaidi_nonstat_innomean(A, SIG, innomean, morder):
     y += innomean
 
     for t in range(morder+1, L):
-        temp = np.flip(y[:, t - morder:t], axis=1).flatten()
-        y[:, t] += A @ temp
+        
+        temp = np.flip(y[:, t - morder:t], axis=1).reshape(nvar * morder, 1)
+        y[:, t] += (A @ temp).squeeze()
     
     return y

@@ -58,7 +58,6 @@ def genvar_nonstat(A, SIG, morder, nvar, L_event, amp, dim, L_perturb, center):
     else:
         Imp_shape = amp * morlet(-4, 4, L_perturb) # 101 point long morlet wave
     
-    
     start_idx = center - (L_perturb // 2)
     end_idx = center + (L_perturb // 2)
     
@@ -67,12 +66,14 @@ def genvar_nonstat(A, SIG, morder, nvar, L_event, amp, dim, L_perturb, center):
     Imp[dim, start_idx:end_idx] = Imp_shape
     
     for t in range(morder , L_event):
-        # X_lag = np.flip(X[:, t - morder:t], axis=1).reshape(nvar * morder, 1)
-        X_lag = np.flip(X[:, t - morder:t]).flatten()
+        X_lag = np.flip(X[:, t - morder:t], axis=1).reshape(nvar * morder, 1)
+        X_lag
+        # X_lag = np.flip(X[:, t - morder:t]).flatten()
         
-        X[:, t] += A @ X_lag
         # X[:, t] += np.dot(A, X_lag).flatten()
-        X[:, t] += Imp[:, t - morder]
+        X[:, t] = X[:, t] + (A @ X_lag).flatten()
+        X[:, t] = X[:, t] + Imp[:, t - morder]
+        
     
-    X = X[:, morder:]    
+    X = X[:, morder:]
     return X, Imp
