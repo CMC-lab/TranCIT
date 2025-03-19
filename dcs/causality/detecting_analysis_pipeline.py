@@ -106,7 +106,7 @@ def snapshot_detect_analysis_pipeline(OriSignal, DetSignal, Params):
             Yt_stats = get_simul_timefreq(Yt_events_mc, Yt_stats, Params['PSD'])
     
     # SAVE RESULTS    
-    
+
     SnapAnalyOutput["d0"] = d0 if Params["Options"]["Detection"] else None
     SnapAnalyOutput['locs'] = locs
     SnapAnalyOutput['morder'] = morder
@@ -129,10 +129,11 @@ def snapshot_detect_analysis_pipeline(OriSignal, DetSignal, Params):
                                 PSD=PSD)
         else:
             if Params["Options"]["CausalAnalysis"]:
-                np.savez_compressed(f"{file_keyword}_model_causality.npz", 
+                np.savez_compressed(f"{file_keyword}_causality.npz", 
                                     Params=Params, 
                                     Yt_stats=Yt_stats, 
-                                    CausalOutput=CausalOutput)
+                                    CausalOutput=CausalOutput,
+                                    SnapAnalyOutput=SnapAnalyOutput)
             else:
                 np.savez_compressed(f"{file_keyword}_model.npz", 
                                     Params=Params, 

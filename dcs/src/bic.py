@@ -72,7 +72,7 @@ def multi_trial_BIC(Yt_events_momax, BICParser):
         Dictionary containing BIC values and associated metrics
     """
     
-    momax = BICParser.Params.BIC.momax
+    momax = BICParser["Params"]["BIC"]["momax"]
     temp, nobs, ntrials = Yt_events_momax.shape
     nvar = temp // (momax + 1)
 
