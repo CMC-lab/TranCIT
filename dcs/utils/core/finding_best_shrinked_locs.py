@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.spatial.distance import euclidean
+from scipy.spatial.distance import euclidean, cdist
 
 
 def find_best_shrinked_locs(D, shrinked_locs, all_locs):
@@ -10,7 +10,8 @@ def find_best_shrinked_locs(D, shrinked_locs, all_locs):
     
     for n in range(100, len(shrinked_locs)):
         Ntemp, _ = np.histogram(D[shrinked_locs[:n]], bins=100, density=True)
-        distance[n] = euclidean(Nfull, Ntemp)
+        # distance[n] = euclidean(Nfull, Ntemp)
+        distance[n] = cdist(Nfull.reshape(1, -1), Ntemp.reshape(1, -1))[0, 0]
 
     best_n = np.nanargmin(distance)
     best_locs = shrinked_locs[:best_n]
@@ -27,9 +28,13 @@ def shrink_locs_resample_uniform(loc, L):
     while Ngen < maxNgen:
         if loc_range.size == 0:
             break
-        selected_loc = loc_range[np.random.randint(0, len(loc_range))]
+        
+        rand_idx = np.random.randint(0, len(loc_range))
+        selected_loc = loc_range[rand_idx]
         shrinked_locs[Ngen] = selected_loc
-        loc_range = loc_range[np.abs(selected_loc - loc_range) >= L]
+        
+        mask = np.abs(selected_loc - loc_range) >= L
+        loc_range = loc_range[mask]
 
         Ngen += 1
 

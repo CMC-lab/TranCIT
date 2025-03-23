@@ -30,22 +30,23 @@ def simul_AR_event_btsp(simobj, Yt_event, Yt_stats, Et):
         
         # Fill y with bootstrapped residuals
         for t in range(L):
-            y[:, t] = Et[:, t, np.random.randint(Yt_event.shape[2])]
+            rand_trial = np.random.randint(0, Yt_event.shape[2])
+            y[:, t] = Et[:, t, rand_trial]  # Shape: (nvar,)
         
-        # Random initial conditions from Yt_event
-        rand_Yt0 = Yt_event[:, 0, np.random.randint(Yt_event.shape[2])]
-        y = np.hstack([np.fliplr(rand_Yt0[2:].reshape(nvar, morder)), y])
+        rand_trial = np.random.randint(0, Yt_event.shape[2])
+        rand_Yt0 = Yt_event[:, 0, rand_trial]  # Shape: (nvar*(morder+1),)
+        lagged_vars = rand_Yt0[2:].reshape(2, simobj['morder'])[::-1]  # Shape: (2, morder), reversed
+        y = np.hstack((lagged_vars, y))  # Shape: (nvar, morder + L
         
-        # Apply AR process
         for ktime in range(morder, y.shape[1]):
-            coeff = Yt_stats['OLS']['At'][ktime - morder].reshape(nvar, nvar, morder)
+            coeff = Yt_stats['OLS']['At'][ktime - morder, :, :].reshape(nvar, nvar, morder)
             for kdelay in range(1, morder + 1):
                 y[:, ktime] += np.dot(coeff[:, :, kdelay - 1], y[:, ktime - kdelay])
         
-        # Fill Yt_event_btsp for each delay
-        Yt_event_btsp[:nvar, :, n] = y[:, morder:]
-        for delay in range(1, morder + 1):
-            Yt_event_btsp[nvar * delay:nvar * (delay + 1), :, n] = y[:, morder - delay:-delay]
+        for delay in range(simobj['morder']):
+            start_idx = nvar * delay
+            end_idx = nvar * (delay + 1)
+            Yt_event_btsp[start_idx:end_idx, :, n] = y[:, morder - delay - 1:-(delay + 1)]
     
     return Yt_event_btsp
 
@@ -79,22 +80,18 @@ def simul_AR_event(simobj, Yt_stats):
         # Generate innovations with covariance sigma at each time point
         for t in range(L):
             sigma = np.round(Yt_stats['OLS']['Sigma_Et'][t], 2)
-            # Fallback handling if covariance is singular
             if np.linalg.cond(sigma) > 1 / np.finfo(sigma.dtype).eps:
                 sigma = 0.5 * (Yt_stats['OLS']['Sigma_Et'][t - 1] + Yt_stats['OLS']['Sigma_Et'][t + 1])
             y[:, t] = np.random.multivariate_normal(Yt_stats['OLS']['bt'][:, t], sigma)
 
-        # Initialize with a random starting point from Yt_stats mean and covariance
         rand_Yt0 = np.random.multivariate_normal(Yt_stats['mean'][:, 0], Yt_stats['Sigma'][0, :, :])
         y = np.hstack([np.flipud(rand_Yt0[nvar:].reshape(nvar, morder)), y])
 
-        # Apply AR process
         for ktime in range(morder, y.shape[1]):
             coeff = Yt_stats['OLS']['At'][ktime - morder].reshape(nvar, nvar, morder)
             for kdelay in range(morder):
                 y[:, ktime] += coeff[:, :, kdelay] @ y[:, ktime - kdelay - 1]
 
-        # Store simulated event for each delay
         Yt_event[:nvar, :, n] = y[:, morder:]
         for delay in range(1, morder + 1):
             Yt_event[nvar * delay:nvar * (delay + 1), :, n] = y[:, morder - delay:L - delay + morder]

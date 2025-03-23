@@ -18,7 +18,7 @@ def snapshot_detect_analysis_pipeline(OriSignal, DetSignal, Params):
         # SET THRESHOLD
         D = DetSignal[0]
         d0 = Params['Detection'].get('d0', np.nanmean(D) + Params['Detection']['ThresRatio'] * np.nanstd(D))
-
+                
         # FIND REFERENCE POINTS
         temp_loc = np.where(D >= d0)[0]
         if Params['Detection']['AlignType'] == "peak":
@@ -39,7 +39,7 @@ def snapshot_detect_analysis_pipeline(OriSignal, DetSignal, Params):
 
     # BIC MODEL ESTIMATION
     if Params['Options']['BIC']:
-        print('performing BIC model selection')
+        print('Performing BIC model selection')
         BICParser = {
             'OriSignal': OriSignal,
             'DetSignal': DetSignal,
@@ -47,7 +47,12 @@ def snapshot_detect_analysis_pipeline(OriSignal, DetSignal, Params):
             'EstimMode': 'OLS'
         }
         if Params['BIC']['mode'] == 'biased':
-            Yt_events_momax = get_Yt(OriSignal, locs, Params['BIC']['momax'], Params['BIC']['tau'], Params['Detection']['L_start'], Params['Detection']['L_extract'])
+            Yt_events_momax = get_Yt(OriSignal,
+                                     locs,
+                                     Params['BIC']['momax'],
+                                     Params['BIC']['tau'],
+                                     Params['Detection']['L_start'],
+                                     Params['Detection']['L_extract'])
             BICoutputs = multi_trial_BIC(Yt_events_momax, BICParser) # For empirical data
             morder = BICoutputs['mobic'][1]
         np.savez(f"{Params['Output']['FileKeyword']}_BIC.npz", Params=Params, BICoutputs=BICoutputs)
@@ -57,7 +62,12 @@ def snapshot_detect_analysis_pipeline(OriSignal, DetSignal, Params):
         BICoutputs = None
 
     # EXTRACT EVENT SNAPSHOTS
-    Yt_events = get_Yt(OriSignal, locs, morder, Params['BIC']['tau'], Params['Detection']['L_start'], Params['Detection']['L_extract'])
+    Yt_events = get_Yt(OriSignal,
+                       locs,
+                       morder,
+                       Params['BIC']['tau'], 
+                       Params['Detection']['L_start'],
+                       Params['Detection']['L_extract'])
 
     if Params['Detection']['remove_artif']:
         Yt_events, locs = remove_artif_trials(Yt_events, locs, -15000)
@@ -69,7 +79,6 @@ def snapshot_detect_analysis_pipeline(OriSignal, DetSignal, Params):
     if Params["Options"]["CausalAnalysis"]:
         CausalParams = Params['CausalParams']
         CausalParams['morder'] = morder  # Set model order
-
         CausalOutput = {}
         CausalOutput['OLS'] = time_varying_causality(Yt_events, Yt_stats, CausalParams)
     
@@ -78,15 +87,12 @@ def snapshot_detect_analysis_pipeline(OriSignal, DetSignal, Params):
         print('Start Bootstrapping!')
         Params['MonteC_Params']['morder'] = morder
         # Params['MonteC_Params']['Ntrials'] = len(locs)
-        
         Et = get_residuals(Yt_events, Yt_stats)
         
         for n_btsp in range(1, Params['MonteC_Params']['Nbtsp'] + 1):
             print(f'Calculating bootstrap trial: {n_btsp}')
             
-            # simulate resampled snapshots
             Yt_events_btsp = simul_AR_event_btsp(Params['MonteC_Params'], Yt_events, Yt_stats, Et) 
-            # gets resampled snapshot statistics
             Yt_stats_btsp = get_Yt_stats(Yt_events_btsp, morder)
             
             CausalOutput_btsp = {}
@@ -106,12 +112,10 @@ def snapshot_detect_analysis_pipeline(OriSignal, DetSignal, Params):
             Yt_stats = get_simul_timefreq(Yt_events_mc, Yt_stats, Params['PSD'])
     
     # SAVE RESULTS    
-
     SnapAnalyOutput["d0"] = d0 if Params["Options"]["Detection"] else None
     SnapAnalyOutput['locs'] = locs
     SnapAnalyOutput['morder'] = morder
     SnapAnalyOutput['Yt_stats'] = Yt_stats
-    
     SnapAnalyOutput['CausalOutput'] = CausalOutput if Params["Options"]["CausalAnalysis"] else None
     SnapAnalyOutput['BICoutputs']   = BICoutputs if Params['Options']['BIC'] else None
 
@@ -119,7 +123,11 @@ def snapshot_detect_analysis_pipeline(OriSignal, DetSignal, Params):
     if Params['Options']['save_flag']:
         Yt_stats['mean'] = Yt_stats['mean'][:2, :]
         Yt_stats['Sigma'] = Yt_stats['Sigma'][:, :2, :2]
-        Params['DeSnap_inputs'] = {'x': [], 'D': [], 'Yt_stats_cond': []}
+        Params['DeSnap_inputs'] = {'x': [],
+                                   'y': OriSignal,
+                                   'yf': DetSignal,
+                                   'D': SnapAnalyOutput["d0"],
+                                   'Yt_stats_cond': Yt_stats}
 
         file_keyword = Params['Output']['FileKeyword']
         if Params['Options']['PSD']:
@@ -129,7 +137,7 @@ def snapshot_detect_analysis_pipeline(OriSignal, DetSignal, Params):
                                 PSD=PSD)
         else:
             if Params["Options"]["CausalAnalysis"]:
-                np.savez_compressed(f"{file_keyword}_causality.npz", 
+                np.savez_compressed(f"{file_keyword}_model_causality.npz", 
                                     Params=Params, 
                                     Yt_stats=Yt_stats, 
                                     CausalOutput=CausalOutput,

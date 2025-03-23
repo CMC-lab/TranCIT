@@ -6,7 +6,7 @@ def estimate_residuals(Yt_stats):
 
     bt = np.full((nvar, L), np.nan)
     Sigma_Et = np.full((L, nvar, nvar), np.nan)
-    sigma_Et = np.full(L, np.nan)
+    sigma_Et = np.full((L, 1), np.nan)
 
     for t in range(L):
         Sigma_Xt = np.squeeze(Yt_stats['Sigma'][t, :nvar, :nvar])
@@ -15,8 +15,11 @@ def estimate_residuals(Yt_stats):
         coeff = np.reshape(np.squeeze(Yt_stats['OLS']['At'][t, :, :]), (nvar, temp))
 
         bt[:, t] = Yt_stats['mean'][:nvar, t] - np.dot(coeff, Yt_stats['mean'][nvar:, t])
-        Sigma_Et[t, :, :] = (Sigma_Xt - np.dot(Sigma_XtXp, coeff.T) - np.dot(coeff, Sigma_XtXp.T)
-                            + np.dot(np.dot(coeff, Sigma_Xp), coeff.T))
+        Sigma_Et[t, :, :] = (Sigma_Xt - 
+                             np.dot(Sigma_XtXp, coeff.T) - 
+                             np.dot(coeff, Sigma_XtXp.T) + 
+                             np.dot(np.dot(coeff, Sigma_Xp), coeff.T))
+        
         sigma_Et[t] = np.trace(np.squeeze(Sigma_Et[t, :, :]))
 
     # Ensure that no negative values exist (if needed)

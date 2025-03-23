@@ -1,6 +1,6 @@
 import numpy as np
 from .residuals import estimate_residuals
-
+from dcs.utils.preprocessing.singular import regularize_if_singular
 
 def get_Yt_stats_cond(Yt_event, mo):
     """
@@ -62,8 +62,8 @@ def extract_events(A, cumP, L_start, L):
     A_event = np.full((L, len(cumP)), np.nan)
     
     for i in range(len(cumP)):
-        start_idx = int(np.round(cumP[i] - L_start + 1))
-        end_idx = int(np.round(cumP[i] + L - L_start + 1))
+        start_idx = int(np.round(cumP[i] - L_start))
+        end_idx = int(np.round(cumP[i] + L - L_start))
         idx = np.arange(start_idx, end_idx).astype(int)
 
         if np.any(idx < 0) or np.any(idx >= len(A)):
@@ -76,56 +76,28 @@ def extract_events(A, cumP, L_start, L):
 
 def get_Yt_stats(Yt_event, mo):
     nvar = Yt_event.shape[0] // (mo + 1)
+    nobs = Yt_event.shape[1]
+    Ntrials = Yt_event.shape[2]
+    
     Yt_stats_cond = {}
-
     Yt_stats_cond['mean'] = np.mean(Yt_event, axis=2)
-    Yt_stats_cond['Ntrials'] = Yt_event.shape[2]
+    Yt_stats_cond['Ntrials'] = Ntrials
+    Yt_stats_cond['Sigma'] = np.zeros((nobs, nvar * (mo + 1), nvar * (mo + 1)))
+    Yt_stats_cond['OLS'] = {'At': np.zeros((nobs, nvar, nvar * mo))}
 
-    Yt_stats_cond['Sigma'] = np.zeros((Yt_event.shape[1], nvar * (mo + 1), nvar * (mo + 1)))
-    Yt_stats_cond['OLS'] = {'At': np.zeros((Yt_event.shape[1], nvar, nvar * mo))}
-
-    for t in range(Yt_event.shape[1]):
+    for t in range(nobs):
         temp = Yt_event[:, t, :] - Yt_stats_cond['mean'][:, t][:, np.newaxis]
-        Yt_stats_cond['Sigma'][t, :, :] = np.dot(temp, temp.T) / Yt_event.shape[2]
+        Yt_stats_cond['Sigma'][t, :, :] = np.dot(temp, temp.T) / Ntrials
+    
+        Sigma_12 = Yt_stats_cond['Sigma'][t, :nvar, nvar:]  # Shape: (nvar, nvar*mo)
+        Sigma_22 = Yt_stats_cond['Sigma'][t, nvar:, nvar:]  # Shape: (nvar*mo, nvar*mo)
         
-        Sigma_Y = Yt_stats_cond['Sigma'][t, nvar:nvar * (mo + 1), nvar:nvar * (mo + 1)]
-        Sigma_X = Yt_stats_cond['Sigma'][t, :nvar, nvar:nvar * (mo + 1)]
+        Sigma_22 = regularize_if_singular(Sigma_22)
+        Yt_stats_cond['OLS']['At'][t, :, :] = Sigma_12 @ np.linalg.inv(Sigma_22)
 
-        # Ensure that Sigma_Y is square and that Sigma_X has compatible dimensions
-        if Sigma_Y.shape[0] != Sigma_Y.shape[1] or Sigma_Y.shape[0] != Sigma_X.shape[1]:
-            raise ValueError(f"Shape mismatch between Sigma_Y {Sigma_Y.shape} and Sigma_X {Sigma_X.shape}")
-
-        # Solve the linear system
-        Yt_stats_cond['OLS']['At'][t, :, :] = np.reshape(
-            np.linalg.solve(Sigma_Y, Sigma_X.T),
-            (nvar, nvar * mo)
-        )
-
-    Yt_stats_cond['OLS']['bt'], Yt_stats_cond['OLS']['Sigma_Et'], Yt_stats_cond['OLS']['sigma_Et'] = estimate_residuals(Yt_stats_cond)
+    bt, Sigma_Et, sigma_Et = estimate_residuals(Yt_stats_cond)
+    Yt_stats_cond['OLS']['bt'] = bt
+    Yt_stats_cond['OLS']['Sigma_Et'] = Sigma_Et
+    Yt_stats_cond['OLS']['sigma_Et'] = sigma_Et
 
     return Yt_stats_cond
-
-# def get_Yt_stats(Yt_event, mo):
-#     nvar = Yt_event.shape[0] // (mo + 1)
-#     Yt_stats_cond = {}
-
-#     Yt_stats_cond['mean'] = np.mean(Yt_event, axis=2)
-#     Yt_stats_cond['Ntrials'] = Yt_event.shape[2]
-
-#     Yt_stats_cond['Sigma'] = np.zeros((Yt_event.shape[1], nvar * (mo + 1), nvar * (mo + 1)))
-#     Yt_stats_cond['OLS'] = {'At': np.zeros((Yt_event.shape[1], nvar, nvar * mo))}
-
-#     for t in range(Yt_event.shape[1]):
-#         temp = Yt_event[:, t, :] - Yt_stats_cond['mean'][:, t][:, np.newaxis]
-#         Yt_stats_cond['Sigma'][t, :, :] = np.dot(temp, temp.T) / Yt_event.shape[2]
-#         Yt_stats_cond['OLS']['At'][t, :, :] = np.reshape(
-#             np.linalg.solve(
-#                 Yt_stats_cond['Sigma'][t, nvar:nvar * (mo + 1), nvar:nvar * (mo + 1)],
-#                 Yt_stats_cond['Sigma'][t, :nvar, nvar:nvar * (mo + 1)]
-#             ).T,
-#             (nvar, nvar * mo)
-#         )
-
-#     Yt_stats_cond['OLS']['bt'], Yt_stats_cond['OLS']['Sigma_Et'], Yt_stats_cond['OLS']['sigma_Et'] = estimate_residuals(Yt_stats_cond)
-
-#     return Yt_stats_cond
