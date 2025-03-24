@@ -1,6 +1,6 @@
 import numpy as np
 
-def regularize_if_singular(matrix, epsilon=1e-6, threshold=1e-10):
+def regularize_if_singular(matrix, epsilon=1e-6, threshold=1e-6):
     """
     Check if a matrix is singular and regularize it by adding epsilon to the diagonal if needed.
     
@@ -14,8 +14,6 @@ def regularize_if_singular(matrix, epsilon=1e-6, threshold=1e-10):
     """
     if matrix.shape[0] != matrix.shape[1]:
         raise ValueError("Input matrix must be square")
-    
-    det = np.linalg.det(matrix)
     # cond_threshold = 1e10
     # cond_number = np.linalg.cond(matrix)
     
@@ -26,7 +24,8 @@ def regularize_if_singular(matrix, epsilon=1e-6, threshold=1e-10):
     #     return regularized_matrix
     # else:
     #     return matrix
-            
+    
+    det = np.linalg.det(matrix)
     if abs(det) < threshold:
         print(f"Warning: Singular matrix detected (det={det}), adding epsilon={epsilon}")
         regularized_matrix = matrix + epsilon * np.eye(matrix.shape[0])

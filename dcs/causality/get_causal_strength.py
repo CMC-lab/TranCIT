@@ -1,4 +1,6 @@
 import numpy as np
+from dcs.utils.preprocessing.singular import regularize_if_singular
+
 
 def cs_nonzero_mean(X, morder, time_mode, diag_flag):
     """
@@ -15,15 +17,15 @@ def cs_nonzero_mean(X, morder, time_mode, diag_flag):
         A flag indicating whether to use diagonal covariance matrices.
     
     Returns:
-    Cs : np.ndarray
+    causal_strength : np.ndarray
         Causal strength measures.
-    TE : np.ndarray
+    transfer_entropy : np.ndarray
         Transfer entropy measures.
-    GC : np.ndarray
+    granger_causality : np.ndarray
         Granger causality measures.
     coeff_t : np.ndarray
         The estimated coefficients.
-    TE_residual_cov : np.ndarray
+    transfer_entropy_residual_cov : np.ndarray
         The residual covariance for transfer entropy.
     """
     nvar, nobs, ntrials = X.shape
@@ -40,6 +42,11 @@ def cs_nonzero_mean(X, morder, time_mode, diag_flag):
     # T = nobs - morder
     T = X0.shape[1] - 1
     
+    transfer_entropy_residual_cov = np.zeros((T, 2))
+    transfer_entropy = np.zeros((T, 2))
+    causal_strength = np.zeros((T, 2))
+    granger_causality = np.zeros((T, 2))
+    
     cov_Xp = np.zeros((T, morder, morder))
     cov_Yp = np.zeros((T, morder, morder))
     C_XYp = np.zeros((T, morder, morder))
@@ -50,19 +57,10 @@ def cs_nonzero_mean(X, morder, time_mode, diag_flag):
     for t in range(T):
         Ct_0 = np.dot(X0[:, t, :], X0[:, t, :].T) / ntrials
         YX_lag = np.vstack([XL[:, :morder, t, :].reshape(nvar * morder, ntrials), np.ones((1, ntrials))])
-        
         Ct_j = np.dot(X0[:, t, :], YX_lag.T) / ntrials
         Ct_1r = np.dot(YX_lag, YX_lag.T) / ntrials
-        
-        epsilon = 1e-6
-        Ct_1r += epsilon * np.eye(Ct_1r.shape[0])
-        
-        try:
-            Coeff = np.linalg.solve(Ct_1r, Ct_j.T).T
-        except np.linalg.LinAlgError:
-            print(f"Singular matrix encountered at t={t}, applying regularization.")
-            Coeff = np.linalg.pinv(Ct_1r) @ Ct_j.T
-        
+        Ct_1r = regularize_if_singular(Ct_1r)
+        Coeff = np.linalg.solve(Ct_1r, Ct_j.T).T
         SIG = Ct_0 - np.dot(Coeff, np.dot(Ct_1r, Coeff.T))
         
         coeff_t[t, :, :] = Coeff
@@ -85,104 +83,48 @@ def cs_nonzero_mean(X, morder, time_mode, diag_flag):
         Ct_0_x = np.dot(X_t.T, X_t) / ntrials
         Ct_j_x = np.dot(X_t.T, X_lag) / ntrials
         Ct_1r_x = np.dot(X_lag.T, X_lag) / ntrials
-        
-        try:
-            Coeff_x = np.linalg.solve(Ct_1r_x, Ct_j_x.T).T
-        except np.linalg.LinAlgError as e:
-            print(f"Singular matrix error at time {t} in reduced X model: {e}")
-            continue
-        
+        Ct_1r_x = regularize_if_singular(Ct_1r_x)
+        Coeff_x = np.linalg.solve(Ct_1r_x, Ct_j_x.T).T
         sigx_r = Ct_0_x - np.dot(Coeff_x, np.dot(Ct_1r_x, Coeff_x.T))
         
         Y_lag = np.hstack([Y_p, np.ones((ntrials, 1))])
         Ct_0_y = np.dot(Y_t.T, Y_t) / ntrials
         Ct_j_y = np.dot(Y_t.T, Y_lag) / ntrials
         Ct_1r_y = np.dot(Y_lag.T, Y_lag) / ntrials
-        
-        try:
-            Coeff_y = np.linalg.solve(Ct_1r_y, Ct_j_y.T).T
-        except np.linalg.LinAlgError as e:
-            print(f"Singular matrix error at time {t} in reduced Y model: {e}")
-            continue
-        
+        Ct_1r_y = regularize_if_singular(Ct_1r_y)
+        Coeff_y = np.linalg.solve(Ct_1r_y, Ct_j_y.T).T
         sigy_r = Ct_0_y - np.dot(Coeff_y, np.dot(Ct_1r_y, Coeff_y.T))
         
-        # # Covariance calculations
-        # cov_Xp[t, :, :] = np.cov(X_p.T)
-        # cov_Yp[t, :, :] = np.cov(Y_p.T)
-        # C_XYp[t, :, :] = np.cov(X_p.T, Y_p.T)[:nvar, nvar:]
-        # C_YXp[t, :, :] = np.cov(Y_p.T, X_p.T)[:nvar, nvar:]
-
-        if morder == 1:
-            cov_Xp[t, :, :] = np.dot((X_p - np.mean(X_p, axis=0)), (X_p - np.mean(X_p, axis=0)).T) / ntrials
-            cov_Yp[t, :, :] = np.dot((Y_p - np.mean(Y_p, axis=0)), (Y_p - np.mean(Y_p, axis=0)).T) / ntrials
-            C_XYp[t, :, :] = np.dot((X_p - np.mean(X_p, axis=0)), (Y_p - np.mean(Y_p, axis=0)).T) / ntrials
-            C_YXp[t, :, :] = np.dot((Y_p - np.mean(Y_p, axis=0)), (X_p - np.mean(X_p, axis=0)).T) / ntrials
-        else:
-            cov_Xp[t, :, :] = np.dot((X_p - np.mean(X_p, axis=0)).T, (X_p - np.mean(X_p, axis=0))) / ntrials
-            cov_Yp[t, :, :] = np.dot((Y_p - np.mean(Y_p, axis=0)).T, (Y_p - np.mean(Y_p, axis=0))) / ntrials
-            C_XYp[t, :, :] = np.dot((X_p - np.mean(X_p, axis=0)).T, (Y_p - np.mean(Y_p, axis=0))) / ntrials
-            C_YXp[t, :, :] = np.dot((Y_p - np.mean(Y_p, axis=0)).T, (X_p - np.mean(X_p, axis=0))) / ntrials
+        cov_Xp[t, :, :] = np.cov(X_p.T)
+        cov_Yp[t, :, :] = np.cov(Y_p.T)
+        C_XYp[t, :, :] = np.cov(X_p.T, Y_p.T)[:nvar, nvar:]
+        C_YXp[t, :, :] = np.cov(Y_p.T, X_p.T)[:nvar, nvar:]
         
-        cov_Yp_reg = cov_Yp[t] + epsilon * np.eye(cov_Yp[t].shape[0])
-        cov_Xp_reg = cov_Xp[t] + epsilon * np.eye(cov_Xp[t].shape[0])
+        cov_Yp_reg = regularize_if_singular(cov_Yp[t])
+        cov_Xp_reg = regularize_if_singular(cov_Xp[t])
         
         if time_mode == 'inhomo':
-            TE_residual_cov = np.zeros((T, 2))
-            TE = np.zeros((T, 2))
-            CS = np.zeros((T, 2))
-            GC = np.zeros((T, 2))
+            transfer_entropy_residual_cov[t, 1] = (
+                sigy + b.T @ cov_Xp_reg @ b 
+                - b.T @ C_XYp[t] @ np.linalg.inv(cov_Yp_reg) @ C_XYp[t].T @ b
+            )
+            transfer_entropy_residual_cov[t, 0] = (
+                sigx + c.T @ cov_Yp_reg @ c 
+                - c.T @ C_YXp[t] @ np.linalg.inv(cov_Xp_reg) @ C_YXp[t].T @ c
+            )
 
-            for t in range(T):
-                
-                # epsilon = 1e-6
-                # cov_Yp += epsilon * np.eye(cov_Yp.shape)
-                
-                # TE_residual_cov[t, 1] = (
-                #     sigy + b.T @ cov_Xp[t] @ b 
-                #     - b.T @ C_XYp[t] @ np.linalg.inv(cov_Yp[t]) @ C_XYp[t].T @ b
-                # )
-                # TE_residual_cov[t, 0] = (
-                #     sigx + c.T @ cov_Yp[t] @ c 
-                #     - c.T @ C_YXp[t] @ np.linalg.inv(cov_Xp[t]) @ C_YXp[t].T @ c
-                # )
-                
-                TE_residual_cov[t, 1] = (
-                    sigy + b.T @ cov_Xp_reg @ b 
-                    - b.T @ C_XYp[t] @ np.linalg.inv(cov_Yp_reg) @ C_XYp[t].T @ b
-                )
-                TE_residual_cov[t, 0] = (
-                    sigx + c.T @ cov_Yp_reg @ c 
-                    - c.T @ C_YXp[t] @ np.linalg.inv(cov_Xp_reg) @ C_YXp[t].T @ c
-                )
-                
-                epsilon = 1e-6
-                cov_Yp[t] += epsilon * np.eye(cov_Yp[t].shape[0])
-                cov_Xp[t] += epsilon * np.eye(cov_Xp[t].shape[0])
-
-                # TE[t, 1] = 0.5 * np.log(TE_residual_cov[t, 1] / sigy)
-                # TE[t, 0] = 0.5 * np.log(TE_residual_cov[t, 0] / sigx)
+            transfer_entropy[t, 1] = 0.5 * np.log(transfer_entropy_residual_cov[t, 1] / sigy)
+            transfer_entropy[t, 0] = 0.5 * np.log(transfer_entropy_residual_cov[t, 0] / sigx)
             
+            if not diag_flag:
+                causal_strength[t, 1] = 0.5 * np.log((sigy + b.T @ cov_Xp_reg @ b) / sigy)
+                causal_strength[t, 0] = 0.5 * np.log((sigx + c.T @ cov_Yp_reg @ c) / sigx)
+            else:
+                causal_strength[t, 1] = 0.5 * np.log((sigy + b.T @ np.diag(np.diag(cov_Xp_reg)) @ b) / sigy)
+                causal_strength[t, 0] = 0.5 * np.log((sigx + c.T @ np.diag(np.diag(cov_Yp_reg)) @ c) / sigx)
                 
-                TE[t, 1] = 0.5 * np.log((sigy + b.T @ cov_Xp[t] @ b - b.T @ C_XYp[t] @ np.linalg.inv(cov_Yp[t]) @ C_XYp[t].T @ b) / sigy)
-                TE[t, 0] = 0.5 * np.log((sigx + c.T @ cov_Yp[t] @ c - c.T @ C_YXp[t] @ np.linalg.inv(cov_Xp[t]) @ C_YXp[t].T @ c) / sigx)
-                
-                # if not diag_flag:
-                #     Cs[t, 1] = 0.5 * np.log((sigy + b.T @ cov_Xp[t] @ b) / sigy)
-                #     Cs[t, 0] = 0.5 * np.log((sigx + c.T @ cov_Yp[t] @ c) / sigx)
-                # else:
-                #     Cs[t, 1] = 0.5 * np.log((sigy + b.T @ np.diag(np.diag(cov_Xp[t])) @ b) / sigy)
-                #     Cs[t, 0] = 0.5 * np.log((sigx + c.T @ np.diag(np.diag(cov_Yp[t])) @ c) / sigx)
-                
-                if not diag_flag:
-                    CS[t, 1] = 0.5 * np.log((sigy + b.T @ cov_Xp_reg @ b) / sigy)
-                    CS[t, 0] = 0.5 * np.log((sigx + c.T @ cov_Yp_reg @ c) / sigx)
-                else:
-                    CS[t, 1] = 0.5 * np.log((sigy + b.T @ np.diag(np.diag(cov_Xp_reg)) @ b) / sigy)
-                    CS[t, 0] = 0.5 * np.log((sigx + c.T @ np.diag(np.diag(cov_Yp_reg)) @ c) / sigx)
-                    
-                GC[t, 1] = np.log(sigy_r / sigy)
-                GC[t, 0] = np.log(sigx_r / sigx)
+            granger_causality[t, 1] = np.log(sigy_r / sigy)
+            granger_causality[t, 0] = np.log(sigx_r / sigx)
         
     if time_mode == 'homo':
         A_square = A_square.reshape(nvar, nvar, morder)
@@ -204,34 +146,31 @@ def cs_nonzero_mean(X, morder, time_mode, diag_flag):
         S_Xp = np.mean(S_Xp, axis=0)
         S_Yp = np.mean(S_Yp, axis=0)
         
-        TE = np.zeros((1, 2))
+        transfer_entropy = np.zeros((1, 2))
+        causal_strength = np.zeros((1, 2))
+        granger_causality = np.zeros((1, 2))
         
-        epsilon = 1e-8
-        cov_Yp += epsilon * np.eye(cov_Yp.shape[0])
+        cov_Yp_reg = regularize_if_singular(cov_Yp)
+        cov_Xp_reg = regularize_if_singular(cov_Xp)
         
-        TE[0, 1] = 0.5 * np.log((sigy + b.T @ Sig_Xp @ b - b.T @ C_XYp @ np.linalg.inv(Sig_Yp) @ C_XYp.T @ b) / sigy)
-        TE[0, 0] = 0.5 * np.log((sigx + c.T @ Sig_Yp @ c - c.T @ C_YXp @ np.linalg.inv(Sig_Xp) @ C_YXp.T @ c) / sigx)
+        transfer_entropy[0, 1] = 0.5 * np.log((sigy + b.T @ Sig_Xp @ b - b.T @ C_XYp @ np.linalg.inv(Sig_Yp) @ C_XYp.T @ b) / sigy)
+        transfer_entropy[0, 0] = 0.5 * np.log((sigx + c.T @ Sig_Yp @ c - c.T @ C_YXp @ np.linalg.inv(Sig_Xp) @ C_YXp.T @ c) / sigx)
         
-        CS = np.zeros((1, 2))
         if not diag_flag:
-            CS[0, 1] = 0.5 * np.log((sigy + b.T @ cov_Xp @ b) / sigy)
-            CS[0, 0] = 0.5 * np.log((sigx + c.T @ cov_Yp @ c) / sigx)
+            causal_strength[0, 1] = 0.5 * np.log((sigy + b.T @ cov_Xp_reg @ b) / sigy)
+            causal_strength[0, 0] = 0.5 * np.log((sigx + c.T @ cov_Yp_reg @ c) / sigx)
         else:
-            CS[0, 1] = 0.5 * np.log((sigy + b.T @ np.diag(np.diag(cov_Xp)) @ b) / sigy)
-            CS[0, 0] = 0.5 * np.log((sigx + c.T @ np.diag(np.diag(cov_Yp)) @ c) / sigx)
+            causal_strength[0, 1] = 0.5 * np.log((sigy + b.T @ np.diag(np.diag(cov_Xp_reg)) @ b) / sigy)
+            causal_strength[0, 0] = 0.5 * np.log((sigx + c.T @ np.diag(np.diag(cov_Yp_reg)) @ c) / sigx)
         
-        GC = np.zeros((1, 2))
-        GC[0, 1] = np.log(sigy_r / sigy)
-        GC[0, 0] = np.log(sigx_r / sigx)
-        
+        granger_causality[0, 1] = np.log(sigy_r / sigy)
+        granger_causality[0, 0] = np.log(sigx_r / sigx)
         
     if time_mode == 'inhomo':
-        # Creating arrays of NaNs with the desired shape
         nan_block = np.full((morder, 2), np.nan)
         
-        # Concatenating along the first axis (equivalent to stacking rows)
-        GC = np.vstack([nan_block, GC])
-        TE = np.vstack([nan_block, TE])
-        CS = np.vstack([nan_block, CS])
+        granger_causality = np.vstack([nan_block, granger_causality])
+        transfer_entropy = np.vstack([nan_block, transfer_entropy])
+        causal_strength = np.vstack([nan_block, causal_strength])
 
-    return CS, TE, GC, coeff_t, TE_residual_cov
+    return causal_strength, transfer_entropy, granger_causality, coeff_t, transfer_entropy_residual_cov
