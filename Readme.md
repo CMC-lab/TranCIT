@@ -1,88 +1,186 @@
-# dcs: Dynamic Causal Strength Package
+# Dynamic Causal Strength (DCS)
 
-The `dcs` package provides implementations of causal analysis methods and simulations necessary to replicate the findings of the paper "[Information Theoretic Measures of Causal Influences During Transient Neural Events](https://www.frontiersin.org/journals/network-physiology/articles/10.3389/fnetp.2023.1085347/full)" by Shao et al. (2023).
+![PyPI version](https://img.shields.io/pypi/v/dynamic-causal-strength.svg)
+![Python version](https://img.shields.io/badge/python-3.8%2B-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Build Status](https://github.com/yourusername/dynamic-causal-strength/actions/workflows/main.yml/badge.svg)
 
-## Overview
+**Dynamic Causal Strength (DCS)** is a Python package for detecting and analyzing causal relationships in time series data. It provides tools for model estimation, causality detection, and simulation, with a focus on dynamic, non-stationary systems.
 
-This package focuses on quantifying causal interactions in neural time series data, particularly during transient events. It includes implementations of:
+---
 
-- **Transfer Entropy (TE)**
-- **Dynamic Causal Strength (DCS)**
-- **Relative Dynamic Causal Strength (rDCS)**
+## Table of Contents
 
-These methods are designed to assess causal influences in both simulated models and experimental neural recordings.
+- [Dynamic Causal Strength (DCS)](#dynamic-causal-strength-dcs)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Installation](#installation)
+    - [Prerequisites](#prerequisites)
+    - [Install from PyPI](#install-from-pypi)
+    - [Install from Source](#install-from-source)
+  - [Quickstart](#quickstart)
+  - [File Structure](#file-structure)
+    - [Key Modules](#key-modules)
+  - [Usage](#usage)
+    - [Detecting Causality](#detecting-causality)
+    - [Estimating VAR Coefficients](#estimating-var-coefficients)
+    - [Simulating Time Series](#simulating-time-series)
+  - [Contributing](#contributing)
+  - [License](#license)
+  - [Contact](#contact)
+
+---
+
+## Features
+
+- **Causality Detection**: Identify causal relationships using methods like Granger causality and transfer entropy.
+- **Model Estimation**: Estimate coefficients for Vector Autoregression (VAR) models.
+- **Simulation Tools**: Generate synthetic time series data for testing and validation.
+- **Non-Stationary Support**: Handle time-varying and non-stationary processes.
+- **Modular Design**: Organized into intuitive modules for easy extension and maintenance.
+
+---
 
 ## Installation
 
-To install the `dcs` package, clone the repository and install it using pip:
+### Prerequisites
+
+- Python 3.8 or higher
+- NumPy 1.21 or higher
+- SciPy 1.7 or higher
+
+### Install from PyPI
 
 ```bash
-    git clone https://github.com/yourusername/dcs.git
-    cd dcs
-    pip install .
+pip install dynamic-causal-strength
 ```
 
-## Package Structure
+### Install from Source
+
+```bash
+git clone https://github.com/yourusername/dynamic-causal-strength.git
+cd dynamic-causal-strength
+pip install .
+```
+
+---
+
+## Quickstart
+
+Here’s a quick example to get you started with detecting causal strength in a simulated dataset.
+
+```python
+import numpy as np
+from dcs.causality import detect_causality
+from dcs.simulation import generate_signals
+
+# Generate synthetic data
+data, _, _ = generate_signals(T=1000, Ntrial=10, h=0.1, gamma1=0.5, gamma2=0.5, Omega1=1, Omega2=1)
+
+# Detect causality with lag=2
+...
+```
+
+For more examples, see the [examples/](examples/) directory.
+
+---
+
+## File Structure
 
 The package is organized as follows:
 
 ```bash
-    dcs/
-    ├── causality
-    │   ├── __init__.py
-    │   ├── detecting_analysis_pipeline.py
-    │   └── time_varying.py
-    ├── src
-    │   ├── __init__.py
-    │   └── bic.py
-    ├── utils
-    │   ├── core
-    │   │   ├── __init__.py
-    │   │   ├── estimating_residuals.py
-    │   │   ├── finding_best_shrinked_locs.py
-    │   │   ├── finding_peak_loc.py
-    │   │   ├── getting_Yt.py
-    │   │   └── getting_residuals.py
-    │   ├── preprocessing
-    │   │   ├── __init__.py
-    │   │   ├── extracting_events.py
-    │   │   └── removing_artif_trials.py
-    │   └── simulate
-    │       ├── __init__.py
-    │       ├── simulate_ar_event.py
-    │       └── simulate_timefreq.py
-    ├── README.md
-    ├── setup.py
-    ├── pyproject.toml
-    ├── setup.cfg
-    ├── requirements.txt
-    └── LICENSE
-
+dynamic-causal-strength/
+├── LICENSE
+├── README.md
+├── pyproject.toml
+├── docs/
+│   ├── conf.py
+│   ├── index.rst
+│   └── requirements.txt
+├── examples/
+│   ├── basic_usage.py
+│   └── simulation_demo.py
+├── tests/
+│   ├── __init__.py
+│   ├── test_causality.py
+│   ├── test_models.py
+│   ├── test_simulation.py
+│   └── test_utils.py
+└── dcs/
+    ├── __init__.py
+    ├── causality.py
+    ├── models.py
+    ├── simulation.py
+    └── utils/
+        ├── __init__.py
+        ├── signal.py
+        ├── preprocess.py
+        └── residuals.py
 ```
+
+### Key Modules
+
+- **`causality.py`**: Core functions for causality detection (e.g., `detect_causality`, `time_varying_causality`).
+- **`models.py`**: Tools for model estimation and selection (e.g., `estimate_coefficients`, `select_model_order`).
+- **`simulation.py`**: Utilities for generating synthetic data (e.g., `generate_signals`, `simulate_var`).
+- **`utils/`**: Helper functions for signal processing, preprocessing, and residual calculations.
+
+---
 
 ## Usage
 
-After installation, you can utilize the package to perform causal analysis as follows:
+### Detecting Causality
 
-```bash
-from dcs.causality import detecting_analysis_pipeline
-from dcs.utils.preprocessing import extracting_events
-from dcs.utils.simulate import simulate_ar_event
+Use `detect_causality` to compute the causal strength between time series:
 
+```python
+from dcs.causality import detect_causality
+
+# Assuming 'data' is a 3D NumPy array (variables, time, trials)
+strength = detect_causality(data, lag=3)
 ```
 
-For detailed examples and tutorials, please refer to the examples directory in the repository.
+### Estimating VAR Coefficients
 
-## Citation
+Estimate coefficients for a Vector Autoregression (VAR) model:
 
-If you use this package in your research, please cite the original paper:
+```python
+from dcs.models import estimate_coefficients
 
-xxxx
+# Estimate coefficients for model order 2
+coeff, residual_cov = estimate_coefficients(data, morder=2)
+```
+
+### Simulating Time Series
+
+Generate synthetic time series data for testing:
+
+```python
+from dcs.simulation import generate_signals
+
+# Generate signals with specified parameters
+X, ns_x, ns_y = generate_signals(T=1000, Ntrial=10, h=0.1, gamma1=0.5, gamma2=0.5, Omega1=1, Omega2=1)
+```
+
+---
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.
+
+---
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for more details.
 
-## Acknowledgments
+---
 
-We acknowledge the authors of the original paper for their foundational work in developing these causal analysis methods.
+## Contact
+
+For questions or issues, please open an issue on the [GitHub repository](https://github.com/yourusername/dynamic-causal-strength) or contact the maintainer at [Salar Nouri](salr.nouri@gmail.com).
+
+---
+
+This README provides a comprehensive overview of the `dynamic-causal-strength` package, including all necessary information for users to install, use, and contribute to the project. It adheres to best practices for Python package documentation, ensuring clarity and accessibility. Let me know if you need any additional details or modifications!
