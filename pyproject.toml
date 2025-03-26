@@ -1,3 +1,11 @@
+[project]
+name = "dynamic-causal-strength"
+version = "0.1.0"
+dependencies = ["numpy>=1.21", "scipy>=1.7"]
+description = "A package for dynamic causal strength analysis."
+authors = [{name = "Salar Nouri", email = "salr.nouri@gmail.com"}]
+license = {text = "MIT License"}
+
 [build-system]
-requires = ["setuptools>=64", "wheel"]
+requires = ["setuptools>=64.0"]
 build-backend = "setuptools.build_meta"
