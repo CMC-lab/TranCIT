@@ -1,285 +1,314 @@
+import logging
 from typing import Dict, Tuple
 
 import numpy as np
-from dcs.utils.core.getting_Yt import get_Yt_stats
+from utils.helpers import regularize_if_singular
 
-# from dcs.causality.detecting_analysis_pipeline import snapshot_detect_analysis_pipeline
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-def multi_trial_BIC(Yt_events_momax: np.ndarray, BICParser: Dict) -> Dict:
+def compute_multi_trial_BIC(
+    event_data_max_order: np.ndarray,
+    bic_params: Dict
+) -> Dict:
     """
-    Calculate BIC (Bayesian Information Criterion) for multiple trial event data and model orders.
-    
+    Calculate Bayesian Information Criterion (BIC) for multiple model orders across trial data.
+
+    This function computes BIC values for Vector Autoregression (VAR) models of orders 1 to momax,
+    supporting model selection with multiple BIC variants.
+
     Args:
-    Yt_events_momax : np.ndarray
-        The time series data with shape (nvar * (mo + 1), nobs, ntrials)
-    BICParser : object
-        The object containing the BIC parameters (including model order, `Params.BIC.momax`)
-    
-    Returns:
-    BICoutputs : dict
-        Dictionary containing BIC values and associated metrics
-    """
-    
-    momax = BICParser["Params"]["BIC"]["momax"]
-    temp, nobs, ntrials = Yt_events_momax.shape
-    nvar = temp // (momax + 1)
+        event_data_max_order (np.ndarray): Time series data for the maximum model order,
+            shape (n_vars * (max_order + 1), n_observations, n_trials).
+        bic_params (dict): Parameters for BIC calculation, containing:
+            - "Params": Sub-dict with "BIC": {"momax": int}, the maximum model order.
 
-    BICoutputs = {
-        'bic': np.full((momax, 4), np.nan),
-        'pt_bic': np.full((momax, 4), np.nan),
-        'logL': np.full(momax, np.nan),
-        'sum_detHess': np.full(momax, np.nan),
-        'mobic': None
+    Returns:
+        dict: Dictionary containing:
+            - 'bic': BIC values for each model order and variant, shape (max_order, 4).
+            - 'penalty_terms': Penalty terms for BIC, shape (max_order, 4).
+            - 'log_likelihood': Log-likelihood for each model order, shape (max_order,).
+            - 'sum_log_det_hessian': Sum of log determinant of Hessian, shape (max_order,).
+            - 'optimal_orders': Optimal model orders for each BIC variant, shape (4,).
+
+    Raises:
+        ValueError: If input data shape is inconsistent with expected dimensions.
+    """
+    max_order = bic_params["Params"]["BIC"]["momax"]
+    total_var_lag, n_observations, n_trials = event_data_max_order.shape
+    n_vars = total_var_lag // (max_order + 1)
+
+    if total_var_lag != n_vars * (max_order + 1):
+        raise ValueError("Data shape does not match expected dimensions based on max_order.")
+
+    bic_outputs = {
+        'bic': np.full((max_order, 4), np.nan),
+        'pt_bic': np.full((max_order, 4), np.nan),
+        'log_likelihood': np.full(max_order, np.nan),
+        'sum_log_det_hessian': np.full(max_order, np.nan),
+        'optimal_orders': None
     }
 
-    for mo in range(1, momax + 1):
-        print(f'Start calculation for model order: {mo}')
-        X = Yt_events_momax[:nvar * (mo + 1), :, :]
+    for model_order in range(1, max_order + 1):
+        logger.info(f"Calculating BIC for model order: {model_order}")
+        data_subset = event_data_max_order[:n_vars * (model_order + 1), :, :]
 
-        logL, sum_detHess = BIC_compare(X, mo, BICParser)
-        BICoutputs['logL'][mo-1] = logL
-        BICoutputs['sum_detHess'][mo-1] = sum_detHess
-        
-        BICoutputs['pt_bic'][mo-1, 0] = 0.5 * nobs * mo * nvar * nvar * np.log(ntrials)
-        BICoutputs['pt_bic'][mo-1, 1] = 0.5 * sum_detHess
-        BICoutputs['pt_bic'][mo-1, 2] = 0.5 * nobs * mo * nvar * nvar * np.log(ntrials * nobs)
-        BICoutputs['pt_bic'][mo-1, 3] = 0.5 * mo * nvar * nvar * np.log(ntrials * nobs)
+        log_likelihood, sum_log_det_hessian = compute_BIC_for_model(data_subset, model_order, bic_params)
+        bic_outputs['log_likelihood'][model_order - 1] = log_likelihood
+        bic_outputs['sum_log_det_hessian'][model_order - 1] = sum_log_det_hessian
 
-        BICoutputs['bic'][mo-1, 0] = -BICoutputs['logL'][mo-1] * ntrials + BICoutputs['pt_bic'][mo-1, 0]
-        BICoutputs['bic'][mo-1, 1] = -BICoutputs['logL'][mo-1] * ntrials + BICoutputs['pt_bic'][mo-1, 1]
-        BICoutputs['bic'][mo-1, 2] = -BICoutputs['logL'][mo-1] * ntrials + BICoutputs['pt_bic'][mo-1, 2]
-        BICoutputs['bic'][mo-1, 3] = -BICoutputs['logL'][mo-1] * ntrials + BICoutputs['pt_bic'][mo-1, 3]
-    
-    # bic_min = np.nanmin(BICoutputs['bic'], axis=0)
-    mobic_index = np.nanargmin(BICoutputs['bic'], axis=0) + 1
-    BICoutputs['mobic'] = mobic_index
+        # Define penalty terms for BIC variants
+        bic_outputs['pt_bic'][model_order - 1, 0] = 0.5 * n_observations * model_order * n_vars * n_vars * np.log(n_trials)
+        bic_outputs['pt_bic'][model_order - 1, 1] = 0.5 * sum_log_det_hessian
+        bic_outputs['pt_bic'][model_order - 1, 2] = 0.5 * n_observations * model_order * n_vars * n_vars * np.log(n_trials * n_observations)
+        bic_outputs['pt_bic'][model_order - 1, 3] = 0.5 * model_order * n_vars * n_vars * np.log(n_trials * n_observations)
 
-    return BICoutputs
+        # Compute BIC for each variant
+        for variant in range(4):
+            bic_outputs['bic'][model_order - 1, variant] = (
+                -bic_outputs['log_likelihood'][model_order - 1] * n_trials +
+                bic_outputs['pt_bic'][model_order - 1, variant]
+            )
+
+    optimal_orders = np.nanargmin(bic_outputs['bic'], axis=0) + 1
+    bic_outputs['optimal_orders'] = optimal_orders
+    logger.info(f"Optimal model orders for BIC variants: {optimal_orders}")
+
+    return bic_outputs
 
 
-def BIC_compare(Yt_events, morder, BICParser):
+def compute_BIC_for_model(
+    event_data: np.ndarray,
+    model_order: int,
+    bic_params: Dict
+) -> Tuple[float, float]:
     """
-    Compare Bayesian Information Criterion (BIC) for biased and debiased models.
-    
+    Compute log-likelihood and sum of log determinant of Hessian for a specific model order.
+
+    Supports 'biased' mode currently; 'debiased' mode is planned for future implementation.
+
     Args:
-    Yt_events : np.ndarray
-        The event data with shape (nvar * (morder + 1), nobs, ntrials).
-    morder : int
-        The model order.
-    BICParser : object
-        An object containing BIC parameters.
-    
+        event_data (np.ndarray): Event data for the model order,
+            shape (n_vars * (model_order + 1), n_observations, n_trials).
+        model_order (int): The VAR model order to evaluate.
+        bic_params (dict): BIC parameters including:
+            - 'Params': Sub-dict with 'BIC': {'mode': str}, e.g., 'biased'.
+            - 'EstimMode': Estimation mode, either 'OLS' or 'RLS'.
+
     Returns:
-    logL : float
-        Log-likelihood.
-    sum_detHess : float
-        Sum of the log determinant of Hessian.
+        Tuple[float, float]: 
+            - log_likelihood: The log-likelihood of the model.
+            - sum_log_det_hessian: Sum of the log determinant of the Hessian.
+
+    Raises:
+        ValueError: If 'mode' or 'EstimMode' is invalid.
     """
-    temp, nobs, ntrials = Yt_events.shape
-    nvar = temp // (morder + 1)
+    total_var_lag, n_observations, n_trials = event_data.shape
+    n_vars = total_var_lag // (model_order + 1)
 
-    if BICParser['Params']['BIC']['mode'] == 'biased':
-        Yt_stats = get_Yt_stats(Yt_events, morder)
+    mode = bic_params['Params']['BIC']['mode']
+    if mode not in ['biased']:
+        raise ValueError(f"Unsupported mode '{mode}'; only 'biased' is implemented.")
 
-    # elif BICParser['Params']['BIC']['mode'] == 'debiased':
-    #     Params = BICParser['Params']
-    #     Params['Options']['BIC'] = 0
-    #     Params['Options']['save_flag'] = 0
-    #     Params['BIC']['morder'] = morder
-    #     SnapAnalyOutput = snapshot_detect_analysis_pipeline(BICParser['OriSignal'], 
-    #                                                         BICParser['DetSignal'],
-    #                                                         Params)
-    #     Yt_stats = SnapAnalyOutput['Yt_stats_debiased']
+    if mode == 'biased':
+        stats = get_Yt_stats(event_data, model_order)
+    else:
+        raise NotImplementedError("'debiased' mode is not yet supported.")
 
-    log_detHess = np.zeros(nobs)
-    DSIG = np.zeros(nobs)
+    log_det_hessian = np.zeros(n_observations)
+    residual_determinants = np.zeros(n_observations)
 
-    for t in range(nobs):
-        C_0 = np.squeeze(Yt_stats['Sigma'][t, nvar:, nvar:])
-        
-        if BICParser['EstimMode'] == 'OLS':
-            DSIG[t] = np.prod(np.diag(np.squeeze(Yt_stats['OLS']['Sigma_Et'][t, :, :])))
-            
-        elif BICParser['EstimMode'] == 'RLS':
-            DSIG[t] = np.prod(np.diag(np.squeeze(Yt_stats['RLS']['Sigma_Et'][t, :, :])))
-            
-        log_detHess[t] = (morder * nvar**2 * np.log(ntrials) + 
-                          nvar * np.log(np.linalg.det(C_0)) - 
-                          nvar * morder * np.log(DSIG[t]))
+    estim_mode = bic_params['EstimMode']
+    if estim_mode not in ['OLS', 'RLS']:
+        raise ValueError(f"Invalid EstimMode '{estim_mode}'; must be 'OLS' or 'RLS'.")
 
-    logL = (-0.5 * nobs * nvar * np.log(2 * np.pi) - 
-            0.5 * np.sum(np.log(DSIG)) -
-            0.5 * nobs * nvar)
-    sum_detHess = np.sum(log_detHess)
+    for t in range(n_observations):
+        covariance_current = stats['Sigma'][t, n_vars:, n_vars:]
+        residual_cov = stats[estim_mode]['Sigma_Et'][t]
+        residual_determinants[t] = np.prod(np.diag(residual_cov))
+        log_det_hessian[t] = (
+            model_order * n_vars**2 * np.log(n_trials) +
+            n_vars * np.log(np.linalg.det(covariance_current)) -
+            n_vars * model_order * np.log(residual_determinants[t] or 1e-8)  # Avoid log(0)
+        )
 
-    return logL, sum_detHess
+    log_likelihood = (
+        -0.5 * n_observations * n_vars * np.log(2 * np.pi) -
+        0.5 * np.sum(np.log(residual_determinants + 1e-8)) -
+        0.5 * n_observations * n_vars
+    )
+    sum_log_det_hessian = np.sum(log_det_hessian)
+
+    logger.debug(f"Model order {model_order}: log_likelihood={log_likelihood:.4f}, sum_log_det_hessian={sum_log_det_hessian:.4f}")
+
+    return log_likelihood, sum_log_det_hessian
 
 
-def select_model_order(X: np.ndarray, momax: int, time_mode: str) -> Tuple[np.ndarray, ...]:
+def select_model_order(
+    time_series_data: np.ndarray,
+    max_model_order: int,
+    time_mode: str
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
-    Perform model order selection using the Bayesian Information Criterion (BIC) and calculate log-likelihood.
-    
+    Select the optimal VAR model order using Bayesian Information Criterion (BIC).
+
+    Evaluates BIC scores for model orders 1 to max_model_order under specified time mode.
+
     Args:
-    X: 3D array of shape (nvar, nobs, ntrials) representing the time series data.
-    momax: Maximum model order for selection.
-    time_mode: String indicating 'inhomo' (inhomogeneous) or 'homo' (homogeneous) time mode.
-    
+        time_series_data (np.ndarray): Time series data, shape (n_vars, n_observations, n_trials).
+        max_model_order (int): Maximum model order to evaluate.
+        time_mode (str): 'inhomo' (inhomogeneous) or 'homo' (homogeneous).
+
     Returns:
-    bic: Array of BIC scores for each model order.
-    mobic: The selected model order that minimizes the BIC.
-    logL: Log-likelihood for each model order.
-    pt_bic: Penalty term used for calculating BIC.
+        Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+            - bic_scores: BIC scores, shape (max_model_order, 2).
+            - optimal_orders: Optimal model orders for each BIC variant, shape (2,).
+            - log_likelihoods: Log-likelihoods, shape (max_model_order,).
+            - penalty_terms: Penalty terms, shape (max_model_order, 2).
+
+    Raises:
+        ValueError: If time_mode is invalid or all BIC scores are NaN.
     """
-    
-    nvar, nobs, ntrials = X.shape
+    if time_mode not in ['inhomo', 'homo']:
+        raise ValueError("time_mode must be 'inhomo' or 'homo'.")
 
-    bic = np.full((momax, 2), np.nan)
-    pt_bic = np.full((momax, 2), np.nan)
-    logL = np.full(momax, np.nan)
-    sum_detHess = np.full(momax, np.nan)
+    n_vars, n_observations, n_trials = time_series_data.shape
+    bic_scores = np.full((max_model_order, 2), np.nan)
+    penalty_terms = np.full((max_model_order, 2), np.nan)
+    log_likelihoods = np.full(max_model_order, np.nan)
+    sum_log_det_hessian = np.full(max_model_order, np.nan)
 
-    for mo in range(1, momax + 1):
-        T = len(range(mo + 1, nobs))
+    for model_order in range(1, max_model_order + 1):
+        n_time_steps = n_observations - model_order - 1  # Adjusted based on data usage:‌ T = len(range(mo + 1, nobs))
+        logger.info(f"Processing model order: {model_order}")
+
         
-        print(f"Processing model order: {mo}")
-
-        try:
-            _, _, logL[mo-1], sum_detHess[mo-1] = estimate_var_coefficients(X, mo, momax, time_mode, 'infocrit')
-        except np.linalg.LinAlgError:
-            print(f"Singular matrix encountered at model order {mo}, skipping.")
-            continue
-
-        print(f"logL[{mo-1}] = {logL[mo-1]}, sum_detHess[{mo-1}] = {sum_detHess[mo-1]}")
-
-        pt_bic[mo-1, 1] = sum_detHess[mo-1]
+        _, _, log_likelihoods[model_order - 1], sum_log_det_hessian[model_order - 1] = (
+            estimate_var_coefficients(time_series_data, model_order, max_model_order, time_mode, 'infocrit')
+        )
+        
+        penalty_terms[model_order - 1, 1] = sum_log_det_hessian[model_order - 1]
 
         if time_mode == 'inhomo':
-            pt_bic[mo-1, 0] = T * mo * nvar * nvar * np.log(ntrials)
-            bic[mo-1, 0] = - logL[mo-1] * ntrials + pt_bic[mo-1, 0]
-            bic[mo-1, 1] = - logL[mo-1] * ntrials + sum_detHess[mo-1]
+            penalty_terms[model_order - 1, 0] = n_time_steps * model_order * n_vars * n_vars * np.log(n_trials)
+            bic_scores[model_order - 1, 0] = -log_likelihoods[model_order - 1] * n_trials + penalty_terms[model_order - 1, 0]
+            bic_scores[model_order - 1, 1] = -log_likelihoods[model_order - 1] * n_trials + sum_log_det_hessian[model_order - 1]
         elif time_mode == 'homo':
-            pt_bic[mo-1, 0] = mo * nvar * nvar * np.log(T * ntrials)
-            bic[mo-1, 0] = - logL[mo-1] * ntrials + pt_bic[mo-1, 0]
-            bic[mo-1, 1] = - logL[mo-1] * ntrials + sum_detHess[mo-1]
+            penalty_terms[model_order - 1, 0] = model_order * n_vars * n_vars * np.log(n_time_steps * n_trials)
+            bic_scores[model_order - 1, 0] = -log_likelihoods[model_order - 1] * n_trials + penalty_terms[model_order - 1, 0]
+            bic_scores[model_order - 1, 1] = -log_likelihoods[model_order - 1] * n_trials + sum_log_det_hessian[model_order - 1]
+
+    if np.isnan(bic_scores).all():
+        raise ValueError("All BIC scores are NaN; verify input data or reduce max_model_order.")
+
+    optimal_orders = np.nanargmin(bic_scores, axis=0) + 1
+    logger.info(f"Optimal model orders: {optimal_orders}")
+
+    return bic_scores, optimal_orders, log_likelihoods, penalty_terms
 
 
-        print(f"BIC[{mo-1}] = {bic[mo-1]}")
-
-    print("Final BIC array:")
-    print(bic)
-
-    if np.isnan(bic).all():
-        raise ValueError("All BIC values are NaN. Check data or model order settings. Ensure the input data X is valid, and try reducing momax.")
-
-    mobic = np.nanargmin(bic, axis=0) + 1
-
-    return bic, mobic, logL, pt_bic
-
-def estimate_var_coefficients(X: np.ndarray, morder: int, momax: int, time_mode: str, lag_mode: str, epsilon: float = 1e-8) -> Tuple[np.ndarray, ...]:
+def estimate_var_coefficients(
+    time_series_data: np.ndarray,
+    model_order: int,
+    max_model_order: int,
+    time_mode: str,
+    lag_mode: str,
+    epsilon: float = 1e-8
+) -> Tuple[np.ndarray, np.ndarray, float, float]:
     """
-    Estimate coefficients of a VAR model and compute residual covariance matrix with regularization.
-    
+    Estimate VAR coefficients and compute residual covariance with regularization.
+
+    Supports both inhomogeneous ('inhomo') and homogeneous ('homo') time modes.
+
     Args:
-    X: 3D array of shape (nvar, nobs, ntrials) representing the time series data.
-    morder: Model order for the VAR process.
-    momax: Maximum model order for comparison.
-    time_mode: Time mode ('inhomo' or 'homo').
-    lag_mode: Lag mode ('infocrit' or 'var').
-    epsilon: Regularization term to handle singular matrices (default: 1e-8).
-    
+        time_series_data (np.ndarray): Data array, shape (n_vars, n_observations, n_trials).
+        model_order (int): Model order for the VAR process.
+        max_model_order (int): Maximum model order for lag_mode 'infocrit'.
+        time_mode (str): 'inhomo' or 'homo'.
+        lag_mode (str): 'infocrit' or 'var' to determine lag structure.
+        epsilon (float, optional): Regularization term for singular matrices. Defaults to 1e-8.
+
     Returns:
-    A: Coefficient matrix of the VAR model.
-    SIG: Residual covariance matrix.
-    logL: Log-likelihood.
-    sum_detHess: Sum of log determinants of the Hessian.
+        Tuple[np.ndarray, np.ndarray, float, float]:
+            - coefficients: VAR coefficients, shape varies by time_mode.
+            - residual_covariance: Residual covariance, shape varies by time_mode.
+            - log_likelihood: Log-likelihood of the model.
+            - sum_log_det_hessian: Sum of log determinants of the Hessian.
+
+    Raises:
+        ValueError: If n_vars == 1, or time_mode/lag_mode is invalid.
     """
-    
-    nvar, nobs, ntrials = X.shape
-    
-    r = morder
-    
-    if lag_mode == 'infocrit':
-        r1 = momax + 1
-    elif lag_mode == 'var':
-        r1 = morder + 1
-    
-    XX = np.zeros((nvar, r1, nobs + r1 - 1, ntrials))
-    
-    for k in range(r1):
-        XX[:, k, k:k + nobs, :] = X
-    
-    # X0 = XX[:, 0, r1 - 1:nobs + r1 - 1]
-    X0 = XX[:, 0, r1 - 1:nobs, :]
-    # XL = XX[:, 1:morder + 1, r1 - 1:nobs + r1 - 1]
-    XL = XX[:, 1 : r + 1, r1 - 1 :nobs, :]
-    T = X0.shape[1]
-    
-    A = np.zeros((T, nvar, nvar * morder))
-    SIG = np.zeros((T, nvar, nvar))
-    DSIG = np.zeros(T)
-    log_detHess = np.zeros(T)
-    detHess = np.zeros(T)
-    
-    for t in range(T):
-        if nvar != 1:
-            Ct_0 = np.dot(X0[:, t, :], X0[:, t, :].T) / ntrials
-            YX_lag = np.vstack([
-                                XL[:, :morder, t, :].reshape(nvar * morder, ntrials),
-                                np.ones((1, ntrials))
-                                ])
-            
-            Ct_j = np.dot(X0[:, t, :], YX_lag.T) / ntrials
-            Ct_1r = np.dot(YX_lag, YX_lag.T) / ntrials
-            
-            # Ct_1r += epsilon * np.eye(Ct_1r.shape[0])
-        
-            try:
-                Coeff = np.linalg.solve(Ct_1r, Ct_j.T).T
-            except np.linalg.LinAlgError:
-                print(f"Singular matrix encountered at t={t}, applying regularization.")
-                Coeff = np.linalg.pinv(Ct_1r) @ Ct_j.T
-        else:
-            raise print("X should be bivariate signals!!!!")
-        
-        if time_mode == 'inhomo':
-            A[t, :, :] = Coeff[:, :-1]
-            
-            if nvar != 1:
-                SIG[t, :, :] = Ct_0 - np.dot(Coeff, np.dot(Ct_1r, Coeff.T))
-                DSIG[t] = np.prod(np.diag(SIG[t, :, :]))
-            else:
-                SIG[t, :, :] = Ct_0 - np.dot(A[t, :, :].T, np.dot(Ct_1r, A[t, :, :]))
-                DSIG[t] = np.prod(np.diag(SIG[t, :, :]))
-            
-            C = Ct_1r[:-1, :-1] * ntrials
-            det_C = np.linalg.det(C)
-            detHess[t] = det_C**nvar * (1 / DSIG[t])**(nvar * morder)
-            
-            C_0 = Ct_1r[:-1, :-1]
-            log_detHess[t] = morder * nvar**2 * np.log(ntrials) + nvar * np.log(np.linalg.det(C_0)) - nvar * morder * np.log(DSIG[t])
-    
+    n_vars, n_observations, n_trials = time_series_data.shape
+    if n_vars == 1:
+        raise ValueError("Input must be multivariate (n_vars > 1).")
+
+    if time_mode not in ['inhomo', 'homo'] or lag_mode not in ['infocrit', 'var']:
+        raise ValueError("Invalid time_mode or lag_mode.")
+
+    lag_depth = max_model_order + 1 if lag_mode == 'infocrit' else model_order + 1
+    extended_data = np.zeros((n_vars, lag_depth, n_observations + lag_depth - 1, n_trials))
+    for k in range(lag_depth):
+        extended_data[:, k, k:k + n_observations, :] = time_series_data
+
+    current_data = extended_data[:, 0, lag_depth - 1:n_observations, :]
+    lagged_data = extended_data[:, 1:model_order + 1, lag_depth - 1:n_observations, :]
+    n_time_steps = current_data.shape[1]
+
+    coefficients = np.zeros((n_time_steps, n_vars, n_vars * model_order))
+    residual_covariance = np.zeros((n_time_steps, n_vars, n_vars))
+    residual_determinants = np.zeros(n_time_steps)
+    log_det_hessian = np.zeros(n_time_steps)
+
+    for t in range(n_time_steps):
+        cov_current = np.dot(current_data[:, t, :], current_data[:, t, :].T) / n_trials
+        lagged_matrix = np.vstack([
+            lagged_data[:, :model_order, t, :].reshape(n_vars * model_order, n_trials),
+            np.ones((1, n_trials))
+        ])
+        cov_current_lagged = np.dot(current_data[:, t, :], lagged_matrix.T) / n_trials
+        cov_lagged = np.dot(lagged_matrix, lagged_matrix.T) / n_trials
+        cov_lagged_reg = regularize_if_singular(cov_lagged)
+        coeff = np.linalg.solve(cov_lagged_reg, cov_current_lagged.T).T
+
+        if time_mode == 'inhomo': # Should be aligned!
+            coefficients[t, :, :] = coeff[:, :-1]
+            residual_covariance[t, :, :] = cov_current - np.dot(coeff, np.dot(cov_lagged, coeff.T))
+            # residual_covariance[t, :, :] = cov_current - np.dot(coefficients[t, :, :].T, np.dot(cov_lagged, coefficients[t, :, :]))
+            residual_determinants[t] = np.prod(np.diag(residual_covariance[t, :, :]))
+            lagged_cov_subset = cov_lagged[:-1, :-1] * n_trials
+            determinant_hessian = np.linalg.det(lagged_cov_subset * n_trials)**n_vars * (1 / residual_determinants[t])**(n_vars * model_order)
+            log_det_hessian[t] = (
+                model_order * n_vars**2 * np.log(n_trials) +
+                n_vars * np.log(np.linalg.det(lagged_cov_subset)) -
+                n_vars * model_order * np.log(residual_determinants[t] or epsilon)
+            )
+
     if time_mode == 'inhomo':
-        DSIG_clamped = np.where(DSIG < epsilon, epsilon, DSIG)
-        logL = -0.5 * T * nvar * np.log(2 * np.pi) - 0.5 * np.sum(np.log(DSIG_clamped)) - 0.5 * T * nvar
-        sum_detHess = np.sum(log_detHess)
-    
-    if time_mode == 'homo':
-        C_0 = np.mean(Ct_0, axis=0)
-        C_jcr = np.mean(Ct_j, axis=0)
-        C_1rcr = np.mean(Ct_1r, axis=0)
-        
-        A = np.dot(C_jcr.reshape(nvar, nvar * morder), np.linalg.inv(C_1rcr))
-        
-        SIG = C_0 - np.dot(A, np.dot(C_1rcr, A.T))
-        
-        sumsign = np.sum(np.sign(SIG))
-        DSIG = np.prod(np.diag(SIG))
-        
-        C = C_1rcr * T * ntrials
-        detHess = (np.linalg.det(C)**nvar) * ((1 / DSIG)**(nvar * morder))
-        
-        logL = -0.5 * T * nvar * np.log(2 * np.pi) - 0.5 * T * np.log(DSIG) - 0.5 * T * nvar
-        
-        sum_detHess = nvar * np.log(np.linalg.det(C)) + (nvar * morder) * np.log(1 / DSIG)
-    
-    return A, SIG, logL, sum_detHess
+        determinants_clamped = np.where(residual_determinants < epsilon, epsilon, residual_determinants)
+        log_likelihood = (
+            -0.5 * n_time_steps * n_vars * np.log(2 * np.pi) -
+            0.5 * np.sum(np.log(determinants_clamped)) -
+            0.5 * n_time_steps * n_vars
+        )
+        sum_log_det_hessian = np.sum(log_det_hessian)
+
+    elif time_mode == 'homo':
+        cov_current_mean = np.mean(cov_current, axis=0)
+        cov_current_lagged_mean = np.mean(cov_current_lagged, axis=0)
+        cov_lagged_mean = np.mean(cov_lagged, axis=0)
+        # coefficients = np.linalg.solve(cov_lagged_mean, cov_current_lagged_mean.T).T[:, :-1]
+        coefficients = np.dot(cov_current_lagged_mean.reshape(n_vars, n_vars * model_order), np.linalg.inv(cov_lagged_mean))
+        residual_covariance = cov_current_mean - np.dot(coefficients, np.dot(cov_lagged_mean, coefficients.T))
+        determinant = np.prod(np.diag(residual_covariance))
+        determinant_hessian = np.linalg.det(cov_lagged_mean * n_time_steps * n_trials)**n_vars * (1 / determinant)**(n_vars * model_order)
+        log_likelihood = (
+            -0.5 * n_time_steps * n_vars * np.log(2 * np.pi) -
+            0.5 * n_time_steps * np.log(determinant or epsilon) -
+            0.5 * n_time_steps * n_vars
+        )
+        sum_log_det_hessian = (
+            n_vars * np.log(np.linalg.det(cov_lagged_mean * n_time_steps * n_trials)) +
+            n_vars * model_order * np.log(1 / (determinant or epsilon))
+        )
+
+    return coefficients, residual_covariance, log_likelihood, sum_log_det_hessian

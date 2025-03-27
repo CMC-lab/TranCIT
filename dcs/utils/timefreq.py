@@ -1,5 +1,7 @@
-import numpy as np
 from typing import Dict
+
+import numpy as np
+
 
 def compute_simulated_timefreq(Yt_event_mc: np.ndarray, Yt_stats: Dict, spectr_params: Dict) -> Dict:
     _, L, ntrials = Yt_event_mc.shape

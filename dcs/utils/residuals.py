@@ -1,57 +1,92 @@
-import numpy as np
+import logging
 from typing import Dict, Tuple
 
-def estimate_residuals(Yt_stats: Dict) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    L, nvar, temp = Yt_stats['OLS']['At'].shape
+import numpy as np
 
-    bt = np.full((nvar, L), np.nan)
-    Sigma_Et = np.full((L, nvar, nvar), np.nan)
-    sigma_Et = np.full((L, 1), np.nan)
+logging.basicConfig(level=logging.INFO)
+
+
+def estimate_residuals(event_stats: Dict) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Estimate residuals and related statistics for each time step in a VAR model.
+
+    Parameters
+    ----------
+    event_stats : Dict
+        Dictionary containing:
+        - 'OLS': Sub-dictionary with 'At' (coefficients), shape (L, nvar, nvar * morder).
+        - 'Sigma': Covariance matrices, shape (L, nvar * (morder + 1), nvar * (morder + 1)).
+        - 'mean': Mean values, shape (nvar * (morder + 1), L).
+
+    Returns
+    -------
+    Tuple[np.ndarray, np.ndarray, np.ndarray]
+        - residual_biases : Shape (nvar, L), residual biases.
+        - residual_covariance : Shape (L, nvar, nvar), residual covariance matrices.
+        - residual_trace : Shape (L, 1), trace of residual covariance matrices.
+    """
+    L, nvar, temp = event_stats['OLS']['At'].shape
+    residual_biases = np.full((nvar, L), np.nan)
+    residual_covariance = np.full((L, nvar, nvar), np.nan)
+    residual_trace = np.full((L, 1), np.nan)
 
     for t in range(L):
-        Sigma_Xt = np.squeeze(Yt_stats['Sigma'][t, :nvar, :nvar])
-        Sigma_Xp = np.squeeze(Yt_stats['Sigma'][t, nvar:, nvar:])
-        Sigma_XtXp = np.reshape(np.squeeze(Yt_stats['Sigma'][t, :nvar, nvar:]), (nvar, temp))
-        coeff = np.reshape(np.squeeze(Yt_stats['OLS']['At'][t, :, :]), (nvar, temp))
+        Sigma_Xt = event_stats['Sigma'][t, :nvar, :nvar]
+        Sigma_Xp = event_stats['Sigma'][t, nvar:, nvar:]
+        Sigma_XtXp = event_stats['Sigma'][t, :nvar, nvar:].reshape(nvar, temp)
+        coeff = event_stats['OLS']['At'][t].reshape(nvar, temp)
 
-        bt[:, t] = Yt_stats['mean'][:nvar, t] - np.dot(coeff, Yt_stats['mean'][nvar:, t])
-        Sigma_Et[t, :, :] = (Sigma_Xt - 
-                             np.dot(Sigma_XtXp, coeff.T) - 
-                             np.dot(coeff, Sigma_XtXp.T) + 
-                             np.dot(np.dot(coeff, Sigma_Xp), coeff.T))
-        
-        sigma_Et[t] = np.trace(np.squeeze(Sigma_Et[t, :, :]))
+        residual_biases[:, t] = event_stats['mean'][:nvar, t] - np.dot(coeff, event_stats['mean'][nvar:, t])
+        residual_covariance[t] = (Sigma_Xt - 
+                                 np.dot(Sigma_XtXp, coeff.T) - 
+                                 np.dot(coeff, Sigma_XtXp.T) + 
+                                 np.dot(np.dot(coeff, Sigma_Xp), coeff.T))
+        residual_trace[t] = np.trace(residual_covariance[t])
+
+        if np.any(residual_covariance[t] < 0):
+            logging.warning(f"Negative values in residual_covariance at time {t}")
 
     # Ensure that no negative values exist (if needed)
     # Sigma_Et[Sigma_Et < 0] = 0
     # sigma_Et[sigma_Et < 0] = 0
-
-    return bt, Sigma_Et, sigma_Et
-
-def get_residuals(Yt_event: np.ndarray, Yt_stats: Dict) -> np.ndarray:
-    """
-    Calculate residuals for each time step based on the model coefficients.
     
-    Parameters:
-    Yt_event : np.ndarray
-        The event matrix with shape (nvar * (morder + 1), L, ntrials).
-    Yt_stats : dict
-        A dictionary containing model statistics, specifically `OLS.At` 
-        with shape (L, nvar, nvar * morder).
+    return residual_biases, residual_covariance, residual_trace
 
-    Returns:
-    Et : np.ndarray
-        The residuals with shape (nvar, L, ntrials).
-    """
-    L, nvar, _ = Yt_stats['OLS']['At'].shape
-    ntrials = Yt_event.shape[2]
-    Et = np.full((nvar, L, ntrials), np.nan)
-    
-    for t in range(L):
-        Xt = Yt_event[:nvar, t, :]  # Shape: (nvar, ntrials)
-        Xp = Yt_event[nvar:, t, :]   # Shape: (nvar * morder, ntrials)
-        coeff = Yt_stats['OLS']['At'][t]  # Shape: (nvar, nvar * morder)
         
-        Et[:, t, :] = Xt - np.dot(coeff, Xp)
+def get_residuals(event_data: np.ndarray, stats: Dict) -> np.ndarray:
+    """
+    Calculate residuals for each time step in a VAR model.
 
-    return Et
+    Parameters
+    ----------
+    event_data : np.ndarray
+        Event matrix, shape (nvar * (morder + 1), L, ntrials).
+    stats : Dict
+        Dictionary containing:
+        - 'OLS': Sub-dictionary with 'At' (coefficients), shape (L, nvar, nvar * morder).
+
+    Returns
+    -------
+    np.ndarray
+        Residuals, shape (nvar, L, ntrials).
+
+    Raises
+    ------
+    ValueError
+        If coefficient and lagged data shapes are incompatible.
+    """
+    L, nvar, _ = stats['OLS']['At'].shape
+    ntrials = event_data.shape[2]
+    residuals = np.full((nvar, L, ntrials), np.nan)
+
+    for t in range(L):
+        Xt = event_data[:nvar, t, :]
+        Xp = event_data[nvar:, t, :]
+        coeff = stats['OLS']['At'][t]
+
+        if coeff.shape[1] != Xp.shape[0]:
+            raise ValueError(f"Shape mismatch at time {t}: coeff.shape[1]={coeff.shape[1]}, Xp.shape[0]={Xp.shape[0]}")
+
+        residuals[:, t, :] = Xt - np.dot(coeff, Xp)
+
+    return residuals
