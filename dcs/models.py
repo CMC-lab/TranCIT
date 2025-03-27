@@ -2,6 +2,7 @@ import logging
 from typing import Dict, Tuple
 
 import numpy as np
+from utils.core import compute_event_statistics
 from utils.helpers import regularize_if_singular
 
 logging.basicConfig(level=logging.INFO)
@@ -111,7 +112,7 @@ def compute_BIC_for_model(
         raise ValueError(f"Unsupported mode '{mode}'; only 'biased' is implemented.")
 
     if mode == 'biased':
-        stats = get_Yt_stats(event_data, model_order)
+        stats = compute_event_statistics(event_data, model_order)
     else:
         raise NotImplementedError("'debiased' mode is not yet supported.")
 

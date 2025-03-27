@@ -1,5 +1,8 @@
-import numpy as np
 from typing import Dict, Tuple
+
+import numpy as np
+
+
 def simulate_ar_event_bootstrap(simobj: Dict, Yt_event: np.ndarray, Yt_stats: Dict, Et: np.ndarray) -> np.ndarray:
     """
     Simulate autoregressive (AR) events with bootstrapping.
