@@ -15,6 +15,7 @@ from .utils.signal import (find_best_shrinked_locs, find_peak_loc,
 
 logger = logging.getLogger(__name__)
 
+
 def snapshot_detect_analysis_pipeline(
     original_signal: np.ndarray,
     detection_signal: np.ndarray,
@@ -24,29 +25,48 @@ def snapshot_detect_analysis_pipeline(
     Perform a pipeline for detecting and analyzing events in time series data.
 
     This function detects reference points, extracts event snapshots, and optionally performs
-    BIC model selection, causality analysis, bootstrapping, and PSD computation.
+    BIC model selection, causality analysis, and bootstrapping based on
+    the provided parameters.
 
     Args:
         original_signal (np.ndarray): Original time series, shape (n_vars, n_time_points).
         detection_signal (np.ndarray): Signal for event detection, shape (2, n_time_points).
-        params (Dict): Configuration dictionary with nested keys:
-            - 'Options': Flags for 'Detection', 'BIC', 'CausalAnalysis', 'Bootstrap', 'PSD', 'save_flag'.
-            - 'Detection': Parameters like 'ThresRatio', 'AlignType', 'L_extract', 'L_start', 'ShrinkFlag'.
-            - 'BIC': Parameters like 'momax', 'tau', 'morder', 'mode'.
-            - 'CausalParams': Causality analysis settings.
-            - 'MonteC_Params': Bootstrapping settings.
-            - 'PSD': PSD computation settings.
-            - 'Output': File saving settings.
+        params (Dict): Configuration dictionary with nested keys specifying pipeline behavior:
+            - 'Options' (Dict): Flags for enabling steps:
+                - 'Detection' (int): 1 to perform detection, 0 to use provided locs.
+                - 'BIC' (bool): True to perform BIC model selection.
+                - 'CausalAnalysis' (bool): True to compute causality measures.
+                - 'Bootstrap' (bool): True to perform bootstrapping for causality.
+                - 'save_flag' (bool): True to save outputs to files.
+            - 'Detection' (Dict): Parameters for event detection:
+                - 'ThresRatio' (float): Threshold ratio for peak detection relative to std dev.
+                - 'AlignType' (str): 'peak' or 'pooled' for aligning events.
+                - 'L_extract' (int): Length of the window to extract around each event.
+                - 'L_start' (int): Offset from the detected location to start extraction.
+                - 'ShrinkFlag' (bool): Whether to use shrinking for 'pooled' alignment.
+                - 'locs' (np.ndarray, optional): Predefined locations if Options['Detection']==0.
+                - 'remove_artif' (bool, optional): True to remove artifact trials based on threshold.
+            - 'BIC' (Dict): Parameters for Bayesian Information Criterion:
+                - 'momax' (int): Maximum model order to test.
+                - 'tau' (int): Lag step used for constructing event snapshots for BIC.
+                - 'morder' (int): Default model order if BIC is not run.
+                - 'mode' (str): BIC calculation mode (e.g., 'biased').
+            - 'CausalParams' (Dict): Parameters for causality analysis (passed to time_varying_causality).
+                - Includes 'ref_time', 'estim_mode', 'diag_flag', 'old_version'.
+            - 'MonteC_Params' (Dict): Parameters for bootstrapping.
+                - Includes 'Nbtsp' (number of bootstrap samples).
+            - 'Output' (Dict): Settings for saving outputs.
+                - 'FileKeyword' (str): Base keyword for output filenames.
 
     Returns:
         Tuple[Dict, Dict, np.ndarray]:
-            - SnapAnalyOutput: Results dictionary.
-            - params: Updated parameters.
-            - Yt_events: Event snapshots.
+            - SnapAnalyOutput: Dictionary containing analysis results like 'locs', 'morder', 'Yt_stats', 'CausalOutput', 'BICoutputs'.
+            - params: Updated parameters dictionary (may include added info like 'DeSnap_inputs').
+            - Yt_events: Extracted event snapshots, shape (n_vars * (model_order + 1), L_extract, n_trials).
 
     Raises:
         KeyError: If required keys are missing in params.
-        ValueError: If parameters are invalid.
+        ValueError: If parameters like 'AlignType' or 'BIC['mode']' are invalid.
     """
     # Validate inputs
     required_keys = ['Options', 'Detection', 'BIC', 'Output']
@@ -138,16 +158,6 @@ def snapshot_detect_analysis_pipeline(
                 Params=params, CausalOutput_btsp=btsp_causal_output, Yt_stats_btsp=btsp_stats
             )
 
-    # Step 9: PSD calculation
-    if params['Options'].get('PSD', False):
-        if not params['PSD'].get('MonteC_flag', False):
-            event_stats = compute_simulated_timefreq(event_snapshots, event_stats, params['PSD'])
-        else:
-            psd_params = params['PSD'].copy()
-            psd_params['simobj']['morder'] = morder
-            mc_snapshots = simulate_ar_event(psd_params['simobj'], event_stats)
-            event_stats = compute_simulated_timefreq(mc_snapshots, event_stats, psd_params)
-
     # Step 10: Prepare and save results
     snap_analysis_output.update({
         "d0": d0 if params["Options"]["Detection"] == 1 else None,
@@ -166,9 +176,7 @@ def snapshot_detect_analysis_pipeline(
             'D': snap_analysis_output["d0"], 'Yt_stats_cond': event_stats
         }
         file_keyword = params['Output']['FileKeyword']
-        if params['Options'].get('PSD', False):
-            np.savez_compressed(f"{file_keyword}_psd.npz", Params=params, PSD=event_stats['spectr'])
-        elif params["Options"].get("CausalAnalysis", False):
+        if params["Options"].get("CausalAnalysis", False):
             np.savez_compressed(f"{file_keyword}_model_causality.npz", Params=params, Yt_stats=event_stats,
                                 CausalOutput=causal_output, SnapAnalyOutput=snap_analysis_output)
         else:

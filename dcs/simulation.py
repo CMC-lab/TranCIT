@@ -128,6 +128,41 @@ def simulate_ar_nonstat_innomean(A: np.ndarray, SIG: np.ndarray, innomean: np.nd
 
 
 def generate_signals(T: int, Ntrial: int, h: float, gamma1: float, gamma2: float, Omega1: float, Omega2: float, apply_morlet: bool = False) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Generate bivariate coupled oscillator signals based on a specified model.
+
+    Simulates two coupled second-order linear differential equations discretized
+    using a time step h, with added noise terms. Allows for optional non-stationarity
+    in the noise applied to the first signal (x) via a Morlet wavelet shape.
+
+    Parameters
+    ----------
+    T : int
+        Total number of time points to simulate (including initial points).
+    Ntrial : int
+        Number of trials (realizations) to generate.
+    h : float
+        Time step for discretization.
+    gamma1 : float
+        Damping coefficient for the first oscillator (x).
+    gamma2 : float
+        Damping coefficient for the second oscillator (y).
+    Omega1 : float
+        Natural frequency for the first oscillator (x).
+    Omega2 : float
+        Natural frequency for the second oscillator (y).
+    apply_morlet : bool, optional
+        If True, applies a Morlet wavelet shape to modulate the noise variance (`ns_x`)
+        for the first signal, introducing non-stationarity. Defaults to False, using
+        constant noise variance.
+
+    Returns
+    -------
+    Tuple[np.ndarray, np.ndarray, np.ndarray]
+        - X : Generated signals, shape (2, T - 500, Ntrial). Contains x and y signals after discarding the first 500 points.
+        - ns_x : Noise variance profile for the x signal, shape (T + 1,).
+        - ns_y : Noise variance profile for the y signal, shape (T + 1,).
+    """
     X = np.zeros((2, T - 500, Ntrial))
     
     if apply_morlet == True:
