@@ -3,7 +3,7 @@ from typing import Dict, Tuple
 
 import numpy as np
 from utils.core import compute_event_statistics
-from utils.helpers import regularize_if_singular
+from utils.preprocess import regularize_if_singular
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

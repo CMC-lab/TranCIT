@@ -3,7 +3,7 @@ from typing import Tuple
 
 import numpy as np
 
-from .core import regularize_if_singular
+from .preprocess import regularize_if_singular
 
 logging.basicConfig(level=logging.INFO)
 
