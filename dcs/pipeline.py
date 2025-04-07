@@ -104,7 +104,7 @@ def snapshot_detect_analysis_pipeline(
          raise KeyError("Missing required BIC parameter: params['BIC']['morder']")
 
     if 'FileKeyword' not in params['Output']:
-         raise KeyError("Missing required Output parameter: params['Output']['FileKeyword']")
+        raise KeyError("Missing required Output parameter: params['Output']['FileKeyword']")
     # --- End: Added Parameter Checks ---
 
     snap_analysis_output = {}
