@@ -1,0 +1,67 @@
+# CITATION.cff in the root of your repository
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "Dynamic Causal Strength (DCS): A Python Package for Transient Neural Causal Inference" # Title from paper draft [cite: 1]
+
+authors:
+  - family-names: "Nouri" # Use actual family name
+    given-names: "Salar" # Use actual given name
+    # Add ORCID if you have one:
+    # orcid: "https://orcid.org/XXXX-XXXX-XXXX-XXXX"
+    affiliation: "[Your Institution]" # Fill this in
+
+  # Add other authors here if applicable, using the same format:
+  # - family-names: "Another"
+  #   given-names: "Author"
+  #   affiliation: "[Their Institution]"
+
+# Use the version from your __init__.py or setup.py
+# It's best practice for this version to match a specific release tag
+version: "0.1.0" # Or fetch dynamically if your build process supports it
+# Use the date of the specific release this CFF file corresponds to
+date-released: 2025-04-02 # Or update to actual release date
+
+# Short description of the software
+abstract: "A Python package implementing advanced causal inference methods (Granger causality, Transfer Entropy, DCS, rDCS) specifically designed for transient neural events, reimplementing and extending Shao et al., 2023." # Adapted from paper summary [cite: 3, 5]
+
+# Keywords relevant to your software
+keywords:
+  - "causal inference"
+  - "neuroscience"
+  - "time series analysis"
+  - "granger causality"
+  - "transfer entropy"
+  - "dynamic causal strength"
+  - "python"
+  - "EEG"
+  - "MEG"
+
+# License identifier from SPDX License List (https://spdx.org/licenses/)
+license: "MIT" # Matches setup.py [cite: uploaded:dynamic-causal-strength/setup.py]
+
+# URL of the software repository
+repository-code: "https://github.com/sa-nouri/dcs" # Use your actual URL [cite: uploaded:dynamic-causal-strength/setup.py]
+# Optional: URL to documentation or project website
+url: "https://sa-nouri.github.io/dcs/" # Example if you host docs on GitHub Pages
+
+# DOI for the software version (IMPORTANT FOR JOSS)
+# You typically get this AFTER archiving a specific release on Zenodo or similar.
+# Leave it empty or comment it out initially.
+# doi: "10.5281/zenodo.XXXXXXX" # Placeholder - get from Zenodo/Figshare archive
+
+# Optional: Reference to the key paper describing the methods/software
+preferred-citation:
+  type: article
+  authors:
+  # List authors of your JOSS paper
+  - family-names: "Nouri"
+    given-names: "Salar"
+    affiliation: "[Your Institution]"
+  # Add other authors
+  doi: "10.21105/joss.XXXXX" # Placeholder - JOSS will assign this upon publication
+  journal: "Journal of Open Source Software"
+  title: "Dynamic Causal Strength (DCS): A Python Package for Transient Neural Causal Inference"
+  # year: # Year of JOSS publication
+  # volume: # JOSS volume
+  # issue: # JOSS issue
+  # start: # JOSS page/article number
