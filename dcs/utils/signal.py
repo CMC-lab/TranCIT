@@ -9,7 +9,7 @@ def find_best_shrinked_locs(
     signal: np.ndarray,
     shrinked_locations: np.ndarray,
     all_locations: np.ndarray,
-    num_bins: int = 100
+    num_bins: int = 100,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Find the best subset of shrinked locations by minimizing histogram distance.
@@ -46,20 +46,28 @@ def find_best_shrinked_locs(
 
     # Compute distances for subsets starting from size 100
     for size in range(100, len(shrinked_locations)):
-        hist_temp, _ = np.histogram(signal[shrinked_locations[:size]], bins=num_bins, density=True)
-        distances[size] = cdist(hist_full.reshape(1, -1), hist_temp.reshape(1, -1), metric='euclidean')[0, 0]
-        logging.debug(f"Computed distance {distances[size]:.4f} for subset size {size}.")
+        hist_temp, _ = np.histogram(
+            signal[shrinked_locations[:size]], bins=num_bins, density=True
+        )
+        distances[size] = cdist(
+            hist_full.reshape(1, -1), hist_temp.reshape(1, -1), metric="euclidean"
+        )[0, 0]
+        logging.debug(
+            f"Computed distance {distances[size]:.4f} for subset size {size}."
+        )
 
     # Find best subset
     best_size = np.nanargmin(distances)
     best_locations = shrinked_locations[:best_size]
-    logging.info(f"Best subset size: {best_size} with distance {distances[best_size]:.4f}.")
+    logging.info(
+        f"Best subset size: {best_size} with distance {distances[best_size]:.4f}."
+    )
 
     return best_locations, distances
 
+
 def shrink_locs_resample_uniform(
-    locations: np.ndarray,
-    min_distance: int
+    locations: np.ndarray, min_distance: int
 ) -> np.ndarray:
     """
     Uniformly resample locations with a minimum distance between points.
@@ -86,7 +94,9 @@ def shrink_locs_resample_uniform(
 
     selected_locations = []
     available_locations = locations.copy()
-    logging.debug(f"Starting resampling with {len(locations)} locations and min_distance {min_distance}.")
+    logging.debug(
+        f"Starting resampling with {len(locations)} locations and min_distance {min_distance}."
+    )
 
     while available_locations.size > 0:
         rand_idx = np.random.randint(0, len(available_locations))
@@ -94,16 +104,17 @@ def shrink_locs_resample_uniform(
         selected_locations.append(selected_loc)
         mask = np.abs(selected_loc - available_locations) >= min_distance
         available_locations = available_locations[mask]
-        logging.debug(f"Selected location {selected_loc}; {len(available_locations)} remain.")
+        logging.debug(
+            f"Selected location {selected_loc}; {len(available_locations)} remain."
+        )
 
     result = np.array(selected_locations)
     logging.info(f"Resampling complete; selected {len(result)} locations.")
     return result
 
+
 def find_peak_loc(
-    signal: np.ndarray,
-    candidate_locations: np.ndarray,
-    window_size: int
+    signal: np.ndarray, candidate_locations: np.ndarray, window_size: int
 ) -> np.ndarray:
     """
     Refine peak locations by grouping candidates and local maximization.
@@ -131,7 +142,8 @@ def find_peak_loc(
 
     # Filter candidates within signal bounds
     valid_candidates = candidate_locations[
-        (candidate_locations >= window_size) & (candidate_locations <= len(signal) - window_size)
+        (candidate_locations >= window_size)
+        & (candidate_locations <= len(signal) - window_size)
     ]
     logging.debug(f"Filtered to {len(valid_candidates)} valid candidates.")
 
@@ -140,10 +152,13 @@ def find_peak_loc(
     idx_start = 0
     while idx_start < len(valid_candidates):
         idx_end = idx_start
-        while (idx_end < len(valid_candidates) - 1 and
-               valid_candidates[idx_end + 1] - valid_candidates[idx_start] < window_size):
+        while (
+            idx_end < len(valid_candidates) - 1
+            and valid_candidates[idx_end + 1] - valid_candidates[idx_start]
+            < window_size
+        ):
             idx_end += 1
-        group = valid_candidates[idx_start:idx_end + 1]
+        group = valid_candidates[idx_start : idx_end + 1]
         group_signal = signal[group]
         max_idx = np.argmax(group_signal)
         preliminary_peaks.append(group[max_idx])

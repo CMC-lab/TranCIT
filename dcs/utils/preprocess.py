@@ -1,7 +1,10 @@
 from typing import Tuple
 import numpy as np
 
-def remove_artifact_trials(event_data: np.ndarray, locations: np.ndarray, lower_threshold: float) -> Tuple[np.ndarray, np.ndarray]:
+
+def remove_artifact_trials(
+    event_data: np.ndarray, locations: np.ndarray, lower_threshold: float
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Remove trials from event data where the signal drops below a specified threshold.
 
@@ -32,21 +35,23 @@ def remove_artifact_trials(event_data: np.ndarray, locations: np.ndarray, lower_
     """
     # Find indices where any value in the first two variables is below the threshold
     artifact_indices = np.where(event_data[:2, :, :] < lower_threshold)
-    
+
     # Get unique trial indices to remove
     trials_to_remove = np.unique(artifact_indices[2])
-    
+
     # Remove the artifact trials from event_data and locations
     updated_event_data = np.delete(event_data, trials_to_remove, axis=2)
     updated_locations = np.delete(locations, trials_to_remove)
-    
+
     # Log the number of removed trials
-    print(f'Removed {len(trials_to_remove)} artifact trials')
-    
+    print(f"Removed {len(trials_to_remove)} artifact trials")
+
     return updated_event_data, updated_locations
 
 
-def regularize_if_singular(matrix: np.ndarray, epsilon: float = 1e-6, threshold: float = 1e-6) -> np.ndarray:
+def regularize_if_singular(
+    matrix: np.ndarray, epsilon: float = 1e-6, threshold: float = 1e-6
+) -> np.ndarray:
     """
     Check if a matrix is singular and regularize it by adding epsilon to the diagonal if needed.
 
@@ -80,7 +85,7 @@ def regularize_if_singular(matrix: np.ndarray, epsilon: float = 1e-6, threshold:
     """
     if matrix.shape[0] != matrix.shape[1]:
         raise ValueError("Input matrix must be square")
-    
+
     # cond_threshold = threshold
     # cond_number = np.linalg.cond(matrix)
     # if cond_number > cond_threshold:
@@ -88,10 +93,12 @@ def regularize_if_singular(matrix: np.ndarray, epsilon: float = 1e-6, threshold:
     #     return regularized_matrix
     # else:
     #     return matrix
-    
+
     det = np.linalg.det(matrix)
     if abs(det) < threshold:
-        print(f"Warning: Singular matrix detected (det={det}), adding epsilon={epsilon}")
+        print(
+            f"Warning: Singular matrix detected (det={det}), adding epsilon={epsilon}"
+        )
         regularized_matrix = matrix + epsilon * np.eye(matrix.shape[0])
         return regularized_matrix
     else:

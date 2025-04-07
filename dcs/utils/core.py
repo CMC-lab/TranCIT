@@ -8,7 +8,10 @@ from .residuals import estimate_residuals
 
 logging.basicConfig(level=logging.INFO)
 
-def extract_event_windows(signal: np.ndarray, centers: np.ndarray, start_offset: int, window_length: int) -> np.ndarray:
+
+def extract_event_windows(
+    signal: np.ndarray, centers: np.ndarray, start_offset: int, window_length: int
+) -> np.ndarray:
     """
     Extract windows of data from a signal around specified center points.
 
@@ -41,15 +44,21 @@ def extract_event_windows(signal: np.ndarray, centers: np.ndarray, start_offset:
         idx = np.arange(start_idx, end_idx)
 
         if np.any(idx < 0) or np.any(idx >= len(signal)):
-            logging.error(f"Index out of bounds for center {center}: {idx} for signal of length {len(signal)}")
-            raise IndexError(f"Index out of bounds: {idx} for array of length {len(signal)}")
+            logging.error(
+                f"Index out of bounds for center {center}: {idx} for signal of length {len(signal)}"
+            )
+            raise IndexError(
+                f"Index out of bounds: {idx} for array of length {len(signal)}"
+            )
 
         event_windows[:, i] = signal[idx]
 
     return event_windows
 
 
-def compute_conditional_event_statistics(event_data: np.ndarray, model_order: int, epsilon: float = 1e-4) -> Dict:
+def compute_conditional_event_statistics(
+    event_data: np.ndarray, model_order: int, epsilon: float = 1e-4
+) -> Dict:
     """
     Compute conditional statistics for VAR time series events, including mean and covariance.
 
@@ -77,10 +86,10 @@ def compute_conditional_event_statistics(event_data: np.ndarray, model_order: in
     nvar = event_data.shape[0] // (model_order + 1)
     stats = {
         "mean": np.mean(event_data, axis=2),
-        "Sigma": np.zeros((event_data.shape[1], nvar * (model_order + 1), nvar * (model_order + 1))),
-        "OLS": {
-            "At": np.zeros((event_data.shape[1], nvar, nvar * model_order))
-        }
+        "Sigma": np.zeros(
+            (event_data.shape[1], nvar * (model_order + 1), nvar * (model_order + 1))
+        ),
+        "OLS": {"At": np.zeros((event_data.shape[1], nvar, nvar * model_order))},
     }
 
     for t in range(event_data.shape[1]):
@@ -91,15 +100,27 @@ def compute_conditional_event_statistics(event_data: np.ndarray, model_order: in
         Sigma_end = stats["Sigma"][t, nvar:, nvar:]
 
         if np.linalg.det(Sigma_end) == 0:
-            logging.warning(f"Matrix singular at time {t}, applying regularization with epsilon={epsilon}")
+            logging.warning(
+                f"Matrix singular at time {t}, applying regularization with epsilon={epsilon}"
+            )
             Sigma_end = regularize_if_singular(Sigma_end, epsilon)
 
         stats["OLS"]["At"][t, :, :] = np.dot(Sigma_sub_matrix, np.linalg.inv(Sigma_end))
 
-    stats["OLS"]["bt"], stats["OLS"]["Sigma_Et"], stats["OLS"]["sigma_Et"] = estimate_residuals(stats)
+    stats["OLS"]["bt"], stats["OLS"]["Sigma_Et"], stats["OLS"]["sigma_Et"] = (
+        estimate_residuals(stats)
+    )
     return stats
 
-def extract_event_snapshots(time_series: np.ndarray, locations: np.ndarray, model_order: int, lag_step: int, start_offset: int, extract_length: int) -> np.ndarray:
+
+def extract_event_snapshots(
+    time_series: np.ndarray,
+    locations: np.ndarray,
+    model_order: int,
+    lag_step: int,
+    start_offset: int,
+    extract_length: int,
+) -> np.ndarray:
     """
     Extract event snapshots from time series data for multiple variables and lags.
 
@@ -125,14 +146,18 @@ def extract_event_snapshots(time_series: np.ndarray, locations: np.ndarray, mode
         containing the extracted event snapshots.
     """
     nvar = time_series.shape[0]
-    snapshots = np.full((nvar * (model_order + 1), extract_length, len(locations)), np.nan)
+    snapshots = np.full(
+        (nvar * (model_order + 1), extract_length, len(locations)), np.nan
+    )
 
     idx1 = np.arange(nvar * (model_order + 1))
     idx2 = np.tile(np.arange(nvar), model_order + 1)
     delay = np.tile(np.arange(0, model_order + 1) * lag_step, (nvar, 1)).flatten()
 
     for n in range(len(idx1)):
-        snapshots[idx1[n], :, :] = extract_event_windows(time_series[idx2[n], :], locations - delay[n], start_offset, extract_length)
+        snapshots[idx1[n], :, :] = extract_event_windows(
+            time_series[idx2[n], :], locations - delay[n], start_offset, extract_length
+        )
 
     return snapshots
 
@@ -169,7 +194,7 @@ def compute_event_statistics(event_data: np.ndarray, model_order: int) -> Dict:
         "mean": np.mean(event_data, axis=2),
         "n_trials": n_trials,
         "Sigma": np.zeros((nobs, nvar * (model_order + 1), nvar * (model_order + 1))),
-        "OLS": {"At": np.zeros((nobs, nvar, nvar * model_order))}
+        "OLS": {"At": np.zeros((nobs, nvar, nvar * model_order))},
     }
 
     for t in range(nobs):
@@ -177,7 +202,9 @@ def compute_event_statistics(event_data: np.ndarray, model_order: int) -> Dict:
         stats["Sigma"][t, :, :] = np.dot(temp, temp.T) / n_trials
 
         Sigma_12 = stats["Sigma"][t, :nvar, nvar:]  # Shape: (nvar, nvar * model_order)
-        Sigma_22 = stats["Sigma"][t, nvar:, nvar:]  # Shape: (nvar * model_order, nvar * model_order)
+        Sigma_22 = stats["Sigma"][
+            t, nvar:, nvar:
+        ]  # Shape: (nvar * model_order, nvar * model_order)
 
         Sigma_22_reg = regularize_if_singular(Sigma_22)
         if not np.allclose(Sigma_22, Sigma_22_reg):
@@ -185,5 +212,7 @@ def compute_event_statistics(event_data: np.ndarray, model_order: int) -> Dict:
 
         stats["OLS"]["At"][t, :, :] = Sigma_12 @ np.linalg.inv(Sigma_22_reg)
 
-    stats["OLS"]["bt"], stats["OLS"]["Sigma_Et"], stats["OLS"]["sigma_Et"] = estimate_residuals(stats)
+    stats["OLS"]["bt"], stats["OLS"]["Sigma_Et"], stats["OLS"]["sigma_Et"] = (
+        estimate_residuals(stats)
+    )
     return stats

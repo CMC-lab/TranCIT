@@ -7,7 +7,10 @@ from .preprocess import regularize_if_singular
 
 logging.basicConfig(level=logging.INFO)
 
-def compute_covariances(lagged_data_array: np.ndarray, n_time_steps: int, model_order: int) -> tuple:
+
+def compute_covariances(
+    lagged_data_array: np.ndarray, n_time_steps: int, model_order: int
+) -> tuple:
     """
     Compute covariance matrices for lagged data.
 
@@ -66,7 +69,10 @@ def compute_covariances(lagged_data_array: np.ndarray, n_time_steps: int, model_
 
     return cov_Xp, cov_Yp, C_XYp, C_YXp
 
-def estimate_coefficients(current_data_matrix: np.ndarray, lagged_data_matrix: np.ndarray, n_trials: int) -> Tuple[np.ndarray, np.ndarray]:
+
+def estimate_coefficients(
+    current_data_matrix: np.ndarray, lagged_data_matrix: np.ndarray, n_trials: int
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Compute regression coefficients and residual covariance for a VAR model.
 
@@ -110,6 +116,8 @@ def estimate_coefficients(current_data_matrix: np.ndarray, lagged_data_matrix: n
     coefficients = np.linalg.solve(auto_cov_lagged_reg, cross_cov_between.T).T
 
     # Compute residual covariance
-    residual_covariance = cross_cov_current - np.dot(coefficients, np.dot(auto_cov_lagged_reg, coefficients.T))
+    residual_covariance = cross_cov_current - np.dot(
+        coefficients, np.dot(auto_cov_lagged_reg, coefficients.T)
+    )
 
     return coefficients, residual_covariance
