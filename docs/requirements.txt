@@ -1,0 +1,9 @@
+# Dependencies required to build the documentation
+
+sphinx>=4.0  # Or a newer version
+sphinx-rtd-theme>=1.0 # The theme you selected
+
+# Dependencies of your package
+
+numpy>=1.26
+scipy>=1.14
