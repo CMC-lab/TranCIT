@@ -239,12 +239,33 @@ def estimate_var_coefficients(
     Raises:
         ValueError: If n_vars == 1, or time_mode/lag_mode is invalid.
     """
+   # --- Start: Added Error Handling ---
+    if not isinstance(time_series_data, np.ndarray):
+        raise TypeError("Input 'time_series_data' must be a NumPy array.")
+    
+    if time_series_data.ndim != 3:
+        raise ValueError(f"Input 'time_series_data' must be 3-dimensional (n_vars, n_observations, n_trials), got {time_series_data.ndim} dimensions.")
+    
     n_vars, n_observations, n_trials = time_series_data.shape
-    if n_vars == 1:
-        raise ValueError("Input must be multivariate (n_vars > 1).")
+    if n_vars <= 1:
+        raise ValueError(f"Input must be multivariate (n_vars > 1), got n_vars={n_vars}.")
+    
+    if np.isnan(time_series_data).any() or np.isinf(time_series_data).any():
+        # Optional: Check for NaN/Inf if they cause issues later
+        logging.warning("Input 'time_series_data' contains NaN or Inf values.")
 
-    if time_mode not in ['inhomo', 'homo'] or lag_mode not in ['infocrit', 'var']:
-        raise ValueError("Invalid time_mode or lag_mode.")
+    if not isinstance(model_order, int) or model_order <= 0:
+        raise ValueError("Input 'model_order' must be a positive integer.")
+    
+    if time_mode not in ['inhomo', 'homo']:
+        raise ValueError("Invalid time_mode; must be 'inhomo' or 'homo'.")
+    
+    if lag_mode not in ['infocrit', 'var']:
+        raise ValueError("Invalid lag_mode; must be 'infocrit' or 'var'.")
+    
+    if n_observations <= model_order:
+        raise ValueError(f"Number of observations ({n_observations}) must be greater than the model order ({model_order}).")
+    # --- End: Added Error Handling --
 
     lag_depth = max_model_order + 1 if lag_mode == 'infocrit' else model_order + 1
     extended_data = np.zeros((n_vars, lag_depth, n_observations + lag_depth - 1, n_trials))

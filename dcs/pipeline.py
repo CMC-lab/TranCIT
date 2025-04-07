@@ -7,7 +7,7 @@ from utils.timefreq import compute_simulated_timefreq
 
 from .causality import time_varying_causality
 from .models import compute_multi_trial_BIC
-from .simulation import simulate_ar_event, simulate_ar_event_bootstrap
+from .simulation import simulate_ar_event_bootstrap
 from .utils.core import compute_event_statistics, extract_event_snapshots
 from .utils.preprocess import remove_artifact_trials
 from .utils.signal import (find_best_shrinked_locs, find_peak_loc,
@@ -68,11 +68,44 @@ def snapshot_detect_analysis_pipeline(
         KeyError: If required keys are missing in params.
         ValueError: If parameters like 'AlignType' or 'BIC['mode']' are invalid.
     """
-    # Validate inputs
-    required_keys = ['Options', 'Detection', 'BIC', 'Output']
+    # --- Start: Added Parameter Checks ---
+    # Validate top-level keys
+    required_keys = ['Options', 'Detection', 'BIC', 'CausalParams', 'MonteC_Params', 'PSD', 'Output']
     for key in required_keys:
         if key not in params:
-            raise KeyError(f"Missing required key '{key}' in params")
+            raise KeyError(f"Missing required top-level key '{key}' in params dictionary.")
+
+    # Validate necessary sub-keys based on options
+    options = params['Options'] # Safe to access now
+    if not isinstance(options, dict): raise TypeError("params['Options'] must be a dictionary.")
+
+    detection_params = params['Detection'] # Safe to access now
+    if not isinstance(detection_params, dict): raise TypeError("params['Detection'] must be a dictionary.")
+    if options.get('Detection', 0) == 1: # Check sub-keys only if detection is active
+        req_detect_keys = ['ThresRatio', 'AlignType', 'L_extract', 'L_start', 'ShrinkFlag']
+        for key in req_detect_keys:
+             if key not in detection_params:
+                 raise KeyError(f"Missing required detection parameter: params['Detection']['{key}']")
+        align_type = detection_params['AlignType'] # Safe to access
+        if align_type not in ['peak', 'pooled']:
+             raise ValueError(f"Invalid AlignType '{align_type}' in params['Detection']")
+    else: # If detection is off, locs must be provided
+        if 'locs' not in detection_params:
+            raise KeyError("Missing required parameter: params['Detection']['locs'] when Options['Detection'] is 0.")
+
+    bic_params = params['BIC'] # Safe to access
+    if not isinstance(bic_params, dict): raise TypeError("params['BIC'] must be a dictionary.")
+    if options.get('BIC', False): # Check sub-keys if BIC is active
+        req_bic_keys = ['momax', 'tau', 'mode']
+        for key in req_bic_keys:
+            if key not in bic_params:
+                raise KeyError(f"Missing required BIC parameter: params['BIC']['{key}']")
+    if 'morder' not in bic_params: # morder is needed even if BIC is off
+         raise KeyError("Missing required BIC parameter: params['BIC']['morder']")
+
+    if 'FileKeyword' not in params['Output']:
+         raise KeyError("Missing required Output parameter: params['Output']['FileKeyword']")
+    # --- End: Added Parameter Checks ---
 
     snap_analysis_output = {}
 
