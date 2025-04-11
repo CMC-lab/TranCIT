@@ -30,8 +30,9 @@ setup(
     url="https://github.com/sa-nouri/dcs", # Use your actual repo URL
     packages=find_packages(exclude=["tests*", "docs*", "examples*"]), # Exclude non-package dirs
     install_requires=[
-        "numpy>=1.21",
-        "scipy>=1.7"
+        "numpy>=1.26",
+        "scipy>=1.14",
+        "matplotlib>=3.9"
     ],
     classifiers=[
         'Programming Language :: Python :: 3',

@@ -7,3 +7,4 @@ sphinx-rtd-theme>=1.0 # The theme you selected
 
 numpy>=1.26
 scipy>=1.14
+matplotlib>=3.9
