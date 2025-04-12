@@ -1,3 +1,4 @@
+
 .. _installation:
 
 ############
@@ -7,43 +8,66 @@ Installation
 Prerequisites
 =============
 
-Make sure you have the following installed:
+Before installing **Dynamic Causal Strength (DCS)**, ensure your environment includes:
 
-* Python 3.8 or higher (Your `setup.py` specifies >=3.12 [cite: uploaded:dynamic-causal-strength/setup.py])
-* NumPy 1.21 or higher [cite: uploaded:dynamic-causal-strength/README.md] (Your `docs/requirements.txt` specifies 1.26.4 [cite: uploaded:dynamic-causal-strength/docs/requirements.txt])
-* SciPy 1.7 or higher [cite: uploaded:dynamic-causal-strength/README.md] (Your `docs/requirements.txt` specifies 1.14.1 [cite: uploaded:dynamic-causal-strength/docs/requirements.txt])
+* Python 3.12 or higher
+* NumPy 1.26 or higher
+* SciPy 1.14 or higher
 
 .. note::
-   It's recommended to use a virtual environment (`venv` or `conda`) to manage dependencies.
+   It's highly recommended to use a virtual environment (`venv` or `conda`) to manage dependencies and avoid conflicts.
 
 Install from PyPI
 =================
 
-The easiest way to install the latest stable release is using pip:
+To install the latest stable release from PyPI:
 
 .. code-block:: bash
 
    pip install dynamic-causal-strength
 
-*(Note: Replace 'dynamic-causal-strength' with your actual PyPI package name if different)*
+.. tip::
+   Replace `'dynamic-causal-strength'` with the actual PyPI package name if different.
 
 Install from Source
 ===================
 
-To install the latest development version directly from the source code:
+To install the latest development version from the source code:
 
 1. Clone the repository:
 
    .. code-block:: bash
 
-      # Replace with your actual repository URL
       git clone https://github.com/sa-nouri/dcs.git
       cd dcs
 
-2. Install the package (in editable mode `-e` if you plan to develop):
+2. Install the package:
 
    .. code-block:: bash
 
       pip install .
-      # Or for editable install:
-      # pip install -e .
+      # Or for editable install (recommended if you are contributing or making changes):
+      pip install -e .
+
+Verify Installation
+===================
+
+To check if DCS was installed correctly:
+
+.. code-block:: bash
+
+   python -c "import dcs; print(dcs.__version__)"
+
+Optional Dependencies
+=====================
+
+Some features may require additional packages:
+
+* `matplotlib` for plotting
+* `jupyter` for running notebooks in the examples directory
+
+To install these along with DCS:
+
+.. code-block:: bash
+
+   pip install dynamic-causal-strength[dev]

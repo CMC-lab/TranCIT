@@ -1,38 +1,80 @@
+
 .. _contributing:
 
 ############
 Contributing
 ############
 
-Contributions to the Dynamic Causal Strength package are welcome! Whether it's reporting bugs, suggesting features, improving documentation, or submitting code changes, your help is appreciated.
+Thank you for your interest in contributing to **Dynamic Causal Strength (DCS)**! 🎉  
+We welcome all forms of contributions — from fixing bugs and improving docs to proposing features or submitting new code.
+
+If you're not sure where to start, feel free to open an issue or ask a question. All contributions, big or small, are appreciated.
+
+TL;DR - How to Contribute
+=========================
+
+1. Fork the repo and clone it locally.
+2. Create a new branch for your change.
+3. Make your changes (with `black`, `flake8`, and tests).
+4. Push to your fork and open a pull request.
 
 Reporting Issues
 ================
 
-If you encounter a bug or have a suggestion for improvement, please check the `GitHub Issues <URL_TO_YOUR_GITHUB_ISSUES>`_ page to see if a similar issue already exists. If not, feel free to open a new issue, providing as much detail as possible:
+Found a bug or have a suggestion? Great! Before opening a new issue, please:
 
-* Describe the expected behavior.
-* Describe the actual behavior or the bug.
-* Provide steps to reproduce the issue, including code snippets or sample data if possible.
-* Mention your operating system, Python version, and the versions of relevant libraries (`dcs`, `numpy`, `scipy`).
+- Search existing issues on `GitHub <https://github.com/CMC-lab/dcs/issues>`_ to avoid duplicates.
+- If it's new, open an issue and include:
+  - Expected vs. actual behavior
+  - Steps to reproduce (code snippets welcome!)
+  - Environment details (OS, Python version, `dcs`, `numpy`, etc.)
 
 Feature Requests
 ================
 
-We are open to suggestions for new features or enhancements. Please open a GitHub issue describing the proposed feature and its potential use case.
+We're always open to thoughtful feature proposals. Please describe:
+
+- What problem this feature solves
+- A clear use case or example
+- Any implementation ideas you have
+
+Open a discussion or issue to get started!
 
 Contributing Code
 =================
 
-If you would like to contribute code changes (e.g., bug fixes, new features):
+To contribute code (bug fixes, features, refactoring, etc.):
 
-1. **Fork the repository** on GitHub.
-2. **Create a new branch** for your feature or bug fix (`git checkout -b your-feature-name`).
-3. **Make your changes.** Please ensure your code follows the existing style (PEP 8, checked with `flake8` and `black`) and includes relevant docstrings.
-4. **Add unit tests** for any new functionality or bug fixes. Ensure all tests pass by running `pytest` in the project root directory.
-5. **Update documentation** (docstrings, `.rst` files) if your changes affect the API or usage.
-6. **Commit your changes** with clear and descriptive commit messages.
-7. **Push your branch** to your fork on GitHub (`git push origin your-feature-name`).
-8. **Open a Pull Request** against the main branch of the original repository. Provide a clear description of your changes in the pull request.
+1. **Fork the repo** on GitHub.
+2. **Create a new branch**:
+   .. code-block:: bash
 
-*(Note: This section could also just reference your `CONTRIBUTING.md` file if you prefer to maintain guidelines there [cite: uploaded:dynamic-causal-strength/README.md]. You could replace the text above with: Please see the `CONTRIBUTING.md <URL_TO_CONTRIBUTING.MD>`_ file in the repository for detailed contribution guidelines.)*
+      git checkout -b my-feature
+
+3. **Make your changes**, following our coding standards:
+   - Use `black` for formatting
+   - Use `flake8` to catch linting issues
+   - Add **docstrings** where applicable
+   - Write **tests** using `pytest`
+   - Run:
+     .. code-block:: bash
+
+        pytest
+
+4. **Update docs** if your changes affect usage or API.
+5. **Commit with clear messages**, then:
+   .. code-block:: bash
+
+      git push origin my-feature
+
+6. **Open a Pull Request** to the `main` branch with a detailed summary of your changes.
+
+Need help with any of this? Just ask!
+
+More Guidelines
+===============
+
+We follow best practices from the Python community. For a more detailed guide, please see the  
+`CONTRIBUTING.md <https://github.com/CMC-lab/dcs/main/CONTRIBUTING.md>`_.
+
+Thank you again for helping improve the DCS package!

@@ -1,43 +1,36 @@
+
 .. _quickstart:
 
 ##########
 Quickstart
 ##########
 
-Here's a quick example to get you started with detecting causal strength using the main pipeline. This example generates synthetic data and runs the analysis with basic parameters.
+This quick example walks you through running the main causal strength analysis pipeline using synthetic data.
+
+We'll use a built-in simulator and minimal configuration. For real-world applications, see the full examples in the `examples/` folder.
 
 .. code-block:: python
    :linenos:
 
    import numpy as np
-   # Assuming your package 'dcs' is installed or in the Python path
-   from dcs.simulation import generate_signals
-   # Assuming config classes are defined in dcs.pipeline or dcs.config
-   from dcs.pipeline import (
-       snapshot_detect_analysis_pipeline,
-       PipelineConfig, PipelineOptions, DetectionParams, BicParams, CausalParams, OutputParams, MonteCParams
-   )
    import logging
+   from dcs import generate_signals, snapshot_detect_analysis_pipeline
+   from dcs.config import PipelineConfig, PipelineOptions, DetectionParams, BicParams, CausalParams, OutputParams
 
-   # Configure logging to see INFO messages
+   # Enable logging to show pipeline steps
    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
-   # --- 1. Generate some simple synthetic data ---
+   # --- 1. Generate synthetic bivariate time-series data ---
    logging.info("Generating synthetic data...")
-   T = 1000  # Reduced length for quicker example
-   Ntrial = 10
-   h = 0.1
-   gamma1, gamma2 = 0.5, 0.5
-   Omega1, Omega2 = 1, 1
-
-   # Generate bivariate signals (variables, time, trials)
+   T, Ntrial, h = 1000, 10, 0.1
+   gamma1, gamma2, Omega1, Omega2 = 0.5, 0.5, 1.0, 1.0
    data, _, _ = generate_signals(T, Ntrial, h, gamma1, gamma2, Omega1, Omega2)
-   # Prepare inputs for the pipeline
-   original_signal_for_pipeline = np.mean(data, axis=2)
-   detection_signal_for_pipeline = original_signal_for_pipeline
 
-   # --- 2. Set up minimal configuration for the pipeline ---
-   logging.info("Setting up pipeline configuration...")
+   # Prepare pipeline inputs (average over trials)
+   original_signal = np.mean(data, axis=2)
+   detection_signal = original_signal  # Use the same input for simplicity
+
+   # --- 2. Set up pipeline configuration ---
    config = PipelineConfig(
        options=PipelineOptions(
            detection=True,
@@ -54,38 +47,35 @@ Here's a quick example to get you started with detecting causal strength using t
            shrink_flag=False,
            remove_artif=False
        ),
-       bic=BicParams(
-           morder=3 # Use fixed model order if bic=False
-       ),
+       bic=BicParams(morder=3),
        causal=CausalParams(
-           ref_time=50,
+           ref_time=range(1, 101),
            estim_mode='OLS'
        ),
-       # monte_carlo can be None or omitted if bootstrap is False and validation allows
-       monte_carlo=None, # Or MonteCParams() if needed by __post_init__
-       output=OutputParams(
-           file_keyword='quickstart_example'
-       )
+       output=OutputParams(file_keyword='quickstart_example')
    )
 
-   # --- 3. Run the analysis pipeline ---
+   # --- 3. Run the pipeline ---
    logging.info("Running the analysis pipeline...")
    try:
        snap_output, final_config, event_snapshots = snapshot_detect_analysis_pipeline(
-           original_signal=original_signal_for_pipeline,
-           detection_signal=detection_signal_for_pipeline,
+           original_signal=original_signal,
+           detection_signal=detection_signal,
            config=config
        )
 
-       # --- 4. Display some results ---
-       logging.info("Pipeline completed successfully.")
+       # --- 4. Access and display DCS results ---
        if snap_output.get('CausalOutput'):
-           dcs_results = snap_output['CausalOutput']['OLS']['DCS']
-           print("\nCalculated Dynamic Causal Strength (DCS) snippet (first 5 time points):")
-           print(dcs_results[:5, :])
-           print(f"\nDCS array shape: {dcs_results.shape}")
+           dcs_result = snap_output['CausalOutput']['OLS']['DCS']
+           print("DCS shape:", dcs_result.shape)
+           print("DCS values (first 5 time points):\n", dcs_result[:5, :])
        else:
-           print("\nCausality analysis was not run or produced no output.")
-
+           print("No causal output was generated.")
    except Exception as e:
-       logging.error(f"An error occurred during the pipeline execution: {e}", exc_info=True)
+       logging.error(f"Pipeline failed: {e}")
+
+What Next?
+==========
+
+- Try changing `thres_ratio` or `ref_time` in the config to explore their effects.
+- Look at `examples/basic_usage.py` and `examples/lfp_pipeline.py` for advanced usage.
