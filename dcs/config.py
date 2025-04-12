@@ -71,10 +71,13 @@ class PipelineConfig:
     detection: DetectionParams
     bic: BicParams
     causal: CausalParams
-    monte_carlo: Optional[MonteCParams] = None  # Optional if bootstrap is False
     output: OutputParams
+    monte_carlo: Optional[MonteCParams] = None
+        
+    Fs: int = 1252
+    passband: List[int] = field(default_factory=lambda: [140, 230])
 
-    # Validation logi
+    # Validation logic
     def __post_init__(self):
         if not self.options.detection and self.detection.locs is None:
             raise ValueError(

@@ -254,7 +254,8 @@ def morlet(start: float, end: float, num_points: int) -> np.ndarray:
     """
     t = np.linspace(start, end, num_points)
     w0 = 5
-    sigma = (end - start) / (2 * np.pi)
+    # sigma = (end - start) / (2 * np.pi)
+    sigma = 1
     # sigma = end / (2 * np.pi)  # Standard deviation for Gaussian
     wavelet = (
         (1 / np.sqrt(sigma)) * np.exp(1j * w0 * t) * np.exp(-(t**2) / (2 * (sigma**2)))

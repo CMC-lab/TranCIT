@@ -2,8 +2,9 @@ import logging
 from typing import Dict, Tuple
 
 import numpy as np
-from utils.core import compute_event_statistics
-from utils.preprocess import regularize_if_singular
+
+from .utils import compute_event_statistics
+from .utils.preprocess import regularize_if_singular
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -85,7 +86,7 @@ def compute_multi_trial_BIC(event_data_max_order: np.ndarray, bic_params: Dict) 
             )
 
     optimal_orders = np.nanargmin(bic_outputs["bic"], axis=0) + 1
-    bic_outputs["optimal_orders"] = optimal_orders
+    bic_outputs["mobic"] = optimal_orders
     logger.info(f"Optimal model orders for BIC variants: {optimal_orders}")
 
     return bic_outputs

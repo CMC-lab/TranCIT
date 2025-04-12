@@ -2,8 +2,9 @@ import logging
 from typing import Dict, Tuple
 
 import numpy as np
-from utils.helpers import compute_covariances, estimate_coefficients
-from utils.preprocess import regularize_if_singular
+
+from .utils.helpers import compute_covariances, estimate_coefficients
+from .utils.preprocess import regularize_if_singular
 
 logging.basicConfig(level=logging.INFO)
 

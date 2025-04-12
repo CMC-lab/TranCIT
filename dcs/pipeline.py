@@ -2,19 +2,15 @@ import logging
 from typing import Dict, Tuple
 
 import numpy as np
-from utils.residuals import get_residuals
 
 from .causality import time_varying_causality
 from .config import PipelineConfig
 from .models import compute_multi_trial_BIC
 from .simulation import simulate_ar_event_bootstrap
-from .utils.core import compute_event_statistics, extract_event_snapshots
-from .utils.preprocess import remove_artifact_trials
-from .utils.signal import (
-    find_best_shrinked_locs,
-    find_peak_loc,
-    shrink_locs_resample_uniform,
-)
+from .utils import (compute_event_statistics, extract_event_snapshots,
+                    get_residuals, remove_artifact_trials)
+from .utils.signal import (find_best_shrinked_locs, find_peak_loc,
+                           shrink_locs_resample_uniform)
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +18,7 @@ logger = logging.getLogger(__name__)
 def snapshot_detect_analysis_pipeline(
     original_signal: np.ndarray,
     detection_signal: np.ndarray,
-    config: PipelineConfig,  # Argument changed to PipelineConfig object
+    config: PipelineConfig,
 ) -> Tuple[Dict, PipelineConfig, np.ndarray]:
     """
     Perform a pipeline for detecting and analyzing events in time series data.
@@ -67,20 +63,22 @@ def snapshot_detect_analysis_pipeline(
         Exception: Can propagate exceptions from underlying functions (e.g., linalg errors).
     """
     # --- Input Validation ---
-    if not isinstance(original_signal, np.ndarray):
-        raise TypeError("original_signal must be a NumPy array.")
-    if not isinstance(detection_signal, np.ndarray):
-        raise TypeError("detection_signal must be a NumPy array.")
-    if not isinstance(config, PipelineConfig):
-        raise TypeError("config must be a PipelineConfig object.")
-    if original_signal.ndim != 2:
-        raise ValueError("original_signal must be 2D (n_vars, time).")
-    if detection_signal.ndim != 2 or detection_signal.shape[0] != 2:
-        raise ValueError("detection_signal must be 2D with shape (2, time).")
-    if original_signal.shape[1] != detection_signal.shape[1]:
-        raise ValueError(
-            "original_signal and detection_signal must have the same time dimension length."
-        )
+    # if not isinstance(original_signal, np.ndarray):
+    #     logger.warning("original_signal must be a NumPy array.")
+    #     original_signal = np.array(original_signal)
+    # if not isinstance(detection_signal, np.ndarray):
+    #     logger.warning("detection_signal must be a NumPy array.")
+    #     detection_signal = np.array(detection_signal)
+    # if not isinstance(config, PipelineConfig):
+    #     raise TypeError("config must be a PipelineConfig object.")
+    # if original_signal.ndim != 2:
+    #     raise ValueError("original_signal must be 2D (n_vars, time).")
+    # if detection_signal.ndim != 2 or detection_signal.shape[0] != 2:
+    #     raise ValueError("detection_signal must be 2D with shape (2, time).")
+    # if original_signal.shape[1] != detection_signal.shape[1]:
+    #     raise ValueError(
+    #         "original_signal and detection_signal must have the same time dimension length."
+    #     )
 
     snap_analysis_output = {}
     logger.info("Starting snapshot detection and analysis pipeline.")
@@ -96,16 +94,15 @@ def snapshot_detect_analysis_pipeline(
         )
 
         align_type = config.detection.align_type
-        L_extract_detect = (
+        l_extract = (
             config.detection.l_extract
         )  # Use L_extract for window size in find_peak_loc
         if align_type == "peak":
-            locs = find_peak_loc(detection_signal[1], temp_locs, L_extract_detect)
+            locs = find_peak_loc(detection_signal[1], temp_locs, l_extract)
             logger.info(f"Aligned to peaks, found {len(locs)} locations.")
         elif align_type == "pooled":
-            # Ensure L_extract is appropriate for pooling logic
-            pool_window = int(np.ceil(config.detection.l_extract / 2))
             if config.detection.shrink_flag:
+                pool_window = int(np.ceil(l_extract / 2))
                 temp_locs_shrink = shrink_locs_resample_uniform(temp_locs, pool_window)
                 locs, _ = find_best_shrinked_locs(D, temp_locs_shrink, temp_locs)
                 logger.info(
@@ -116,7 +113,6 @@ def snapshot_detect_analysis_pipeline(
                 logger.info(
                     f"Used pooled alignment (no shrinking), using {len(locs)} locations."
                 )
-        # align_type validity checked in __post_init__
     else:
         logger.info("Skipping detection, using provided locations.")
         locs = config.detection.locs
@@ -127,9 +123,8 @@ def snapshot_detect_analysis_pipeline(
         d0 = None
 
     # --- Step 2: Remove border points ---
-    L_extract = config.detection.l_extract
     original_length = len(locs)
-    locs = locs[(locs >= L_extract) & (locs <= original_signal.shape[1] - L_extract)]
+    locs = locs[(locs >= l_extract) & (locs <= original_signal.shape[1] - l_extract)]
     if len(locs) < original_length:
         logger.info(
             f"Removed {original_length - len(locs)} locations too close to signal borders."
@@ -159,14 +154,14 @@ def snapshot_detect_analysis_pipeline(
                 config.bic.momax,
                 config.bic.tau,
                 config.detection.l_start,
-                L_extract,
+                l_extract,
             )
             logger.info("Running compute_multi_trial_BIC...")
-            # *** NOTE: Ensure compute_multi_trial_BIC interface matches this dict ***
             bic_outputs = compute_multi_trial_BIC(
                 event_snapshots_momax, temp_bic_params_dict
             )
-            selected_morder = bic_outputs["mobic"][1]  # Adjust index [1] if needed
+            print(bic_outputs.keys())
+            selected_morder = bic_outputs["mobic"][1]
             if np.isnan(selected_morder):
                 logger.warning(
                     "BIC calculation resulted in NaN optimal order. Using default morder."
@@ -185,7 +180,7 @@ def snapshot_detect_analysis_pipeline(
         f"Extracting final event snapshots (morder={morder}, tau={final_tau})..."
     )
     event_snapshots = extract_event_snapshots(
-        original_signal, locs, morder, final_tau, config.detection.l_start, L_extract
+        original_signal, locs, morder, final_tau, config.detection.l_start, l_extract
     )
     logger.info(f"Extracted snapshots shape: {event_snapshots.shape}")
 
@@ -202,7 +197,7 @@ def snapshot_detect_analysis_pipeline(
             logger.info(
                 f"Removed {removed_count} artifact trials. {event_snapshots.shape[2]} trials remaining."
             )
-            locs = locs_filtered  # Update locs to match filtered snapshots
+            locs = locs_filtered
         else:
             logger.info("No artifact trials removed.")
         if event_snapshots.shape[2] == 0:
@@ -251,7 +246,7 @@ def snapshot_detect_analysis_pipeline(
         simobj_dict = {
             "nvar": event_stats["OLS"]["At"].shape[1],  # Get nvar from stats
             "morder": morder,
-            "L": L_extract,
+            "L": l_extract,
             "Ntrials": event_snapshots.shape[2],  # Use current number of trials
         }
         try:
