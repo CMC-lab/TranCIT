@@ -28,6 +28,7 @@ release = version_str
 # -- General configuration ---------------------------------------------------
 
 extensions = [
+    'sphinx_sitemap',
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
@@ -72,6 +73,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 pygments_style = 'sphinx'
 
 # -- Options for HTML output -------------------------------------------------
+html_baseurl = 'https://yourproject.readthedocs.io'
 
 html_theme = 'sphinx_rtd_theme'
 html_theme_options = {
