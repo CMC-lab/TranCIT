@@ -11,9 +11,9 @@ def fill_std_known(
     std_temp: np.ndarray,
     t: np.ndarray,
     ax: Axes,
-    color: str = 'C0',
+    color: str = "C0",
     label: Optional[str] = None,
-    alpha: float = 0.2
+    alpha: float = 0.2,
 ) -> Tuple[List[Line2D], Polygon]:
     """
     Plots a mean line with a shaded region representing +/- standard deviation.
@@ -64,7 +64,9 @@ def fill_std_known(
     >>> plt.show()
     """
     if not (len(mean_temp) == len(std_temp) == len(t)):
-        raise ValueError("Inputs 'mean_temp', 'std_temp', and 't' must have the same length.")
+        raise ValueError(
+            "Inputs 'mean_temp', 'std_temp', and 't' must have the same length."
+        )
     if not isinstance(ax, Axes):
         raise TypeError("'ax' must be a Matplotlib Axes object.")
 
@@ -78,14 +80,9 @@ def fill_std_known(
         mean_temp + std_temp,
         color=color,
         alpha=alpha,
-        linewidth=0
+        linewidth=0,
     )
-    
-    line = ax.plot(
-        t,
-        mean_temp,
-        label=label,
-        color=color
-    )
+
+    line = ax.plot(t, mean_temp, label=label, color=color)
 
     return line, shade

@@ -16,19 +16,20 @@ from .residuals import get_residuals
 
 try:
     from .plotting import fill_std_known
+
     _plotting_available = True
 except ImportError:
     _plotting_available = False
     pass
 
 _public_api = [
-    'extract_event_snapshots',
-    'compute_event_statistics',
-    'remove_artifact_trials',
-    'get_residuals',
+    "extract_event_snapshots",
+    "compute_event_statistics",
+    "remove_artifact_trials",
+    "get_residuals",
 ]
 
 if _plotting_available:
-    _public_api.append('fill_std_known')
+    _public_api.append("fill_std_known")
 
 __all__ = _public_api

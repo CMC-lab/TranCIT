@@ -73,7 +73,7 @@ class PipelineConfig:
     causal: CausalParams
     output: OutputParams
     monte_carlo: Optional[MonteCParams] = None
-        
+
     Fs: int = 1252
     passband: List[int] = field(default_factory=lambda: [140, 230])
 

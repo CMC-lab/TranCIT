@@ -8,9 +8,9 @@ def test_compute_causal_strength_nonzero_mean_shapes():
     model_order = 2
 
     cs, te, gc, coeffs, te_cov = compute_causal_strength_nonzero_mean(
-        data, model_order=model_order, time_mode='inhomo', use_diagonal_covariance=False
+        data, model_order=model_order, time_mode="inhomo", use_diagonal_covariance=False
     )
-    
+
     assert cs.shape[1] == 2
     assert te.shape[1] == 2
     assert gc.shape[1] == 2

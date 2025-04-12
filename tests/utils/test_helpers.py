@@ -13,6 +13,7 @@ def test_compute_covariances_shapes():
     assert C_XYp.shape == (tsteps, morder, morder)
     assert C_YXp.shape == (tsteps, morder, morder)
 
+
 def test_estimate_coefficients_shapes_and_validity():
     nvar, morder, ntrials = 2, 2, 50
     current_data = np.random.randn(ntrials, nvar)

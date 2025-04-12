@@ -1,4 +1,3 @@
-
 import numpy as np
 import pytest
 from dcs.utils.residuals import estimate_residuals, get_residuals
@@ -22,6 +21,7 @@ def test_estimate_residuals_shapes():
     assert Sigma_Et.shape == (L, nvar, nvar)
     assert sigma_Et.shape == (L, 1)
 
+
 def test_get_residuals_output():
     L, nvar, morder, ntrials = 8, 2, 2, 5
     event_data = np.random.randn(nvar * (morder + 1), L, ntrials)
@@ -31,6 +31,7 @@ def test_get_residuals_output():
 
     residuals = get_residuals(event_data, stats)
     assert residuals.shape == (nvar, L, ntrials)
+
 
 def test_get_residuals_shape_mismatch_raises():
     L, nvar, morder, ntrials = 5, 2, 2, 3

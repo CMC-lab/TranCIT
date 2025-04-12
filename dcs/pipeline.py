@@ -7,10 +7,17 @@ from .causality import time_varying_causality
 from .config import PipelineConfig
 from .models import compute_multi_trial_BIC
 from .simulation import simulate_ar_event_bootstrap
-from .utils import (compute_event_statistics, extract_event_snapshots,
-                    get_residuals, remove_artifact_trials)
-from .utils.signal import (find_best_shrinked_locs, find_peak_loc,
-                           shrink_locs_resample_uniform)
+from .utils import (
+    compute_event_statistics,
+    extract_event_snapshots,
+    get_residuals,
+    remove_artifact_trials,
+)
+from .utils.signal import (
+    find_best_shrinked_locs,
+    find_peak_loc,
+    shrink_locs_resample_uniform,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -41,18 +48,22 @@ def snapshot_detect_analysis_pipeline(
             and output (config.output). See PipelineConfig definition for details.
 
     Returns:
-        Tuple[Dict, PipelineConfig, np.ndarray]:
-            - SnapAnalyOutput (Dict): Dictionary containing analysis results:
-                - 'd0' (float | None): Detection threshold used, if calculated.
-                - 'locs' (np.ndarray): Detected and filtered event locations (indices).
-                - 'morder' (int): The VAR model order used for analysis (potentially BIC selected).
-                - 'Yt_stats' (Dict): Statistics computed from event snapshots (mean, covariance, OLS coeffs).
-                - 'CausalOutput' (Dict | None): Causality measures (DCS, TE, rDCS) if calculated.
-                - 'BICoutputs' (Dict | None): Results from BIC selection, if run.
-            - config (PipelineConfig): The input configuration object (potentially updated
-              if future versions modify it; currently returns the input config).
-            - Yt_events (np.ndarray): Extracted event snapshots used for analysis, shape
-              (n_vars * (model_order + 1), L_extract, n_trials_after_artifact_removal).
+        A tuple containing:
+
+        - **SnapAnalyOutput (dict):** Contains keys:
+            * `'d0'` (float or None): Detection threshold used, if calculated.
+            * `'locs'` (np.ndarray): Detected and filtered event locations.
+            * `'morder'` (int): The VAR model order used.
+            * `'Yt_stats'` (dict): Snapshot statistics (mean, cov, coeffs).
+            * `'CausalOutput'` (dict or None): DCS/TE/rDCS results if available.
+            * `'BICoutputs'` (dict or None): BIC selection outputs, if enabled.
+
+        - **config (PipelineConfig):** Final configuration object.
+
+        - **Yt_events (np.ndarray):** Extracted snapshot array of shape
+        *(n_vars × (model_order + 1), L_extract, n_trials_filtered)*.
+
+    :rtype: Tuple[Dict[str, Any], PipelineConfig, np.ndarray]
 
     Raises:
         ValueError: If configuration parameters are inconsistent (e.g., detection
@@ -63,22 +74,22 @@ def snapshot_detect_analysis_pipeline(
         Exception: Can propagate exceptions from underlying functions (e.g., linalg errors).
     """
     # --- Input Validation ---
-    # if not isinstance(original_signal, np.ndarray):
-    #     logger.warning("original_signal must be a NumPy array.")
-    #     original_signal = np.array(original_signal)
-    # if not isinstance(detection_signal, np.ndarray):
-    #     logger.warning("detection_signal must be a NumPy array.")
-    #     detection_signal = np.array(detection_signal)
-    # if not isinstance(config, PipelineConfig):
-    #     raise TypeError("config must be a PipelineConfig object.")
-    # if original_signal.ndim != 2:
-    #     raise ValueError("original_signal must be 2D (n_vars, time).")
-    # if detection_signal.ndim != 2 or detection_signal.shape[0] != 2:
-    #     raise ValueError("detection_signal must be 2D with shape (2, time).")
-    # if original_signal.shape[1] != detection_signal.shape[1]:
-    #     raise ValueError(
-    #         "original_signal and detection_signal must have the same time dimension length."
-    #     )
+    if not isinstance(original_signal, np.ndarray):
+        logger.warning("original_signal must be a NumPy array.")
+        original_signal = np.array(original_signal)
+    if not isinstance(detection_signal, np.ndarray):
+        logger.warning("detection_signal must be a NumPy array.")
+        detection_signal = np.array(detection_signal)
+    if not isinstance(config, PipelineConfig):
+        raise TypeError("config must be a PipelineConfig object.")
+    if original_signal.ndim != 2:
+        raise ValueError("original_signal must be 2D (n_vars, time).")
+    if detection_signal.ndim != 2 or detection_signal.shape[0] != 2:
+        raise ValueError("detection_signal must be 2D with shape (2, time).")
+    if original_signal.shape[1] != detection_signal.shape[1]:
+        logger.warning(
+            "original_signal and detection_signal must have the same time dimension length."
+        )
 
     snap_analysis_output = {}
     logger.info("Starting snapshot detection and analysis pipeline.")
@@ -229,7 +240,6 @@ def snapshot_detect_analysis_pipeline(
             "old_version": config.causal.old_version,
         }
         try:
-            # Assuming only OLS mode for now based on dict structure
             causal_output = {
                 "OLS": time_varying_causality(
                     event_snapshots, event_stats, causal_params_dict
