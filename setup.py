@@ -20,7 +20,7 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='dcs', # Or 'dynamic-causal-strength' if preferred for PyPI
+    name='dcs',
     version=get_version(),
     description='A package for detecting causality structures in time series',
     long_description=long_description, # Use content from README.md
