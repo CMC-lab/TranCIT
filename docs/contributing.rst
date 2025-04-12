@@ -5,7 +5,7 @@
 Contributing
 ############
 
-Thank you for your interest in contributing to **Dynamic Causal Strength (DCS)**! 🎉  
+Thank you for your interest in contributing to **Dynamic Causal Strength (DCS)**!  
 We welcome all forms of contributions — from fixing bugs and improving docs to proposing features or submitting new code.
 
 If you're not sure where to start, feel free to open an issue or ask a question. All contributions, big or small, are appreciated.
