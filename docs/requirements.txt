@@ -1,7 +1,11 @@
 # Dependencies required to build the documentation
 
-sphinx>=4.0  # Or a newer version
-sphinx-rtd-theme>=1.0 # The theme you selected
+sphinx>=7.0
+sphinx_rtd_theme>=1.2
+myst-parser>=2.0
+sphinx.ext.napoleon
+sphinx.ext.viewcode
+sphinx.ext.mathjax
 
 # Dependencies of your package
 
