@@ -60,8 +60,27 @@ class OutputParams:
     """Parameters for output file naming."""
 
     file_keyword: str
-
-
+    
+@dataclass
+class DeSnapParams:
+    """
+    Input structure for the de-snapshotting analysis.
+    """
+    D: np.ndarray               # Conditioning variable values (1D array)
+    original_signal: np.ndarray # Original time series data (e.g., from pipeline).
+                                # Used as input to extract_event_snapshots.
+                                # Expected shape, e.g., (n_channels, total_time_points).
+    Yt_stats_cond: Dict         # Conditional statistics (output from snapshot_detect_analysis_pipeline['Yt_stats'])
+    morder: int                 # Model order
+    tau: int                    # Lag step
+    l_start: int                # Start offset for snapshot extraction (snake_case is good)
+    l_extract: int              # Length of extracted snapshots (snake_case is good)
+    d0: float                   # Lower bound of the first bin for D
+    N_d: int                    # Number of bins for D
+    d0_max: Optional[float] = None # Upper bound for binning D (alternative to maxStdRatio)
+    maxStdRatio: Optional[float] = None # Alternative to define d0_max based on std(D)
+    diff_flag: bool = False     # Flag for how 'c' (covariance adjustment factor) is calculated
+    
 # --- Main Configuration Class ---
 @dataclass
 class PipelineConfig:
@@ -73,7 +92,7 @@ class PipelineConfig:
     causal: CausalParams
     output: OutputParams
     monte_carlo: Optional[MonteCParams] = None
-
+    desnap: Optional[DeSnapParams] = None
     Fs: int = 1252
     passband: List[int] = field(default_factory=lambda: [140, 230])
 
