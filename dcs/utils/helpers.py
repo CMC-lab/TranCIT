@@ -121,3 +121,60 @@ def estimate_coefficients(
     )
 
     return coefficients, residual_covariance
+
+
+def compute_multi_variable_linear_regression(X, Y):
+    """
+    Perform multiple linear regressions for each slice of Y against X.
+
+    This function fits a linear model Y_slice = intercept + coeff * X
+    for each slice Y[:, i, j] using a vectorized approach.
+
+    Parameters
+    ----------
+    X : np.ndarray
+        Independent variable, 1D array of shape (N,).
+    Y : np.ndarray
+        Dependent variable, 3D array of shape (N, N2, N3).
+        N must match the length of X. Each Y[:, i, j] slice is regressed against X.
+
+    Returns
+    -------
+    Tuple[np.ndarray, np.ndarray]
+        A tuple containing:
+        - coeff (np.ndarray): Regression slopes (coefficients for X),
+                                shape (N2, N3).
+        - intercept (np.ndarray): Regression intercepts, shape (N2, N3).
+
+    Raises
+    ------
+    ValueError
+        If X and Y do not have the same first dimension length,
+        if N < 2 (at least two data points required), or
+        if X or Y contain NaN values.
+    """
+    if Y.ndim != 3:
+        raise ValueError(f"Dependent variable Y must be 3-dimensional, got {Y.ndim}.")
+    
+    N, N2, N3 = Y.shape
+    
+    if X.ndim != 1 or X.shape[0] != N:
+        raise ValueError(
+            f"Independent variable X must be 1D with length {N} "
+            f"to match Y's first dimension, got shape {X.shape}."
+        )
+    if N < 2:
+        raise ValueError(
+            "At least two data points (N >= 2) are required for linear regression."
+        )
+    if np.any(np.isnan(X)) or np.any(np.isnan(Y)):
+        raise ValueError("Input arrays X and Y must not contain NaN values.")
+    
+    X_design = np.vstack([np.ones(N), X]).T  # Shape: (N, 2)
+    Y_flat = Y.reshape(N, -1)  # Shape: (N, N2 * N3)    
+    betas, _, _, _ = np.linalg.lstsq(X_design, Y_flat, rcond=None)
+    
+    intercept = betas[0].reshape(N2, N3)
+    coeff = betas[1].reshape(N2, N3)
+    
+    return coeff, intercept

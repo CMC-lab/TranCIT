@@ -3,6 +3,8 @@ from typing import Dict
 
 import numpy as np
 
+from ..config import DeSnapParams
+from .helpers import compute_multi_variable_linear_regression
 from .preprocess import regularize_if_singular
 from .residuals import estimate_residuals
 
@@ -216,3 +218,233 @@ def compute_event_statistics(event_data: np.ndarray, model_order: int) -> Dict:
         estimate_residuals(stats)
     )
     return stats
+
+def desnapanalysis(
+    inputs: DeSnapParams,
+) -> Dict:
+    """
+    Performs a "de-snapshotting" analysis to derive unconditional statistics
+    from conditional statistics by accounting for a conditioning variable 'D'.
+
+    This process involves several linear regression steps to estimate and remove
+    the influence of 'D' from the mean and covariance of event-related data.
+
+    Parameters
+    ----------
+    inputs : DeSnapInputs
+        A dataclass object containing all necessary input parameters and data:
+        - D (np.ndarray): The conditioning variable values.
+        - x (np.ndarray): The time series data from which snapshots are extracted.
+                          Shape should be compatible with `extract_event_snapshots`.
+                          Typically (n_channels, total_time_points).
+        - Yt_stats_cond (Dict): Conditional statistics, usually the 'Yt_stats'
+                                output from `snapshot_detect_analysis_pipeline`.
+                                Expected to contain fields like 'Sigma', 'OLS.At'.
+        - morder (int): Model order used for snapshot extraction.
+        - tau (int): Lag step for snapshot extraction.
+        - L_start (int): Start offset for snapshot extraction.
+        - L_extract (int): Length of extracted snapshots.
+        - d0 (float): Starting value for binning 'D'.
+        - N_d (int): Number of bins for 'D'.
+        - d0_max (Optional[float]): Maximum value for binning 'D'.
+                                    Either d0_max or maxStdRatio must be provided.
+        - maxStdRatio (Optional[float]): Alternative to d0_max, defines d0_max
+                                         relative to mean and std of 'D'.
+        - diff_flag (bool): Flag to control method for calculating covariance
+                            adjustment factor 'c'.
+
+    Returns
+    -------
+    Dict[str, Any]
+        A dictionary containing the results of the de-snapshotting analysis:
+        - 'loc_size': Size of locations per bin of D.
+        - 'p_t', 'q_t': Coefficients from the first linear regression.
+        - 'd_bin_bar': Mean D values for each bin.
+        - 'mean_Yt_cond': Mean Yt events per bin of D.
+        - 'mu_D': Estimated unconditional mean of D.
+        - 'Yt_stats_uncond' (Dict): Unconditional statistics:
+            - 'mean': Unconditional mean of Yt.
+            - 'Sigma': Unconditional covariance of Yt.
+            - 'OLS': {'At': Unconditional AR coefficients}.
+        - 'cov_pt': Covariance related to p_t.
+        - 'c': Covariance adjustment factor.
+
+    Raises
+    ------
+    ValueError
+        If required input fields are missing or improperly specified.
+    """
+    if inputs.d0_max is None and inputs.maxStdRatio is None:
+        raise ValueError("Either d0_max or maxStdRatio must be provided in DeSnapInputs")
+    
+    # --- Determine d0_max if using maxStdRatio ---
+    if inputs.d0_max is None and inputs.maxStdRatio is not None:
+        d0_max_resolved = np.mean(inputs.D) + inputs.maxStdRatio * np.std(inputs.D)
+        
+    # --- Setup Bins for Conditioning Variable D ---
+    # Ensure N_d is positive
+    if inputs.N_d <= 0:
+        raise ValueError("N_d (number of bins) must be positive.")
+    # Calculate bin step, ensure d0_max_resolved > inputs.d0
+    if d0_max_resolved <= inputs.d0:
+        raise ValueError(f"d0_max_resolved ({d0_max_resolved}) must be greater than d0 ({inputs.d0}).")
+    
+    bin_step = (d0_max_resolved - inputs.d0) / inputs.N_d
+    d_bin_edges = np.arange(inputs.d0, d0_max_resolved + bin_step + 1e-12, bin_step)
+    d_bin_lower_limits = d_bin_edges[:-1]
+    
+    # --- Initialize Result Arrays ---
+    num_bins = len(d_bin_lower_limits)
+    d_bin_mean_D = np.full(num_bins, np.nan) # Stores mean of D values in each bin
+    
+    num_input_channels = inputs.x.shape[0]
+    num_snapshot_vars = num_input_channels * (inputs.morder + 1)
+    mean_events_cond_binned = np.full((num_bins, num_snapshot_vars, inputs.l_extract), np.nan)
+    
+    DeSnap_results = {}
+    DeSnap_results['loc_size'] = np.full(num_bins, np.nan)
+    
+    # --- Loop Over Bins of D to Gather Samples ---
+    print("Processing bins of conditioning variable D...")
+    current_bin_uplim = np.max(inputs.D)
+    for n, current_bin_lolim in enumerate(d_bin_lower_limits):
+        # current_bin_uplim = d_bin_edges[n + 1]
+        
+        # Find D values within the current bin
+        # Using inputs.D consistently here (assuming it's attribute of dataclass)
+        mask = (inputs.D >= current_bin_lolim) & (inputs.D < current_bin_uplim)
+        
+        if not np.any(mask):
+            print(f"Bin {n+1} ({current_bin_lolim:.2f}-{current_bin_uplim:.2f}): No D values. Skipping.")
+            # d_bin_mean_D[n] remains NaN
+            # mean_Yt_cond_binned[n, :, :] remains NaN
+            DeSnap_results['loc_size'][n] = 0
+            continue
+        
+        # Compute mean of D within the current bin
+        d_bin_mean_D[n] = np.mean(inputs.D[mask])
+        temp_loc = np.where(mask)[0]
+        
+        # Filter locations to ensure full snapshot extraction is possible
+        valid_locs = temp_loc
+        # Filter locations based on constraints
+        valid_locs = valid_locs[inputs.x.shape[0] - valid_locs >= inputs.l_extract - inputs.l_start]
+        valid_locs = valid_locs[valid_locs - inputs.l_start - (inputs.morder * inputs.tau) >= 0]
+        
+        # Display bin information
+        print(f"Bin {n+1} ({current_bin_lolim:.2f}-{current_bin_uplim:.2f}): "
+                f"Mean D={d_bin_mean_D[n]:.2f}, N_in_bin={len(temp_loc)}, N_valid_locs={len(valid_locs)}")
+        
+        DeSnap_results['loc_size'][n] = len(valid_locs)
+        
+        if len(valid_locs) > 0:
+            # Extract event snapshots using valid locations for the current bin
+            # inputs.x is the original time series (e.g., LFP data)
+            events_binned = extract_event_snapshots(
+                inputs.x, valid_locs, inputs.morder, inputs.tau,
+                inputs.l_start, inputs.l_extract
+            )
+            if events_binned.shape[2] > 0: # Check if any events were actually extracted
+                 mean_events_cond_binned[n, :, :] = np.mean(events_binned, axis=2)
+            else:
+                 print(f"  Warning: No snapshots extracted for bin {n+1} despite {len(valid_locs)} valid_locs.")
+        else:
+            print(f"  No valid locations for snapshot extraction in bin {n+1}.")
+    
+    # Filter out bins where no data was found (d_bin_mean_D is NaN)
+    valid_bins_mask = ~np.isnan(d_bin_mean_D)
+    if not np.any(valid_bins_mask):
+        raise ValueError("No valid data points found across all bins of D. Check binning parameters or input D.")
+        
+    d_bin_mean_D_filtered = d_bin_mean_D[valid_bins_mask]
+    mean_events_cond_binned_filtered = mean_events_cond_binned[valid_bins_mask, :, :]
+    
+    # --- First Linear Regression: Fit p_t and q_t ---
+    # Regress mean_Yt_cond_binned_filtered on d_bin_mean_D_filtered
+    # p_t will be slopes, q_t will be intercepts
+    print("Performing first linear regression for p_t and q_t...")
+    p_t, q_t = compute_multi_variable_linear_regression(d_bin_mean_D_filtered, mean_events_cond_binned_filtered)
+    DeSnap_results["p_t"] = p_t
+    DeSnap_results["q_t"] = q_t
+    DeSnap_results["d_bin_bar"] = d_bin_mean_D_filtered
+    DeSnap_results["mean_Yt_cond"] = mean_events_cond_binned_filtered
+    
+    # --- Second Linear Regression: Estimate mu_D (unconditional mean of D) ---
+    # Regress -q_t on p_t. Reshape p_t and q_t to be 1D vectors for this regression.
+    # This assumes a single scalar mu_D.
+    p_t_flat = p_t.reshape(-1, 1) # All p_t values as a column vector
+    q_t_flat = -q_t.reshape(-1)   # All -q_t values as a 1D array
+    
+    # Filter out NaNs that might have resulted from p_t/q_t calculation if some bins had too few points
+    # for compute_multi_variable_linear_regression (though it has its own checks)
+    nan_mask_regression2 = ~np.isnan(p_t_flat.ravel()) & ~np.isnan(q_t_flat)
+    if not np.any(nan_mask_regression2):
+        raise ValueError("All p_t or q_t values are NaN, cannot compute mu_D.")
+
+    p_t_flat_valid = p_t_flat[nan_mask_regression2]
+    q_t_flat_valid = q_t_flat[nan_mask_regression2]
+    
+    # lstsq solves p_t_flat_valid * mu_D = q_t_flat_valid
+    DeSnap_results['mu_D'] = np.linalg.lstsq(p_t_flat_valid, q_t_flat_valid, rcond=None)[0][0]
+    # --- Compute Unconditional Mean of Yt ---
+    DeSnap_results['Yt_stats_uncond'] = {}
+    DeSnap_results['Yt_stats_uncond']['mean'] = q_t + p_t * DeSnap_results['mu_D']
+    
+    # --- Third Linear Regression: Compute Covariance Adjustment Factor 'c' ---
+    # This part adjusts the conditional covariance matrices.
+    # cov_pt is related to the variance explained by p_t.
+    print("Performing third linear regression for covariance adjustment factor 'c'...")
+    DeSnap_results['cov_pt'] = np.full((inputs.L_extract, num_snapshot_vars, num_snapshot_vars), np.nan)
+    for t in range(inputs.L_extract):
+        DeSnap_results['cov_pt'][t, :, :] = np.outer(p_t[:, t], p_t[:, t])
+    
+    if inputs.diff_flag:
+        x_reg_c = np.diff(DeSnap_results['cov_pt'], axis=0) # Independent variable
+        y_reg_c = np.diff(inputs.Yt_stats_cond['Sigma'], axis=0) # Dependent variable
+        DeSnap_results['c'] = np.linalg.lstsq(x_reg_c.reshape(-1, 1), y_reg_c.reshape(-1), rcond=None)[0][0]
+    else:
+        x_reg_c_levels = DeSnap_results['cov_pt'][:, 0, 0]
+        y_reg_c_levels = inputs.Yt_stats_cond['Sigma'][:, 0, 0]
+        
+        valid_c_mask = ~np.isnan(x_reg_c_levels) & ~np.isnan(y_reg_c_levels)
+        if not np.any(valid_c_mask):
+            raise ValueError("Not enough valid data points to calculate 'c' for covariance adjustment.")
+
+        X_design_c = np.vstack([np.ones(np.sum(valid_c_mask)), x_reg_c_levels[valid_c_mask]]).T
+        # X = np.vstack([np.ones(len(x)), x]).T
+        temp_coeffs_c = np.linalg.lstsq(X_design_c, y_reg_c_levels[valid_c_mask], rcond=None)[0]
+        DeSnap_results['c'] = temp_coeffs_c[1]
+    
+    # --- Compute Unconditional Covariance Sigma ---
+    DeSnap_results['Yt_stats_uncond']['Sigma'] = inputs.Yt_stats_cond['Sigma'] - DeSnap_results['c'] * DeSnap_results['cov_pt']
+    
+    # --- Compute Unconditional Autoregressive Coefficients At ---
+    print("Calculating unconditional AR coefficients...")
+    try:
+        nvar_actual = inputs.Yt_stats_cond['OLS']['At'].shape[1]
+    except (KeyError, AttributeError, IndexError):
+        raise ValueError("Could not determine 'nvar_actual' from inputs.Yt_stats_cond['OLS']['At']. Ensure it's correctly structured.")
+        
+    DeSnap_results['Yt_stats_uncond']['OLS'] = {}
+    DeSnap_results['Yt_stats_uncond']['OLS']['At'] = np.full(
+        (inputs.l_extract, nvar_actual, nvar_actual * inputs.morder), np.nan
+    )
+    
+    
+    for t in range(inputs.l_extract):
+        # Sigma_uncond is (L_extract, num_snapshot_vars, num_snapshot_vars)
+        # num_snapshot_vars = nvar_actual * (morder + 1)
+        # Current data part: indices 0 to nvar_actual-1
+        # Lagged data part: indices nvar_actual to num_snapshot_vars-1
+        Sigma_yx_uncond = DeSnap_results['Yt_stats_uncond']['Sigma'][t, :nvar_actual, nvar_actual:]
+        Sigma_xx_uncond = DeSnap_results['Yt_stats_uncond']['Sigma'][t, nvar_actual:, nvar_actual:]
+        
+        # Solve At * Sigma_xx_uncond = Sigma_yx_uncond  => At = Sigma_yx_uncond * inv(Sigma_xx_uncond)
+        try:
+            DeSnap_results['Yt_stats_uncond']['OLS']['At'][t, :, :] = np.linalg.solve(Sigma_xx_uncond.T, Sigma_yx_uncond.T).T
+        except np.linalg.LinAlgError:
+            print(f"Warning: Singular matrix encountered for Sigma_xx_uncond at time step {t}. AR coefficients will be NaN.")
+            # At[t,:,:] will remain NaN as initialized
+
+    print("De-snapshotting analysis complete.")
+    return DeSnap_results

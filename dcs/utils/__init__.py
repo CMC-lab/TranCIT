@@ -10,9 +10,10 @@ functions can be imported directly from their respective submodules
 (e.g., from dcs.utils.signal import find_peak_loc).
 """
 
-from .core import compute_event_statistics, extract_event_snapshots
+from .core import (compute_event_statistics, desnapanalysis,
+                   extract_event_snapshots)
 from .preprocess import remove_artifact_trials
-from .residuals import get_residuals
+from .residuals import estimate_residuals, get_residuals
 
 try:
     from .plotting import fill_std_known
@@ -25,8 +26,10 @@ except ImportError:
 _public_api = [
     "extract_event_snapshots",
     "compute_event_statistics",
+    "desnapanalysis",
     "remove_artifact_trials",
     "get_residuals",
+    "estimate_residuals"
 ]
 
 if _plotting_available:
