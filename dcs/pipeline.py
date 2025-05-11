@@ -1,23 +1,18 @@
+import dataclasses
 import logging
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Any, Optional
 
 import numpy as np
 
 from .causality import time_varying_causality
-from .config import PipelineConfig
+from .config import DeSnapParams, PipelineConfig
 from .models import compute_multi_trial_BIC
 from .simulation import simulate_ar_event_bootstrap
-from .utils import (
-    compute_event_statistics,
-    extract_event_snapshots,
-    get_residuals,
-    remove_artifact_trials,
-)
-from .utils.signal import (
-    find_best_shrinked_locs,
-    find_peak_loc,
-    shrink_locs_resample_uniform,
-)
+from .utils import (compute_event_statistics, desnapanalysis,
+                    estimate_residuals, extract_event_snapshots, get_residuals,
+                    remove_artifact_trials)
+from .utils.signal import (find_best_shrinked_locs, find_peak_loc,
+                           shrink_locs_resample_uniform)
 
 logger = logging.getLogger(__name__)
 
@@ -43,9 +38,10 @@ def snapshot_detect_analysis_pipeline(
             used for thresholding, Channel 1 for alignment (e.g., peak finding).
         config (PipelineConfig): A dataclass object containing all configuration
             parameters for the pipeline. Includes nested dataclasses for options
-            (config.options), detection (config.detection), BIC (config.bic),
-            causality (config.causal), bootstrapping (config.monte_carlo),
-            and output (config.output). See PipelineConfig definition for details.
+            (config.options - including 'debiased_stats'), detection (config.detection),
+            BIC (config.bic), causality (config.causal), bootstrapping (config.monte_carlo),
+            DeSnap settings (config.desnap_settings), and output (config.output).
+            See PipelineConfig and related dataclass definitions for details.
 
     Returns:
         A tuple containing:
@@ -57,6 +53,8 @@ def snapshot_detect_analysis_pipeline(
             * `'Yt_stats'` (dict): Snapshot statistics (mean, cov, coeffs).
             * `'CausalOutput'` (dict or None): DCS/TE/rDCS results if available.
             * `'BICoutputs'` (dict or None): BIC selection outputs, if enabled.
+            * `DeSnap_output` (Dict | None): Full output from the desnapanalysis function, if run.
+            * `event_stats_debiased` (Dict | None): Unconditional statistics derived from DeSnap analysis, if run.
 
         - **config (PipelineConfig):** Final configuration object.
 
@@ -82,6 +80,7 @@ def snapshot_detect_analysis_pipeline(
         detection_signal = np.array(detection_signal)
     if not isinstance(config, PipelineConfig):
         raise TypeError("config must be a PipelineConfig object.")
+    
     if original_signal.ndim != 2:
         raise ValueError("original_signal must be 2D (n_vars, time).")
     if detection_signal.ndim != 2 or detection_signal.shape[0] != 2:
@@ -91,23 +90,23 @@ def snapshot_detect_analysis_pipeline(
             "original_signal and detection_signal must have the same time dimension length."
         )
 
-    snap_analysis_output = {}
+    snap_analysis_output: Dict[str, Any] = {}
     logger.info("Starting snapshot detection and analysis pipeline.")
 
+    d0_threshold: Optional[float] = None
+    l_extract = config.detection.l_extract
+    
     # --- Step 1: Detect reference points ---
+    D_for_detection = detection_signal[0]
     if config.options.detection:
         logger.info("Performing event detection.")
-        D = detection_signal[0]
-        d0 = np.nanmean(D) + config.detection.thres_ratio * np.nanstd(D)
-        temp_locs = np.where(D >= d0)[0]
+        d0_threshold = np.nanmean(D_for_detection) + config.detection.thres_ratio * np.nanstd(D_for_detection)
+        temp_locs = np.where(D_for_detection >= d0_threshold)[0]
         logger.info(
-            f"Initial detection: {len(temp_locs)} points above threshold {d0:.2f}."
+            f"Initial detection: {len(temp_locs)} points above threshold {d0_threshold:.2f}."
         )
 
         align_type = config.detection.align_type
-        l_extract = (
-            config.detection.l_extract
-        )  # Use L_extract for window size in find_peak_loc
         if align_type == "peak":
             locs = find_peak_loc(detection_signal[1], temp_locs, l_extract)
             logger.info(f"Aligned to peaks, found {len(locs)} locations.")
@@ -115,23 +114,22 @@ def snapshot_detect_analysis_pipeline(
             if config.detection.shrink_flag:
                 pool_window = int(np.ceil(l_extract / 2))
                 temp_locs_shrink = shrink_locs_resample_uniform(temp_locs, pool_window)
-                locs, _ = find_best_shrinked_locs(D, temp_locs_shrink, temp_locs)
+                locs, _ = find_best_shrinked_locs(D_for_detection, temp_locs_shrink, temp_locs)
                 logger.info(
                     f"Used pooled alignment with shrinking, found {len(locs)} locations."
                 )
             else:
-                locs = temp_locs  # Use original thresholded if no shrinking
+                locs = temp_locs
                 logger.info(
                     f"Used pooled alignment (no shrinking), using {len(locs)} locations."
                 )
     else:
         logger.info("Skipping detection, using provided locations.")
-        locs = config.detection.locs
-        if locs is None:
+        if config.detection.locs is None:
             raise ValueError(
                 "config.detection.locs cannot be None when config.options.detection is False"
             )
-        d0 = None
+        locs = np.array(config.detection.locs, dtype=int)
 
     # --- Step 2: Remove border points ---
     original_length = len(locs)
@@ -171,21 +169,26 @@ def snapshot_detect_analysis_pipeline(
             bic_outputs = compute_multi_trial_BIC(
                 event_snapshots_momax, temp_bic_params_dict
             )
-            print(bic_outputs.keys())
+
             selected_morder = bic_outputs["mobic"][1]
+            if 'mobic' in bic_outputs and bic_outputs['mobic'] is not None and len(bic_outputs['mobic']) > 1:
+                selected_morder = bic_outputs['mobic'][1]
+            else:
+                logger.error(f"Could not find 'mobic' in BIC output: {bic_outputs.keys()}")
+                raise KeyError("Optimal model order key not found in BIC results.")
+
             if np.isnan(selected_morder):
                 logger.warning(
                     "BIC calculation resulted in NaN optimal order. Using default morder."
                 )
             else:
-                morder = int(selected_morder)  # Update morder based on BIC result
+                morder = int(selected_morder)
                 logger.info(f"BIC selected model order: {morder}")
         except Exception as e:
             logger.error(f"BIC calculation failed: {e}. Using default morder: {morder}")
             raise RuntimeError(f"BIC calculation failed: {e}") from e
 
     # --- Step 4: Extract event snapshots with final morder ---
-    # Determine lag step tau: use BIC tau if BIC ran, otherwise default to 1?
     final_tau = config.bic.tau if config.options.bic else 1
     logger.info(
         f"Extracting final event snapshots (morder={morder}, tau={final_tau})..."
@@ -193,6 +196,11 @@ def snapshot_detect_analysis_pipeline(
     event_snapshots = extract_event_snapshots(
         original_signal, locs, morder, final_tau, config.detection.l_start, l_extract
     )
+    if event_snapshots.shape[2] == 0:
+        logger.warning("No trials available for final analysis after snapshot extraction.")
+        snap_analysis_output.update({"locs": locs, "morder": morder, "d0": d0_threshold})
+        return snap_analysis_output, config, event_snapshots
+    
     logger.info(f"Extracted snapshots shape: {event_snapshots.shape}")
 
     # --- Step 5: Remove artifacts ---
@@ -213,7 +221,7 @@ def snapshot_detect_analysis_pipeline(
             logger.info("No artifact trials removed.")
         if event_snapshots.shape[2] == 0:
             logger.warning("No trials remaining after artifact removal.")
-            snap_analysis_output.update({"locs": locs, "morder": morder})
+            snap_analysis_output.update({"locs": locs, "morder": morder, "d0": d0_threshold})
             return (
                 snap_analysis_output,
                 config,
@@ -221,7 +229,7 @@ def snapshot_detect_analysis_pipeline(
             )  # Return empty snapshots
 
     # --- Step 6: Compute statistics ---
-    logger.info("Computing event statistics...")
+    logger.info("Computing conditional event statistics...")
     try:
         event_stats = compute_event_statistics(event_snapshots, morder)
     except Exception as e:
@@ -235,7 +243,7 @@ def snapshot_detect_analysis_pipeline(
         causal_params_dict = {
             "ref_time": config.causal.ref_time,
             "estim_mode": config.causal.estim_mode,
-            "morder": morder,  # Use the final determined model order
+            "morder": morder,
             "diag_flag": config.causal.diag_flag,
             "old_version": config.causal.old_version,
         }
@@ -251,61 +259,111 @@ def snapshot_detect_analysis_pipeline(
             raise
 
     # --- Step 8: Bootstrapping ---
+    bootstrap_causal_outputs_list = None
     if config.options.bootstrap:
-        logger.info(f"Starting bootstrapping ({config.monte_carlo.n_btsp} samples)...")
-        simobj_dict = {
-            "nvar": event_stats["OLS"]["At"].shape[1],  # Get nvar from stats
-            "morder": morder,
-            "L": l_extract,
-            "Ntrials": event_snapshots.shape[2],  # Use current number of trials
-        }
+        if config.monte_carlo is None:
+            logger.warning("Bootstrap requested but no Monte Carlo parameters provided. Skipping bootstrap.")
+        else:
+            logger.info(f"Starting bootstrapping ({config.monte_carlo.n_btsp} samples)...")
+            simobj_dict_bootstrap = {
+                "nvar": event_stats["OLS"]["At"].shape[1],
+                "morder": morder,
+                "L": l_extract,
+                "Ntrials": event_snapshots.shape[2],
+            }
+            try:
+                residuals_for_btsp = get_residuals(event_snapshots, event_stats)
+                logger.info("Calculated residuals for bootstrapping.")
+                
+                for n_btsp in range(1, config.monte_carlo.n_btsp + 1):
+                    logger.debug(f"Calculating bootstrap trial: {n_btsp}")
+                    try:
+                        btsp_snapshots = simulate_ar_event_bootstrap(
+                            simobj_dict_bootstrap, event_snapshots, event_stats, residuals_for_btsp   
+                        )
+                        btsp_stats = compute_event_statistics(btsp_snapshots, morder)
+                        btsp_causal_output = {
+                            "OLS": time_varying_causality(
+                                btsp_snapshots, btsp_stats, causal_params_dict
+                            )
+                        }
+                        bootstrap_causal_outputs_list.append(btsp_causal_output)
+
+                        if config.options.save_flag:
+                            outfile_btsp = f"{config.output.file_keyword}_bootstrap_sample_{n_btsp}.npz"
+                            config_dict_to_save = dataclasses.asdict(config)
+                            np.savez_compressed(
+                                outfile_btsp,
+                                params=config_dict_to_save,
+                                CausalOutput_bootstrap_sample=bootstrap_causal_outputs_list,
+                                EventSnapshots=btsp_snapshots,
+                                Yt_stats=btsp_stats
+                            )
+                            logger.debug(f"Saved bootstrap sample {n_btsp} to {outfile_btsp}")
+                    except Exception as e:
+                        logger.error(f"Bootstrap trial {n_btsp} failed: {e}")
+            except Exception as e:
+                logger.error(f"Failed to get residuals for bootstrapping: {e}")
+
+    # --- Step 10: Perform DeSnap (Derive Unconditional Statistics) ---
+    desnap_full_output = None
+    event_stats_unconditional = None
+    
+    if config.options.debiased_stats:
+        if config.desnap_settings is None:
+            logger.warning("DeSnap (debiased_stats) analysis requested but no desnapping settings (config.desnap_settings) provided. Skipping DeSnap.")
+        elif d0_threshold is None and config.desnap_settings.maxStdRatio is None and config.desnap_settings.d0_max_val is None :
+             logger.warning("DeSnap analysis requires either a d0 from detection or d0_max/maxStdRatio in desnapping_settings. Skipping DeSnap.")
+        elif event_stats is None:
+            logger.warning("Event statistics (event_stats) not available. Skipping DeSnap.")
+        else:
+            logger.info("Performing DeSnap analysis to derive unconditional statistics...")
+            
+        logger.info("Performing DeSnap analysis...")
+        desnap_params_instance = DeSnapParams(
+            detection_signal=D_for_detection,
+            original_signal=original_signal,
+            Yt_stats_cond=event_stats,
+            morder=morder,
+            tau=config.get('DeSnap_inputs', {}).get('tau', None),
+            l_start=config.get('DeSnap_inputs', {}).get('l_start', None),
+            l_extract=config.get('DeSnap_inputs', {}).get('l_extract', None),
+            d0=d0_threshold,
+            N_d=config.get('DeSnap_inputs', {}).get('N_d', 10),
+            d0_max=config.get('DeSnap_inputs', {}).get('d0_max', None),
+            maxStdRatio=config.get('DeSnap_inputs', {}).get('maxStdRatio', None),
+            diff_flag=config.get('DeSnap_inputs', {}).get('diff_flag', False)
+        )
+        if desnap_params_instance.d0_max is None and desnap_params_instance.maxStdRatio is not None:
+            desnap_params_instance.d0_max = np.mean(D_for_detection) + desnap_params_instance.maxStdRatio * np.std(D_for_detection)
+        
         try:
-            residuals = get_residuals(event_snapshots, event_stats)
-            logger.info("Calculated residuals for bootstrapping.")
+            desnap_full_output = desnapanalysis(desnap_params_instance)
+            if 'Yt_stats_uncond' in desnap_full_output:
+                event_stats_unconditional = desnap_full_output['Yt_stats_uncond']
+                
+                if 'OLS' not in event_stats_unconditional: event_stats_unconditional['OLS'] = {}
+                bt_uncond, sigma_et_uncond = estimate_residuals(event_stats_unconditional)
+                event_stats_unconditional['OLS']['bt'] = bt_uncond
+                event_stats_unconditional['OLS']['Sigma_Et'] = sigma_et_uncond
+                logger.info("DeSnap analysis complete. Unconditional stats derived.")
+            else:
+                logger.warning("DeSnap analysis ran but 'Yt_stats_uncond' not found in output.")
         except Exception as e:
-            logger.error(f"Failed to get residuals for bootstrapping: {e}")
-            config.options.bootstrap = False
-            logger.warning("Disabling bootstrap due to error in residual calculation.")
-
-        bootstrap_results_list = []
-
-        if config.options.bootstrap:  # Check again in case it was disabled
-            for n_btsp in range(1, config.monte_carlo.n_btsp + 1):
-                logger.debug(f"Calculating bootstrap trial: {n_btsp}")
-                try:
-                    btsp_snapshots = simulate_ar_event_bootstrap(
-                        simobj_dict, event_snapshots, event_stats, residuals
-                    )
-                    btsp_stats = compute_event_statistics(btsp_snapshots, morder)
-                    btsp_causal_output = {
-                        "OLS": time_varying_causality(
-                            btsp_snapshots, btsp_stats, causal_params_dict
-                        )
-                    }
-                    bootstrap_results_list.append(btsp_causal_output)
-
-                    if config.options.save_flag:
-                        outfile = f"{config.output.file_keyword}_btsp_{n_btsp}_model_causality.npz"
-                        np.savez_compressed(
-                            outfile,
-                            params=config,
-                            CausalOutput_btsp=btsp_causal_output,
-                            Yt_stats_btsp=btsp_stats,
-                        )
-                        logger.debug(f"Saved bootstrap sample {n_btsp} to {outfile}")
-
-                except Exception as e:
-                    logger.error(f"Bootstrap trial {n_btsp} failed: {e}")
-
-    # --- Step 10: Prepare final output and save ---
+            logger.error(f"Desnapanalysis step failed: {e}")
+    
+    # --- Step 11: Prepare final output and save ---
     snap_analysis_output.update(
         {
-            "d0": d0,
+            "d0": d0_threshold,
             "locs": locs,
             "morder": morder,
-            "Yt_stats": event_stats,  # Contains coefficients, covariances etc.
-            "CausalOutput": causal_output,  # Contains DCS, TE, rDCS
+            "Yt_stats": event_stats,
+            "CausalOutput": causal_output,
             "BICoutputs": bic_outputs,
+            "BootstrapCausalOutputs": bootstrap_causal_outputs_list,
+            "DeSnap_output": desnap_full_output,
+            "Yt_stats_unconditional": event_stats_unconditional
         }
     )
 
@@ -313,18 +371,19 @@ def snapshot_detect_analysis_pipeline(
         file_keyword = config.output.file_keyword
         outfile_final = f"{file_keyword}_model_causality.npz"
         logger.info(f"Saving final results to {outfile_final}...")
-        event_stats["mean"] = event_stats["mean"][:2, :]
-        event_stats["Sigma"] = event_stats["Sigma"][:, :2, :2]
+        
+        event_stats_to_save = event_stats.copy()
+        event_stats_to_save["mean"] = event_stats_to_save["mean"][:2, :]
+        event_stats_to_save["Sigma"] = event_stats_to_save["Sigma"][:, :2, :2]
+        
         try:
-            import dataclasses
-
-            config_dict = dataclasses.asdict(config)
+            config_dict_to_save = dataclasses.asdict(config)
             np.savez_compressed(
                 outfile_final,
-                Config=config_dict,
+                Config=config_dict_to_save,
                 SnapAnalyOutput=snap_analysis_output,
                 EventSnapshots=event_snapshots,
-                Yt_stats=event_stats,
+                Yt_stats=event_stats_to_save,
             )
             logger.info("Final results saved.")
         except Exception as e:

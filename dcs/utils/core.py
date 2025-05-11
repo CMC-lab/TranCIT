@@ -233,8 +233,8 @@ def desnapanalysis(
     ----------
     inputs : DeSnapInputs
         A dataclass object containing all necessary input parameters and data:
-        - D (np.ndarray): The conditioning variable values.
-        - x (np.ndarray): The time series data from which snapshots are extracted.
+        - detection_signal (np.ndarray): The conditioning variable values.
+        - original_signal (np.ndarray): The time series data from which snapshots are extracted.
                           Shape should be compatible with `extract_event_snapshots`.
                           Typically (n_channels, total_time_points).
         - Yt_stats_cond (Dict): Conditional statistics, usually the 'Yt_stats'
@@ -277,15 +277,12 @@ def desnapanalysis(
     if inputs.d0_max is None and inputs.maxStdRatio is None:
         raise ValueError("Either d0_max or maxStdRatio must be provided in DeSnapInputs")
     
-    # --- Determine d0_max if using maxStdRatio ---
     if inputs.d0_max is None and inputs.maxStdRatio is not None:
-        d0_max_resolved = np.mean(inputs.D) + inputs.maxStdRatio * np.std(inputs.D)
-        
-    # --- Setup Bins for Conditioning Variable D ---
-    # Ensure N_d is positive
+        d0_max_resolved = np.mean(inputs.detection_signal) + inputs.maxStdRatio * np.std(inputs.detection_signal)
+    
     if inputs.N_d <= 0:
         raise ValueError("N_d (number of bins) must be positive.")
-    # Calculate bin step, ensure d0_max_resolved > inputs.d0
+    
     if d0_max_resolved <= inputs.d0:
         raise ValueError(f"d0_max_resolved ({d0_max_resolved}) must be greater than d0 ({inputs.d0}).")
     
@@ -306,13 +303,11 @@ def desnapanalysis(
     
     # --- Loop Over Bins of D to Gather Samples ---
     print("Processing bins of conditioning variable D...")
-    current_bin_uplim = np.max(inputs.D)
+    current_bin_uplim = np.max(inputs.detection_signal)
     for n, current_bin_lolim in enumerate(d_bin_lower_limits):
         # current_bin_uplim = d_bin_edges[n + 1]
         
-        # Find D values within the current bin
-        # Using inputs.D consistently here (assuming it's attribute of dataclass)
-        mask = (inputs.D >= current_bin_lolim) & (inputs.D < current_bin_uplim)
+        mask = (inputs.detection_signal >= current_bin_lolim) & (inputs.detection_signal < current_bin_uplim)
         
         if not np.any(mask):
             print(f"Bin {n+1} ({current_bin_lolim:.2f}-{current_bin_uplim:.2f}): No D values. Skipping.")
@@ -321,33 +316,27 @@ def desnapanalysis(
             DeSnap_results['loc_size'][n] = 0
             continue
         
-        # Compute mean of D within the current bin
-        d_bin_mean_D[n] = np.mean(inputs.D[mask])
+        d_bin_mean_D[n] = np.mean(inputs.detection_signal[mask])
         temp_loc = np.where(mask)[0]
         
-        # Filter locations to ensure full snapshot extraction is possible
         valid_locs = temp_loc
-        # Filter locations based on constraints
-        valid_locs = valid_locs[inputs.x.shape[0] - valid_locs >= inputs.l_extract - inputs.l_start]
+        valid_locs = valid_locs[inputs.original_signal.shape[0] - valid_locs >= inputs.l_extract - inputs.l_start]
         valid_locs = valid_locs[valid_locs - inputs.l_start - (inputs.morder * inputs.tau) >= 0]
         
-        # Display bin information
         print(f"Bin {n+1} ({current_bin_lolim:.2f}-{current_bin_uplim:.2f}): "
                 f"Mean D={d_bin_mean_D[n]:.2f}, N_in_bin={len(temp_loc)}, N_valid_locs={len(valid_locs)}")
         
         DeSnap_results['loc_size'][n] = len(valid_locs)
         
         if len(valid_locs) > 0:
-            # Extract event snapshots using valid locations for the current bin
-            # inputs.x is the original time series (e.g., LFP data)
             events_binned = extract_event_snapshots(
-                inputs.x, valid_locs, inputs.morder, inputs.tau,
+                inputs.original_signal, valid_locs, inputs.morder, inputs.tau,
                 inputs.l_start, inputs.l_extract
             )
-            if events_binned.shape[2] > 0: # Check if any events were actually extracted
-                 mean_events_cond_binned[n, :, :] = np.mean(events_binned, axis=2)
+            if events_binned.shape[2] > 0:
+                mean_events_cond_binned[n, :, :] = np.mean(events_binned, axis=2)
             else:
-                 print(f"  Warning: No snapshots extracted for bin {n+1} despite {len(valid_locs)} valid_locs.")
+                print(f"  Warning: No snapshots extracted for bin {n+1} despite {len(valid_locs)} valid_locs.")
         else:
             print(f"  No valid locations for snapshot extraction in bin {n+1}.")
     
@@ -394,8 +383,8 @@ def desnapanalysis(
     # This part adjusts the conditional covariance matrices.
     # cov_pt is related to the variance explained by p_t.
     print("Performing third linear regression for covariance adjustment factor 'c'...")
-    DeSnap_results['cov_pt'] = np.full((inputs.L_extract, num_snapshot_vars, num_snapshot_vars), np.nan)
-    for t in range(inputs.L_extract):
+    DeSnap_results['cov_pt'] = np.full((inputs.l_extract, num_snapshot_vars, num_snapshot_vars), np.nan)
+    for t in range(inputs.l_extract):
         DeSnap_results['cov_pt'][t, :, :] = np.outer(p_t[:, t], p_t[:, t])
     
     if inputs.diff_flag:
@@ -411,7 +400,6 @@ def desnapanalysis(
             raise ValueError("Not enough valid data points to calculate 'c' for covariance adjustment.")
 
         X_design_c = np.vstack([np.ones(np.sum(valid_c_mask)), x_reg_c_levels[valid_c_mask]]).T
-        # X = np.vstack([np.ones(len(x)), x]).T
         temp_coeffs_c = np.linalg.lstsq(X_design_c, y_reg_c_levels[valid_c_mask], rcond=None)[0]
         DeSnap_results['c'] = temp_coeffs_c[1]
     
@@ -429,7 +417,6 @@ def desnapanalysis(
     DeSnap_results['Yt_stats_uncond']['OLS']['At'] = np.full(
         (inputs.l_extract, nvar_actual, nvar_actual * inputs.morder), np.nan
     )
-    
     
     for t in range(inputs.l_extract):
         # Sigma_uncond is (L_extract, num_snapshot_vars, num_snapshot_vars)

@@ -66,7 +66,7 @@ class DeSnapParams:
     """
     Input structure for the de-snapshotting analysis.
     """
-    D: np.ndarray               # Conditioning variable values (1D array)
+    detection_signal: np.ndarray               # Conditioning variable values (1D array)
     original_signal: np.ndarray # Original time series data (e.g., from pipeline).
                                 # Used as input to extract_event_snapshots.
                                 # Expected shape, e.g., (n_channels, total_time_points).
