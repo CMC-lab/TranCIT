@@ -207,12 +207,16 @@ def compute_event_statistics(event_data: np.ndarray, model_order: int) -> Dict:
         Sigma_22 = stats["Sigma"][
             t, nvar:, nvar:
         ]  # Shape: (nvar * model_order, nvar * model_order)
-
+        
+        # X_lagged = event_data[nvar:, t, :].T  
         Sigma_22_reg = regularize_if_singular(Sigma_22)
         if not np.allclose(Sigma_22, Sigma_22_reg):
             logging.warning(f"Applied regularization to Sigma_22 at time step {t}")
-
-        stats["OLS"]["At"][t, :, :] = Sigma_12 @ np.linalg.inv(Sigma_22_reg)
+        try:
+            stats["OLS"]["At"][t, :, :] = Sigma_12 @ np.linalg.inv(Sigma_22_reg)
+        except np.linalg.LinAlgError:
+            logging.warning(f"Singular matrix at time step {t}, using pseudo-inverse")
+            stats["OLS"]["At"][t, :, :] = Sigma_12 @ np.linalg.pinv(Sigma_22_reg)
 
     stats["OLS"]["bt"], stats["OLS"]["Sigma_Et"], stats["OLS"]["sigma_Et"] = (
         estimate_residuals(stats)
@@ -277,54 +281,38 @@ def desnapanalysis(
     if inputs.d0_max is None and inputs.maxStdRatio is None:
         raise ValueError("Either d0_max or maxStdRatio must be provided in DeSnapInputs")
     
-    if inputs.d0_max is None and inputs.maxStdRatio is not None:
-        d0_max_resolved = np.mean(inputs.detection_signal) + inputs.maxStdRatio * np.std(inputs.detection_signal)
-    
     if inputs.N_d <= 0:
         raise ValueError("N_d (number of bins) must be positive.")
     
-    if d0_max_resolved <= inputs.d0:
-        raise ValueError(f"d0_max_resolved ({d0_max_resolved}) must be greater than d0 ({inputs.d0}).")
+    # if inputs.d0_max <= inputs.d0:
+    #     raise ValueError(f"d0_max_resolved ({inputs.d0_max}) must be greater than d0 ({inputs.d0}).")
     
-    bin_step = (d0_max_resolved - inputs.d0) / inputs.N_d
-    d_bin_edges = np.arange(inputs.d0, d0_max_resolved + bin_step + 1e-12, bin_step)
+    bin_step = abs(inputs.d0_max - inputs.d0) / inputs.N_d
+    d_bin_edges = np.arange(inputs.d0, inputs.d0_max + bin_step + 1e-12, bin_step)
     d_bin_lower_limits = d_bin_edges[:-1]
     
-    # --- Initialize Result Arrays ---
     num_bins = len(d_bin_lower_limits)
     d_bin_mean_D = np.full(num_bins, np.nan) # Stores mean of D values in each bin
     
-    num_input_channels = inputs.x.shape[0]
+    num_input_channels = inputs.original_signal.shape[0]
     num_snapshot_vars = num_input_channels * (inputs.morder + 1)
     mean_events_cond_binned = np.full((num_bins, num_snapshot_vars, inputs.l_extract), np.nan)
     
     DeSnap_results = {}
     DeSnap_results['loc_size'] = np.full(num_bins, np.nan)
     
-    # --- Loop Over Bins of D to Gather Samples ---
-    print("Processing bins of conditioning variable D...")
+    logging.info("Processing bins of conditioning variable D ...")
     current_bin_uplim = np.max(inputs.detection_signal)
     for n, current_bin_lolim in enumerate(d_bin_lower_limits):
         # current_bin_uplim = d_bin_edges[n + 1]
-        
         mask = (inputs.detection_signal >= current_bin_lolim) & (inputs.detection_signal < current_bin_uplim)
-        
-        if not np.any(mask):
-            print(f"Bin {n+1} ({current_bin_lolim:.2f}-{current_bin_uplim:.2f}): No D values. Skipping.")
-            # d_bin_mean_D[n] remains NaN
-            # mean_Yt_cond_binned[n, :, :] remains NaN
-            DeSnap_results['loc_size'][n] = 0
-            continue
         
         d_bin_mean_D[n] = np.mean(inputs.detection_signal[mask])
         temp_loc = np.where(mask)[0]
         
         valid_locs = temp_loc
-        valid_locs = valid_locs[inputs.original_signal.shape[0] - valid_locs >= inputs.l_extract - inputs.l_start]
-        valid_locs = valid_locs[valid_locs - inputs.l_start - (inputs.morder * inputs.tau) >= 0]
-        
-        print(f"Bin {n+1} ({current_bin_lolim:.2f}-{current_bin_uplim:.2f}): "
-                f"Mean D={d_bin_mean_D[n]:.2f}, N_in_bin={len(temp_loc)}, N_valid_locs={len(valid_locs)}")
+        # valid_locs = valid_locs[inputs.original_signal.shape[0] - valid_locs >= inputs.l_extract - inputs.l_start]
+        # valid_locs = valid_locs[valid_locs - inputs.l_start - (inputs.morder * inputs.tau) >= 0]
         
         DeSnap_results['loc_size'][n] = len(valid_locs)
         
@@ -336,36 +324,22 @@ def desnapanalysis(
             if events_binned.shape[2] > 0:
                 mean_events_cond_binned[n, :, :] = np.mean(events_binned, axis=2)
             else:
-                print(f"  Warning: No snapshots extracted for bin {n+1} despite {len(valid_locs)} valid_locs.")
+                logging.warning(f"No snapshots extracted for bin {n+1} despite {len(valid_locs)} valid_locs.")
         else:
-            print(f"  No valid locations for snapshot extraction in bin {n+1}.")
-    
-    # Filter out bins where no data was found (d_bin_mean_D is NaN)
-    valid_bins_mask = ~np.isnan(d_bin_mean_D)
-    if not np.any(valid_bins_mask):
-        raise ValueError("No valid data points found across all bins of D. Check binning parameters or input D.")
-        
-    d_bin_mean_D_filtered = d_bin_mean_D[valid_bins_mask]
-    mean_events_cond_binned_filtered = mean_events_cond_binned[valid_bins_mask, :, :]
+            logging.warning(f"No valid locations for snapshot extraction in bin {n+1}.")
     
     # --- First Linear Regression: Fit p_t and q_t ---
-    # Regress mean_Yt_cond_binned_filtered on d_bin_mean_D_filtered
-    # p_t will be slopes, q_t will be intercepts
-    print("Performing first linear regression for p_t and q_t...")
-    p_t, q_t = compute_multi_variable_linear_regression(d_bin_mean_D_filtered, mean_events_cond_binned_filtered)
+    logging.info("Performing first linear regression for p_t and q_t...")
+    p_t, q_t = compute_multi_variable_linear_regression(d_bin_mean_D, mean_events_cond_binned)
     DeSnap_results["p_t"] = p_t
     DeSnap_results["q_t"] = q_t
-    DeSnap_results["d_bin_bar"] = d_bin_mean_D_filtered
-    DeSnap_results["mean_Yt_cond"] = mean_events_cond_binned_filtered
+    DeSnap_results["d_bin_bar"] = d_bin_mean_D
+    DeSnap_results["mean_Yt_cond"] = mean_events_cond_binned
     
     # --- Second Linear Regression: Estimate mu_D (unconditional mean of D) ---
-    # Regress -q_t on p_t. Reshape p_t and q_t to be 1D vectors for this regression.
-    # This assumes a single scalar mu_D.
     p_t_flat = p_t.reshape(-1, 1) # All p_t values as a column vector
     q_t_flat = -q_t.reshape(-1)   # All -q_t values as a 1D array
     
-    # Filter out NaNs that might have resulted from p_t/q_t calculation if some bins had too few points
-    # for compute_multi_variable_linear_regression (though it has its own checks)
     nan_mask_regression2 = ~np.isnan(p_t_flat.ravel()) & ~np.isnan(q_t_flat)
     if not np.any(nan_mask_regression2):
         raise ValueError("All p_t or q_t values are NaN, cannot compute mu_D.")
@@ -380,9 +354,7 @@ def desnapanalysis(
     DeSnap_results['Yt_stats_uncond']['mean'] = q_t + p_t * DeSnap_results['mu_D']
     
     # --- Third Linear Regression: Compute Covariance Adjustment Factor 'c' ---
-    # This part adjusts the conditional covariance matrices.
-    # cov_pt is related to the variance explained by p_t.
-    print("Performing third linear regression for covariance adjustment factor 'c'...")
+    logging.info("Performing third linear regression for covariance adjustment factor 'c'...")
     DeSnap_results['cov_pt'] = np.full((inputs.l_extract, num_snapshot_vars, num_snapshot_vars), np.nan)
     for t in range(inputs.l_extract):
         DeSnap_results['cov_pt'][t, :, :] = np.outer(p_t[:, t], p_t[:, t])
@@ -407,7 +379,7 @@ def desnapanalysis(
     DeSnap_results['Yt_stats_uncond']['Sigma'] = inputs.Yt_stats_cond['Sigma'] - DeSnap_results['c'] * DeSnap_results['cov_pt']
     
     # --- Compute Unconditional Autoregressive Coefficients At ---
-    print("Calculating unconditional AR coefficients...")
+    logging.info("Calculating unconditional AR coefficients...")
     try:
         nvar_actual = inputs.Yt_stats_cond['OLS']['At'].shape[1]
     except (KeyError, AttributeError, IndexError):
@@ -426,12 +398,14 @@ def desnapanalysis(
         Sigma_yx_uncond = DeSnap_results['Yt_stats_uncond']['Sigma'][t, :nvar_actual, nvar_actual:]
         Sigma_xx_uncond = DeSnap_results['Yt_stats_uncond']['Sigma'][t, nvar_actual:, nvar_actual:]
         
-        # Solve At * Sigma_xx_uncond = Sigma_yx_uncond  => At = Sigma_yx_uncond * inv(Sigma_xx_uncond)
+        Sigma_xx_uncond_reg = regularize_if_singular(Sigma_xx_uncond)
+        if not np.allclose(Sigma_xx_uncond, Sigma_xx_uncond_reg):
+            logging.warning(f"Applied regularization to Sigma_22 at time step {t}")
+            
         try:
-            DeSnap_results['Yt_stats_uncond']['OLS']['At'][t, :, :] = np.linalg.solve(Sigma_xx_uncond.T, Sigma_yx_uncond.T).T
+            DeSnap_results['Yt_stats_uncond']["OLS"]["At"][t, :, :] = Sigma_yx_uncond @ np.linalg.inv(Sigma_xx_uncond)
         except np.linalg.LinAlgError:
-            print(f"Warning: Singular matrix encountered for Sigma_xx_uncond at time step {t}. AR coefficients will be NaN.")
-            # At[t,:,:] will remain NaN as initialized
+            logging.warning(f"Singular matrix at time step {t}, using pseudo-inverse")
+            DeSnap_results['Yt_stats_uncond']["OLS"]["At"][t, :, :] = Sigma_yx_uncond @ np.linalg.pinv(Sigma_xx_uncond)
 
-    print("De-snapshotting analysis complete.")
     return DeSnap_results
