@@ -1,5 +1,8 @@
+import logging
 from typing import Tuple
+
 import numpy as np
+from sklearn.covariance import ledoit_wolf
 
 
 def remove_artifact_trials(
@@ -50,7 +53,7 @@ def remove_artifact_trials(
 
 
 def regularize_if_singular(
-    matrix: np.ndarray, epsilon: float = 1e-6, threshold: float = 1e-6
+    matrix: np.ndarray, samples=None, epsilon: float = 1e-4, threshold: float = 1e-6
 ) -> np.ndarray:
     """
     Check if a matrix is singular and regularize it by adding epsilon to the diagonal if needed.
@@ -86,20 +89,29 @@ def regularize_if_singular(
     if matrix.shape[0] != matrix.shape[1]:
         raise ValueError("Input matrix must be square")
 
-    # cond_threshold = threshold
     # cond_number = np.linalg.cond(matrix)
-    # if cond_number > cond_threshold:
+    # if cond_number > threshold:
     #     regularized_matrix = matrix + epsilon * np.eye(matrix.shape[0])
     #     return regularized_matrix
     # else:
     #     return matrix
-
+    # det = np.linalg.det(matrix)
+    max_iter = 2
+    
     det = np.linalg.det(matrix)
     if abs(det) < threshold:
-        print(
-            f"Warning: Singular matrix detected (det={det}), adding epsilon={epsilon}"
-        )
-        regularized_matrix = matrix + epsilon * np.eye(matrix.shape[0])
-        return regularized_matrix
-    else:
-        return matrix
+        logging.warning(f"Singular matrix (det={det:.2e})")
+
+        # 1) Try one-shot Ledoit–Wolf shrinkage if we have samples
+        if samples is not None:
+            matrix, alpha = ledoit_wolf(samples)
+            logging.info(f"Ledoit-Wolf alpha={alpha:.3f}")
+            return matrix
+
+        # 2) Iteratively add ridge until no longer singular
+        ridge_factor = epsilon
+        for i in range(1, max_iter + 1):
+            scale = np.mean(np.diag(matrix))
+            matrix = matrix + ridge_factor * scale * np.eye(matrix.shape[0])
+            ridge_factor *= 2
+    return matrix
