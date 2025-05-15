@@ -13,6 +13,7 @@ class PipelineOptions:
     causal_analysis: bool = True
     bootstrap: bool = False
     save_flag: bool = False
+    debiased_stats: bool = True
 
 
 @dataclass
@@ -60,6 +61,7 @@ class OutputParams:
     """Parameters for output file naming."""
 
     file_keyword: str
+    save_path: str
     
 @dataclass
 class DeSnapParams:
@@ -93,7 +95,7 @@ class PipelineConfig:
     output: OutputParams
     monte_carlo: Optional[MonteCParams] = None
     desnap: Optional[DeSnapParams] = None
-    Fs: int = 1252
+    sampling_rate: int = 1252
     passband: List[int] = field(default_factory=lambda: [140, 230])
 
     # Validation logic
