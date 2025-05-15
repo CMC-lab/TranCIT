@@ -1,7 +1,7 @@
 import logging
 import sys
 
-LOG_LEVEL_DEFAULT = logging.INFO
+LOG_LEVEL_DEFAULT = logging.ERROR
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 LOGGER_NAME = 'dcs'
