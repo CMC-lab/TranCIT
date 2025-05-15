@@ -5,7 +5,7 @@ import numpy as np
 
 from .preprocess import regularize_if_singular
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def compute_covariances(
@@ -65,7 +65,7 @@ def compute_covariances(
 
         # Log warnings if NaN values are detected
         if np.any(np.isnan(cov_Xp[t])):
-            logging.warning(f"NaN values detected in cov_Xp at time step {t}")
+            logger.warning(f"NaN values detected in cov_Xp at time step {t}")
 
     return cov_Xp, cov_Yp, C_XYp, C_YXp
 
@@ -110,7 +110,7 @@ def estimate_coefficients(
     # Regularize the auto-covariance matrix if singular
     auto_cov_lagged_reg = regularize_if_singular(auto_cov_lagged)
     if not np.allclose(auto_cov_lagged, auto_cov_lagged_reg):
-        logging.warning("Applied regularization to auto_cov_lagged due to singularity")
+        logger.warning("Applied regularization to auto_cov_lagged due to singularity")
 
     # Solve for coefficients using the regularized matrix
     coefficients = np.linalg.solve(auto_cov_lagged_reg, cross_cov_between.T).T

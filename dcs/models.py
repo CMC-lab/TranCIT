@@ -6,7 +6,6 @@ import numpy as np
 from .utils import compute_event_statistics
 from .utils.preprocess import regularize_if_singular
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -291,7 +290,7 @@ def estimate_var_coefficients(
 
     if np.isnan(time_series_data).any() or np.isinf(time_series_data).any():
         # Optional: Check for NaN/Inf if they cause issues later
-        logging.warning("Input 'time_series_data' contains NaN or Inf values.")
+        logger.warning("Input 'time_series_data' contains NaN or Inf values.")
 
     if not isinstance(model_order, int) or model_order <= 0:
         raise ValueError("Input 'model_order' must be a positive integer.")

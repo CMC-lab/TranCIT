@@ -306,51 +306,34 @@ def snapshot_detect_analysis_pipeline(
                 logger.error(f"Failed to get residuals for bootstrapping: {e}")
 
     # --- Step 10: Perform DeSnap (Derive Unconditional Statistics) ---
-    desnap_full_output = None
     event_stats_unconditional = None
     
     if config.options.debiased_stats:
-        if config.desnap_settings is None:
-            logger.warning("DeSnap (debiased_stats) analysis requested but no desnapping settings (config.desnap_settings) provided. Skipping DeSnap.")
-        elif d0_threshold is None and config.desnap_settings.maxStdRatio is None and config.desnap_settings.d0_max_val is None :
-             logger.warning("DeSnap analysis requires either a d0 from detection or d0_max/maxStdRatio in desnapping_settings. Skipping DeSnap.")
-        elif event_stats is None:
-            logger.warning("Event statistics (event_stats) not available. Skipping DeSnap.")
-        else:
-            logger.info("Performing DeSnap analysis to derive unconditional statistics...")
-            
-        logger.info("Performing DeSnap analysis...")
-        desnap_params_instance = DeSnapParams(
-            detection_signal=D_for_detection,
-            original_signal=original_signal,
-            Yt_stats_cond=event_stats,
-            morder=morder,
-            tau=config.get('DeSnap_inputs', {}).get('tau', None),
-            l_start=config.get('DeSnap_inputs', {}).get('l_start', None),
-            l_extract=config.get('DeSnap_inputs', {}).get('l_extract', None),
-            d0=d0_threshold,
-            N_d=config.get('DeSnap_inputs', {}).get('N_d', 10),
-            d0_max=config.get('DeSnap_inputs', {}).get('d0_max', None),
-            maxStdRatio=config.get('DeSnap_inputs', {}).get('maxStdRatio', None),
-            diff_flag=config.get('DeSnap_inputs', {}).get('diff_flag', False)
-        )
-        if desnap_params_instance.d0_max is None and desnap_params_instance.maxStdRatio is not None:
-            desnap_params_instance.d0_max = np.mean(D_for_detection) + desnap_params_instance.maxStdRatio * np.std(D_for_detection)
+        desnap_full_output = None
+        desnap_params_instance = config.desnap
+    
+        desnap_params_instance.detection_signal = D_for_detection
+        desnap_params_instance.original_signal = original_signal
+        desnap_params_instance.Yt_stats_cond = event_stats
+        desnap_params_instance.morder = morder
+        desnap_params_instance.d0 = d0_threshold
+        logger.info("Performing DeSnap analysis ...")
         
-        try:
-            desnap_full_output = desnapanalysis(desnap_params_instance)
-            if 'Yt_stats_uncond' in desnap_full_output:
-                event_stats_unconditional = desnap_full_output['Yt_stats_uncond']
-                
-                if 'OLS' not in event_stats_unconditional: event_stats_unconditional['OLS'] = {}
-                bt_uncond, sigma_et_uncond = estimate_residuals(event_stats_unconditional)
-                event_stats_unconditional['OLS']['bt'] = bt_uncond
-                event_stats_unconditional['OLS']['Sigma_Et'] = sigma_et_uncond
-                logger.info("DeSnap analysis complete. Unconditional stats derived.")
-            else:
-                logger.warning("DeSnap analysis ran but 'Yt_stats_uncond' not found in output.")
-        except Exception as e:
-            logger.error(f"Desnapanalysis step failed: {e}")
+        # if desnap_params_instance.d0_max is None and desnap_params_instance.maxStdRatio is not None:
+        desnap_params_instance.d0_max = np.mean(D_for_detection) + desnap_params_instance.maxStdRatio * np.std(D_for_detection)
+        
+        # try:
+        desnap_full_output = desnapanalysis(desnap_params_instance)
+        if 'Yt_stats_uncond' in desnap_full_output:
+            event_stats_unconditional = desnap_full_output['Yt_stats_uncond']
+            
+        if 'OLS' not in event_stats_unconditional: event_stats_unconditional['OLS'] = {}
+        bt_uncond, sigma_et_uncond, _ = estimate_residuals(event_stats_unconditional)
+        event_stats_unconditional['OLS']['bt'] = bt_uncond
+        event_stats_unconditional['OLS']['Sigma_Et'] = sigma_et_uncond
+        logger.info("DeSnap analysis complete. Unconditional stats derived.")
+        # except Exception as e:
+        #     logger.error(f"Desnapanalysis step failed: {e}")
     
     # --- Step 11: Prepare final output and save ---
     snap_analysis_output.update(

@@ -8,8 +8,7 @@ from .helpers import compute_multi_variable_linear_regression
 from .preprocess import regularize_if_singular
 from .residuals import estimate_residuals
 
-logging.basicConfig(level=logging.INFO)
-
+logger = logging.getLogger(__name__)
 
 def extract_event_windows(
     signal: np.ndarray, centers: np.ndarray, start_offset: int, window_length: int
@@ -46,7 +45,7 @@ def extract_event_windows(
         idx = np.arange(start_idx, end_idx)
 
         if np.any(idx < 0) or np.any(idx >= len(signal)):
-            logging.error(
+            logger.error(
                 f"Index out of bounds for center {center}: {idx} for signal of length {len(signal)}"
             )
             raise IndexError(
@@ -102,7 +101,7 @@ def compute_conditional_event_statistics(
         Sigma_end = stats["Sigma"][t, nvar:, nvar:]
 
         if np.linalg.det(Sigma_end) == 0:
-            logging.warning(
+            logger.warning(
                 f"Matrix singular at time {t}, applying regularization with epsilon={epsilon}"
             )
             Sigma_end = regularize_if_singular(Sigma_end, epsilon)
@@ -211,11 +210,11 @@ def compute_event_statistics(event_data: np.ndarray, model_order: int) -> Dict:
         # X_lagged = event_data[nvar:, t, :].T  
         Sigma_22_reg = regularize_if_singular(Sigma_22)
         if not np.allclose(Sigma_22, Sigma_22_reg):
-            logging.warning(f"Applied regularization to Sigma_22 at time step {t}")
+            logger.warning(f"Applied regularization to Sigma_22 at time step {t}")
         try:
             stats["OLS"]["At"][t, :, :] = Sigma_12 @ np.linalg.inv(Sigma_22_reg)
         except np.linalg.LinAlgError:
-            logging.warning(f"Singular matrix at time step {t}, using pseudo-inverse")
+            logger.warning(f"Singular matrix at time step {t}, using pseudo-inverse")
             stats["OLS"]["At"][t, :, :] = Sigma_12 @ np.linalg.pinv(Sigma_22_reg)
 
     stats["OLS"]["bt"], stats["OLS"]["Sigma_Et"], stats["OLS"]["sigma_Et"] = (
@@ -287,11 +286,14 @@ def desnapanalysis(
     # if inputs.d0_max <= inputs.d0:
     #     raise ValueError(f"d0_max_resolved ({inputs.d0_max}) must be greater than d0 ({inputs.d0}).")
     
+    print("d0_max", inputs.d0_max)
+    print("d0", inputs.d0)
+    print("N_d", inputs.N_d)
     bin_step = abs(inputs.d0_max - inputs.d0) / inputs.N_d
     d_bin_edges = np.arange(inputs.d0, inputs.d0_max + bin_step + 1e-12, bin_step)
-    d_bin_lower_limits = d_bin_edges[:-1]
+    # d_bin_lower_limits = d_bin_edges[:-1]
     
-    num_bins = len(d_bin_lower_limits)
+    num_bins = len(d_bin_edges)
     d_bin_mean_D = np.full(num_bins, np.nan) # Stores mean of D values in each bin
     
     num_input_channels = inputs.original_signal.shape[0]
@@ -301,9 +303,9 @@ def desnapanalysis(
     DeSnap_results = {}
     DeSnap_results['loc_size'] = np.full(num_bins, np.nan)
     
-    logging.info("Processing bins of conditioning variable D ...")
+    logger.info("Processing bins of conditioning variable D ...")
     current_bin_uplim = np.max(inputs.detection_signal)
-    for n, current_bin_lolim in enumerate(d_bin_lower_limits):
+    for n, current_bin_lolim in enumerate(d_bin_edges):
         # current_bin_uplim = d_bin_edges[n + 1]
         mask = (inputs.detection_signal >= current_bin_lolim) & (inputs.detection_signal < current_bin_uplim)
         
@@ -324,12 +326,12 @@ def desnapanalysis(
             if events_binned.shape[2] > 0:
                 mean_events_cond_binned[n, :, :] = np.mean(events_binned, axis=2)
             else:
-                logging.warning(f"No snapshots extracted for bin {n+1} despite {len(valid_locs)} valid_locs.")
+                logger.warning(f"No snapshots extracted for bin {n+1} despite {len(valid_locs)} valid_locs.")
         else:
-            logging.warning(f"No valid locations for snapshot extraction in bin {n+1}.")
+            logger.warning(f"No valid locations for snapshot extraction in bin {n+1}.")
     
     # --- First Linear Regression: Fit p_t and q_t ---
-    logging.info("Performing first linear regression for p_t and q_t...")
+    logger.info("Performing first linear regression for p_t and q_t...")
     p_t, q_t = compute_multi_variable_linear_regression(d_bin_mean_D, mean_events_cond_binned)
     DeSnap_results["p_t"] = p_t
     DeSnap_results["q_t"] = q_t
@@ -354,7 +356,7 @@ def desnapanalysis(
     DeSnap_results['Yt_stats_uncond']['mean'] = q_t + p_t * DeSnap_results['mu_D']
     
     # --- Third Linear Regression: Compute Covariance Adjustment Factor 'c' ---
-    logging.info("Performing third linear regression for covariance adjustment factor 'c'...")
+    logger.info("Performing third linear regression for covariance adjustment factor 'c'...")
     DeSnap_results['cov_pt'] = np.full((inputs.l_extract, num_snapshot_vars, num_snapshot_vars), np.nan)
     for t in range(inputs.l_extract):
         DeSnap_results['cov_pt'][t, :, :] = np.outer(p_t[:, t], p_t[:, t])
@@ -379,7 +381,7 @@ def desnapanalysis(
     DeSnap_results['Yt_stats_uncond']['Sigma'] = inputs.Yt_stats_cond['Sigma'] - DeSnap_results['c'] * DeSnap_results['cov_pt']
     
     # --- Compute Unconditional Autoregressive Coefficients At ---
-    logging.info("Calculating unconditional AR coefficients...")
+    logger.info("Calculating unconditional AR coefficients...")
     try:
         nvar_actual = inputs.Yt_stats_cond['OLS']['At'].shape[1]
     except (KeyError, AttributeError, IndexError):
@@ -400,12 +402,12 @@ def desnapanalysis(
         
         Sigma_xx_uncond_reg = regularize_if_singular(Sigma_xx_uncond)
         if not np.allclose(Sigma_xx_uncond, Sigma_xx_uncond_reg):
-            logging.warning(f"Applied regularization to Sigma_22 at time step {t}")
+            logger.warning(f"Applied regularization to Sigma_22 at time step {t}")
             
         try:
             DeSnap_results['Yt_stats_uncond']["OLS"]["At"][t, :, :] = Sigma_yx_uncond @ np.linalg.inv(Sigma_xx_uncond)
         except np.linalg.LinAlgError:
-            logging.warning(f"Singular matrix at time step {t}, using pseudo-inverse")
+            logger.warning(f"Singular matrix at time step {t}, using pseudo-inverse")
             DeSnap_results['Yt_stats_uncond']["OLS"]["At"][t, :, :] = Sigma_yx_uncond @ np.linalg.pinv(Sigma_xx_uncond)
 
     return DeSnap_results

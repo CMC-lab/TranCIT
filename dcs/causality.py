@@ -6,7 +6,7 @@ import numpy as np
 from .utils.helpers import compute_covariances, estimate_coefficients
 from .utils.preprocess import regularize_if_singular
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def compute_causal_strength_nonzero_mean(
@@ -61,7 +61,7 @@ def compute_causal_strength_nonzero_mean(
         raise ValueError("time_mode must be 'inhomo' or 'homo'.")
 
     nvar, nobs, ntrials = time_series_data.shape
-    logging.info(f"Starting computation: nvar={nvar}, nobs={nobs}, ntrials={ntrials}")
+    logger.info(f"Starting computation: nvar={nvar}, nobs={nobs}, ntrials={ntrials}")
 
     # Prepare extended data
     r1 = model_order + 1
@@ -87,7 +87,7 @@ def compute_causal_strength_nonzero_mean(
 
     # Time-inhomogeneous computation
     for t in range(n_time_steps):
-        logging.debug(f"Processing time step {t}/{n_time_steps - 1}")
+        logger.debug(f"Processing time step {t}/{n_time_steps - 1}")
         coeff, residual_cov = estimate_coefficients(
             current_data[:, t, :].T,
             lagged_data[:, :model_order, t, :].reshape(nvar * model_order, ntrials).T,
@@ -249,7 +249,7 @@ def time_varying_causality(
     if causal_params["estim_mode"] not in ["OLS", "RLS"]:
         raise ValueError("estim_mode must be 'OLS' or 'RLS'.")
 
-    logging.info(f"Computing causality with mode: {causal_params['estim_mode']}")
+    logger.info(f"Computing causality with mode: {causal_params['estim_mode']}")
 
     causality_measures = {
         "TE": np.zeros((nobs, 2)),

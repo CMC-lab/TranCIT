@@ -1,9 +1,6 @@
-import logging
 from typing import Dict, Tuple
 
 import numpy as np
-
-logging.basicConfig(level=logging.INFO)
 
 
 def estimate_residuals(event_stats: Dict) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -46,9 +43,6 @@ def estimate_residuals(event_stats: Dict) -> Tuple[np.ndarray, np.ndarray, np.nd
             + np.dot(np.dot(coeff, Sigma_Xp), coeff.T)
         )
         residual_trace[t] = np.trace(residual_covariance[t])
-
-        if np.any(residual_covariance[t] < 0):
-            logging.warning(f"Negative values in residual_covariance at time {t}")
 
     # Ensure that no negative values exist (if needed)
     # Sigma_Et[Sigma_Et < 0] = 0

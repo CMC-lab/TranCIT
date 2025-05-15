@@ -4,6 +4,7 @@ from typing import Tuple
 import numpy as np
 from sklearn.covariance import ledoit_wolf
 
+logger = logging.getLogger(__name__)
 
 def remove_artifact_trials(
     event_data: np.ndarray, locations: np.ndarray, lower_threshold: float
@@ -100,12 +101,12 @@ def regularize_if_singular(
     
     det = np.linalg.det(matrix)
     if abs(det) < threshold:
-        logging.warning(f"Singular matrix (det={det:.2e})")
+        logger.warning(f"Singular matrix (det={det:.2e})")
 
         # 1) Try one-shot Ledoit–Wolf shrinkage if we have samples
         if samples is not None:
             matrix, alpha = ledoit_wolf(samples)
-            logging.info(f"Ledoit-Wolf alpha={alpha:.3f}")
+            logger.info(f"Ledoit-Wolf alpha={alpha:.3f}")
             return matrix
 
         # 2) Iteratively add ridge until no longer singular

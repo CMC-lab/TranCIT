@@ -4,6 +4,7 @@ from typing import Tuple
 import numpy as np
 from scipy.spatial.distance import cdist
 
+logger = logging.getLogger(__name__)
 
 def find_best_shrinked_locs(
     signal: np.ndarray,
@@ -34,12 +35,12 @@ def find_best_shrinked_locs(
     """
     # Input validation
     if not signal.size or not shrinked_locations.size or not all_locations.size:
-        logging.error("Empty input arrays provided to find_best_shrinked_locs.")
+        logger.error("Empty input arrays provided to find_best_shrinked_locs.")
         raise ValueError("Signal and location arrays must not be empty.")
 
     # Compute histogram for all locations
     hist_full, _ = np.histogram(signal[all_locations], bins=num_bins, density=True)
-    logging.debug(f"Computed full histogram with {num_bins} bins.")
+    logger.debug(f"Computed full histogram with {num_bins} bins.")
 
     # Initialize distances array
     distances = np.full(len(shrinked_locations), np.nan)
@@ -52,16 +53,12 @@ def find_best_shrinked_locs(
         distances[size] = cdist(
             hist_full.reshape(1, -1), hist_temp.reshape(1, -1), metric="euclidean"
         )[0, 0]
-        logging.debug(
-            f"Computed distance {distances[size]:.4f} for subset size {size}."
-        )
+        logger.debug(f"Computed distance {distances[size]:.4f} for subset size {size}.")
 
     # Find best subset
     best_size = np.nanargmin(distances)
     best_locations = shrinked_locations[:best_size]
-    logging.info(
-        f"Best subset size: {best_size} with distance {distances[best_size]:.4f}."
-    )
+    logger.info(f"Best subset size: {best_size} with distance {distances[best_size]:.4f}.")
 
     return best_locations, distances
 
@@ -86,15 +83,15 @@ def shrink_locs_resample_uniform(
         ValueError: If `min_distance` is negative or `locations` is empty.
     """
     if len(locations) == 0:
-        logging.warning("Empty locations array provided; returning empty array.")
+        logger.warning("Empty locations array provided; returning empty array.")
         return np.array([])
     if min_distance < 0:
-        logging.error("Negative min_distance provided.")
+        logger.error("Negative min_distance provided.")
         raise ValueError("min_distance must be non-negative.")
 
     selected_locations = []
     available_locations = locations.copy()
-    logging.debug(
+    logger.debug(
         f"Starting resampling with {len(locations)} locations and min_distance {min_distance}."
     )
 
@@ -104,12 +101,12 @@ def shrink_locs_resample_uniform(
         selected_locations.append(selected_loc)
         mask = np.abs(selected_loc - available_locations) >= min_distance
         available_locations = available_locations[mask]
-        logging.debug(
+        logger.debug(
             f"Selected location {selected_loc}; {len(available_locations)} remain."
         )
 
     result = np.array(selected_locations)
-    logging.info(f"Resampling complete; selected {len(result)} locations.")
+    logger.info(f"Resampling complete; selected {len(result)} locations.")
     return result
 
 
@@ -134,10 +131,10 @@ def find_peak_loc(
         ValueError: If `window_size` is negative or inputs are empty/invalid.
     """
     if not signal.size or not candidate_locations.size:
-        logging.error("Empty signal or candidate_locations provided.")
+        logger.error("Empty signal or candidate_locations provided.")
         raise ValueError("Signal and candidate_locations must not be empty.")
     if window_size < 0:
-        logging.error("Negative window_size provided.")
+        logger.error("Negative window_size provided.")
         raise ValueError("window_size must be non-negative.")
 
     # Filter candidates within signal bounds
@@ -145,7 +142,7 @@ def find_peak_loc(
         (candidate_locations >= window_size)
         & (candidate_locations <= len(signal) - window_size)
     ]
-    logging.debug(f"Filtered to {len(valid_candidates)} valid candidates.")
+    logger.debug(f"Filtered to {len(valid_candidates)} valid candidates.")
 
     # Group candidates and find preliminary peaks
     preliminary_peaks = []
@@ -163,7 +160,7 @@ def find_peak_loc(
         max_idx = np.argmax(group_signal)
         preliminary_peaks.append(group[max_idx])
         idx_start = idx_end + 1
-    logging.debug(f"Found {len(preliminary_peaks)} preliminary peaks.")
+    logger.debug(f"Found {len(preliminary_peaks)} preliminary peaks.")
 
     # Refine peaks within local windows
     half_window = int(np.ceil(window_size / 2))
@@ -172,11 +169,11 @@ def find_peak_loc(
         start = peak - half_window + 1
         end = peak + half_window
         if start < 0 or end > len(signal):
-            logging.warning(f"Skipping peak at {peak} due to boundary violation.")
+            logger.warning(f"Skipping peak at {peak} due to boundary violation.")
             continue
         local_signal = signal[start:end]
         local_max_idx = np.argmax(local_signal)
         refined_peaks.append(start + local_max_idx)
-    logging.info(f"Refined to {len(refined_peaks)} peaks.")
+    logger.info(f"Refined to {len(refined_peaks)} peaks.")
 
     return np.unique(refined_peaks)
