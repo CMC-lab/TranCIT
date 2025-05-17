@@ -60,7 +60,6 @@ def compute_multi_trial_BIC(event_data_max_order: np.ndarray, bic_params: Dict) 
         bic_outputs["log_likelihood"][model_order - 1] = log_likelihood
         bic_outputs["sum_log_det_hessian"][model_order - 1] = sum_log_det_hessian
 
-        # Define penalty terms for BIC variants
         bic_outputs["pt_bic"][model_order - 1, 0] = (
             0.5 * n_observations * model_order * n_vars * n_vars * np.log(n_trials)
         )
@@ -77,7 +76,6 @@ def compute_multi_trial_BIC(event_data_max_order: np.ndarray, bic_params: Dict) 
             0.5 * model_order * n_vars * n_vars * np.log(n_trials * n_observations)
         )
 
-        # Compute BIC for each variant
         for variant in range(4):
             bic_outputs["bic"][model_order - 1, variant] = (
                 -bic_outputs["log_likelihood"][model_order - 1] * n_trials
@@ -141,9 +139,7 @@ def compute_BIC_for_model(
         log_det_hessian[t] = (
             model_order * n_vars**2 * np.log(n_trials)
             + n_vars * np.log(np.linalg.det(covariance_current))
-            - n_vars
-            * model_order
-            * np.log(residual_determinants[t] or 1e-8)  # Avoid log(0)
+            - n_vars * model_order * np.log(residual_determinants[t] or 1e-8)
         )
 
     log_likelihood = (

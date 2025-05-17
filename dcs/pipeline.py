@@ -5,7 +5,7 @@ from typing import Dict, Tuple, Any, Optional
 import numpy as np
 
 from .causality import time_varying_causality
-from .config import DeSnapParams, PipelineConfig
+from .config import PipelineConfig
 from .models import compute_multi_trial_BIC
 from .simulation import simulate_ar_event_bootstrap
 from .utils import (compute_event_statistics, desnapanalysis,
@@ -94,6 +94,7 @@ def snapshot_detect_analysis_pipeline(
     logger.info("Starting snapshot detection and analysis pipeline.")
 
     d0_threshold: Optional[float] = None
+    l_start = config.detection.l_start
     l_extract = config.detection.l_extract
     
     # --- Step 1: Detect reference points ---
@@ -162,7 +163,7 @@ def snapshot_detect_analysis_pipeline(
                 locs,
                 config.bic.momax,
                 config.bic.tau,
-                config.detection.l_start,
+                l_start,
                 l_extract,
             )
             logger.info("Running compute_multi_trial_BIC...")
@@ -194,7 +195,7 @@ def snapshot_detect_analysis_pipeline(
         f"Extracting final event snapshots (morder={morder}, tau={final_tau})..."
     )
     event_snapshots = extract_event_snapshots(
-        original_signal, locs, morder, final_tau, config.detection.l_start, l_extract
+        original_signal, locs, morder, final_tau, l_start, l_extract
     )
     if event_snapshots.shape[2] == 0:
         logger.warning("No trials available for final analysis after snapshot extraction.")
@@ -322,18 +323,18 @@ def snapshot_detect_analysis_pipeline(
         # if desnap_params_instance.d0_max is None and desnap_params_instance.maxStdRatio is not None:
         desnap_params_instance.d0_max = np.mean(D_for_detection) + desnap_params_instance.maxStdRatio * np.std(D_for_detection)
         
-        # try:
-        desnap_full_output = desnapanalysis(desnap_params_instance)
-        if 'Yt_stats_uncond' in desnap_full_output:
-            event_stats_unconditional = desnap_full_output['Yt_stats_uncond']
-            
-        if 'OLS' not in event_stats_unconditional: event_stats_unconditional['OLS'] = {}
-        bt_uncond, sigma_et_uncond, _ = estimate_residuals(event_stats_unconditional)
-        event_stats_unconditional['OLS']['bt'] = bt_uncond
-        event_stats_unconditional['OLS']['Sigma_Et'] = sigma_et_uncond
-        logger.info("DeSnap analysis complete. Unconditional stats derived.")
-        # except Exception as e:
-        #     logger.error(f"Desnapanalysis step failed: {e}")
+        try:
+            desnap_full_output = desnapanalysis(desnap_params_instance)
+            if 'Yt_stats_uncond' in desnap_full_output:
+                event_stats_unconditional = desnap_full_output['Yt_stats_uncond']
+                
+            if 'OLS' not in event_stats_unconditional: event_stats_unconditional['OLS'] = {}
+            bt_uncond, sigma_et_uncond, _ = estimate_residuals(event_stats_unconditional)
+            event_stats_unconditional['OLS']['bt'] = bt_uncond
+            event_stats_unconditional['OLS']['Sigma_Et'] = sigma_et_uncond
+            logger.info("DeSnap analysis complete. Unconditional stats derived.")
+        except Exception as e:
+            logger.error(f"Desnapanalysis step failed: {e}")
     
     # --- Step 11: Prepare final output and save ---
     snap_analysis_output.update(
