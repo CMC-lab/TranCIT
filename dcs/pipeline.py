@@ -1,6 +1,6 @@
 import dataclasses
 import logging
-from typing import Dict, Tuple, Any, Optional, List
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -265,6 +265,124 @@ def save_bootstrap_results(n_btsp: int, config: PipelineConfig, btsp_causal_outp
     logger.debug(f"Saved bootstrap sample {n_btsp} to {outfile_btsp}")
 
 
+def remove_artifacts(event_snapshots: np.ndarray, locs: np.ndarray, config: PipelineConfig) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Remove artifact trials from the event snapshots.
+    
+    Args:
+        event_snapshots (np.ndarray): Array of event snapshots
+        locs (np.ndarray): Array of event locations
+        config (PipelineConfig): Configuration object
+        
+    Returns:
+        Tuple containing:
+        - event_snapshots (np.ndarray): Filtered event snapshots
+        - locs (np.ndarray): Updated event locations
+    """
+    if not config.detection.remove_artif:
+        return event_snapshots, locs
+        
+    original_trials = event_snapshots.shape[2]
+    threshold = -15000
+    logger.info(f"Removing artifact trials below threshold {threshold}...")
+    event_snapshots, locs_filtered = remove_artifact_trials(event_snapshots, locs, threshold)
+    removed_count = original_trials - event_snapshots.shape[2]
+    
+    if removed_count > 0:
+        logger.info(f"Removed {removed_count} artifact trials. {event_snapshots.shape[2]} trials remaining.")
+        locs = locs_filtered
+    else:
+        logger.info("No artifact trials removed.")
+    
+    return event_snapshots, locs
+
+
+def extract_event_snapshots_with_config(original_signal: np.ndarray, locs: np.ndarray, 
+                                      morder: int, config: PipelineConfig) -> np.ndarray:
+    """
+    Extract event snapshots using configuration parameters.
+    
+    Args:
+        original_signal (np.ndarray): Original time series data
+        locs (np.ndarray): Array of event locations
+        morder (int): Model order to use
+        config (PipelineConfig): Configuration object
+        
+    Returns:
+        np.ndarray: Extracted event snapshots
+    """
+    final_tau = config.bic.tau if config.options.bic else 1
+    logger.info(f"Extracting final event snapshots (morder={morder}, tau={final_tau})...")
+    
+    event_snapshots = extract_event_snapshots(
+        original_signal, 
+        locs, 
+        morder, 
+        final_tau, 
+        config.detection.l_start, 
+        config.detection.l_extract
+    )
+    
+    return event_snapshots
+
+
+def compute_event_statistics_with_error_handling(event_snapshots: np.ndarray, morder: int) -> Dict:
+    """
+    Compute event statistics with proper error handling.
+    
+    Args:
+        event_snapshots (np.ndarray): Array of event snapshots
+        morder (int): Model order to use
+        
+    Returns:
+        Dict: Computed event statistics
+        
+    Raises:
+        Exception: If statistics computation fails
+    """
+    logger.info("Computing conditional event statistics...")
+    try:
+        event_stats = compute_event_statistics(event_snapshots, morder)
+        return event_stats
+    except Exception as e:
+        logger.error(f"Failed to compute event statistics: {e}")
+        raise
+
+
+def prepare_final_output(d0_threshold: Optional[float], locs: np.ndarray, morder: int,
+                        event_stats: Dict, causal_output: Optional[Dict],
+                        bic_outputs: Optional[Dict], bootstrap_causal_outputs_list: Optional[List[Dict]],
+                        desnap_full_output: Optional[Dict], event_stats_unconditional: Optional[Dict]) -> Dict:
+    """
+    Prepare the final output dictionary with all analysis results.
+    
+    Args:
+        d0_threshold (Optional[float]): Detection threshold used
+        locs (np.ndarray): Detected event locations
+        morder (int): Model order used
+        event_stats (Dict): Event statistics
+        causal_output (Optional[Dict]): Causality analysis results
+        bic_outputs (Optional[Dict]): BIC selection results
+        bootstrap_causal_outputs_list (Optional[List[Dict]]): Bootstrap results
+        desnap_full_output (Optional[Dict]): DeSnap analysis results
+        event_stats_unconditional (Optional[Dict]): Unconditional statistics
+        
+    Returns:
+        Dict: Complete analysis output
+    """
+    return {
+        "d0": d0_threshold,
+        "locs": locs,
+        "morder": morder,
+        "Yt_stats": event_stats,
+        "CausalOutput": causal_output,
+        "BICoutputs": bic_outputs,
+        "BootstrapCausalOutputs": bootstrap_causal_outputs_list,
+        "DeSnap_output": desnap_full_output,
+        "Yt_stats_unconditional": event_stats_unconditional
+    }
+
+
 def snapshot_detect_analysis_pipeline(
     original_signal: np.ndarray,
     detection_signal: np.ndarray,
@@ -312,42 +430,21 @@ def snapshot_detect_analysis_pipeline(
     bic_outputs, morder = perform_bic_selection(original_signal, locs, config)
 
     # Extract event snapshots
-    final_tau = config.bic.tau if config.options.bic else 1
-    logger.info(f"Extracting final event snapshots (morder={morder}, tau={final_tau})...")
-    event_snapshots = extract_event_snapshots(
-        original_signal, locs, morder, final_tau, config.detection.l_start, config.detection.l_extract
-    )
-    
+    event_snapshots = extract_event_snapshots_with_config(original_signal, locs, morder, config)
     if event_snapshots.shape[2] == 0:
         logger.warning("No trials available for final analysis after snapshot extraction.")
         snap_analysis_output.update({"locs": locs, "morder": morder, "d0": d0_threshold})
         return snap_analysis_output, config, event_snapshots
 
     # Remove artifacts if enabled
-    if config.detection.remove_artif:
-        original_trials = event_snapshots.shape[2]
-        threshold = -15000
-        logger.info(f"Removing artifact trials below threshold {threshold}...")
-        event_snapshots, locs_filtered = remove_artifact_trials(event_snapshots, locs, threshold)
-        removed_count = original_trials - event_snapshots.shape[2]
-        if removed_count > 0:
-            logger.info(f"Removed {removed_count} artifact trials. {event_snapshots.shape[2]} trials remaining.")
-            locs = locs_filtered
-        else:
-            logger.info("No artifact trials removed.")
-        
-        if event_snapshots.shape[2] == 0:
-            logger.warning("No trials remaining after artifact removal.")
-            snap_analysis_output.update({"locs": locs, "morder": morder, "d0": d0_threshold})
-            return snap_analysis_output, config, event_snapshots
+    event_snapshots, locs = remove_artifacts(event_snapshots, locs, config)
+    if event_snapshots.shape[2] == 0:
+        logger.warning("No trials remaining after artifact removal.")
+        snap_analysis_output.update({"locs": locs, "morder": morder, "d0": d0_threshold})
+        return snap_analysis_output, config, event_snapshots
 
     # Compute statistics
-    logger.info("Computing conditional event statistics...")
-    try:
-        event_stats = compute_event_statistics(event_snapshots, morder)
-    except Exception as e:
-        logger.error(f"Failed to compute event statistics: {e}")
-        raise
+    event_stats = compute_event_statistics_with_error_handling(event_snapshots, morder)
 
     # Perform causality analysis
     causal_output = perform_causality_analysis(event_snapshots, event_stats, config)
@@ -361,17 +458,11 @@ def snapshot_detect_analysis_pipeline(
     )
 
     # Prepare final output
-    snap_analysis_output.update({
-        "d0": d0_threshold,
-        "locs": locs,
-        "morder": morder,
-        "Yt_stats": event_stats,
-        "CausalOutput": causal_output,
-        "BICoutputs": bic_outputs,
-        "BootstrapCausalOutputs": bootstrap_causal_outputs_list,
-        "DeSnap_output": desnap_full_output,
-        "Yt_stats_unconditional": event_stats_unconditional
-    })
+    snap_analysis_output = prepare_final_output(
+        d0_threshold, locs, morder, event_stats, causal_output,
+        bic_outputs, bootstrap_causal_outputs_list,
+        desnap_full_output, event_stats_unconditional
+    )
 
     # Save results if enabled
     save_results(config, snap_analysis_output, event_snapshots, event_stats)
