@@ -91,11 +91,12 @@ def shrink_locs_resample_uniform(
 
     selected_locations = []
     available_locations = locations.copy()
+    max_number_generation = len(available_locations)
     logger.debug(
         f"Starting resampling with {len(locations)} locations and min_distance {min_distance}."
     )
 
-    while available_locations.size > 0:
+    while len(selected_locations) < max_number_generation:
         rand_idx = np.random.randint(0, len(available_locations))
         selected_loc = available_locations[rand_idx]
         selected_locations.append(selected_loc)
