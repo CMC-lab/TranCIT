@@ -37,18 +37,14 @@ def remove_artifact_trials(
     - The function examines only the first two variables (rows) of `event_data`.
     - Trials are removed based on the condition `event_data[:2, :, :] < lower_threshold`.
     """
-    # Find indices where any value in the first two variables is below the threshold
     artifact_indices = np.where(event_data[:2, :, :] < lower_threshold)
 
-    # Get unique trial indices to remove
     trials_to_remove = np.unique(artifact_indices[2])
 
-    # Remove the artifact trials from event_data and locations
     updated_event_data = np.delete(event_data, trials_to_remove, axis=2)
     updated_locations = np.delete(locations, trials_to_remove)
 
-    # Log the number of removed trials
-    print(f"Removed {len(trials_to_remove)} artifact trials")
+    logger.info(f"Removed {len(trials_to_remove)} artifact trials")
 
     return updated_event_data, updated_locations
 
