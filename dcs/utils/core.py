@@ -40,8 +40,8 @@ def extract_event_windows(
     event_windows = np.full((window_length, len(centers)), np.nan)
 
     for i, center in enumerate(centers):
-        start_idx = int(np.round(center - start_offset))
-        end_idx = start_idx + window_length
+        start_idx = int(np.round(center - start_offset) + 1)
+        end_idx = start_idx + window_length + 1
         idx = np.arange(start_idx, end_idx)
 
         if np.any(idx < 0) or np.any(idx >= len(signal)):
@@ -312,9 +312,9 @@ def desnapanalysis(
         d_bin_mean_D[n] = np.mean(inputs.detection_signal[mask])
         temp_loc = np.where(mask)[0]
         
-        valid_locs = temp_loc
-        # valid_locs = valid_locs[inputs.original_signal.shape[0] - valid_locs >= inputs.l_extract - inputs.l_start]
-        # valid_locs = valid_locs[valid_locs - inputs.l_start - (inputs.morder * inputs.tau) >= 0]
+        valid_locs = temp_loc.copy()
+        valid_locs = valid_locs[inputs.original_signal.shape[0] - valid_locs >= inputs.l_extract - inputs.l_start]
+        valid_locs = valid_locs[valid_locs - inputs.l_start - (inputs.morder * inputs.tau) >= 0]
         
         DeSnap_results['loc_size'][n] = len(valid_locs)
         
@@ -339,8 +339,8 @@ def desnapanalysis(
     DeSnap_results["mean_Yt_cond"] = mean_events_cond_binned
     
     # --- Second Linear Regression: Estimate mu_D (unconditional mean of D) ---
-    p_t_flat = p_t.reshape(-1, 1) # All p_t values as a column vector
-    q_t_flat = -q_t.reshape(-1)   # All -q_t values as a 1D array
+    p_t_flat = p_t.reshape(-1, 1)
+    q_t_flat = -q_t.reshape(-1)
     
     nan_mask_regression2 = ~np.isnan(p_t_flat.ravel()) & ~np.isnan(q_t_flat)
     if not np.any(nan_mask_regression2):
@@ -368,13 +368,8 @@ def desnapanalysis(
     else:
         x_reg_c_levels = DeSnap_results['cov_pt'][:, 0, 0]
         y_reg_c_levels = inputs.Yt_stats_cond['Sigma'][:, 0, 0]
-        
-        valid_c_mask = ~np.isnan(x_reg_c_levels) & ~np.isnan(y_reg_c_levels)
-        if not np.any(valid_c_mask):
-            raise ValueError("Not enough valid data points to calculate 'c' for covariance adjustment.")
-
-        X_design_c = np.vstack([np.ones(np.sum(valid_c_mask)), x_reg_c_levels[valid_c_mask]]).T
-        temp_coeffs_c = np.linalg.lstsq(X_design_c, y_reg_c_levels[valid_c_mask], rcond=None)[0]
+        X_design_c = np.vstack([np.ones_like(x_reg_c_levels), x_reg_c_levels]).T
+        temp_coeffs_c = np.linalg.lstsq(X_design_c, y_reg_c_levels, rcond=None)[0]
         DeSnap_results['c'] = temp_coeffs_c[1]
     
     # --- Compute Unconditional Covariance Sigma ---
@@ -402,12 +397,12 @@ def desnapanalysis(
         
         Sigma_xx_uncond_reg = regularize_if_singular(Sigma_xx_uncond)
         if not np.allclose(Sigma_xx_uncond, Sigma_xx_uncond_reg):
-            logger.warning(f"Applied regularization to Sigma_22 at time step {t}")
+            logger.warning(f"DeSnap: Applied regularization to Sigma_xx_uncond at time step {t}")
             
         try:
             DeSnap_results['Yt_stats_uncond']["OLS"]["At"][t, :, :] = Sigma_yx_uncond @ np.linalg.inv(Sigma_xx_uncond)
         except np.linalg.LinAlgError:
-            logger.warning(f"Singular matrix at time step {t}, using pseudo-inverse")
+            logger.warning(f"DeSnap: Singular matrix at time step {t}, using pseudo-inverse")
             DeSnap_results['Yt_stats_uncond']["OLS"]["At"][t, :, :] = Sigma_yx_uncond @ np.linalg.pinv(Sigma_xx_uncond)
 
     return DeSnap_results
