@@ -137,29 +137,27 @@ def find_peak_loc(
         logger.error("Negative window_size provided.")
         raise ValueError("window_size must be non-negative.")
 
-    # Filter candidates within signal bounds
-    valid_candidates = candidate_locations[
+    valid_candidates = np.sort(candidate_locations[
         (candidate_locations >= window_size)
         & (candidate_locations <= len(signal) - window_size)
-    ]
+    ].astype(np.intp))
     logger.debug(f"Filtered to {len(valid_candidates)} valid candidates.")
 
-    # Group candidates and find preliminary peaks
     preliminary_peaks = []
     idx_start = 0
-    while idx_start < len(valid_candidates):
-        idx_end = idx_start
-        while (
-            idx_end < len(valid_candidates) - 1
-            and valid_candidates[idx_end + 1] - valid_candidates[idx_start]
-            < window_size
-        ):
+    idx_end = 0
+    while idx_end < len(valid_candidates) - 1:
+        while idx_end + 1 < len(valid_candidates) and valid_candidates[idx_end + 1] - valid_candidates[idx_start] < window_size:
             idx_end += 1
-        group = valid_candidates[idx_start : idx_end + 1]
+        if idx_end == len(valid_candidates) - 1:
+            break
+        
+        group = valid_candidates[idx_start: idx_end + 1]
         group_signal = signal[group]
         max_idx = np.argmax(group_signal)
-        preliminary_peaks.append(group[max_idx])
+        preliminary_peaks.append(group[max_idx + idx_start])
         idx_start = idx_end + 1
+        idx_end = idx_start
     logger.debug(f"Found {len(preliminary_peaks)} preliminary peaks.")
 
     # Refine peaks within local windows
