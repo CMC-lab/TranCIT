@@ -2,7 +2,7 @@ import logging
 from typing import Tuple
 
 import numpy as np
-from scipy.spatial.distance import cdist
+from scipy.spatial.distance import cdist, euclidean
 
 logger = logging.getLogger(__name__)
 
@@ -33,29 +33,25 @@ def find_best_shrinked_locs(
     Raises:
         ValueError: If input arrays are empty or incompatible with `num_bins`.
     """
-    # Input validation
     if not signal.size or not shrinked_locations.size or not all_locations.size:
         logger.error("Empty input arrays provided to find_best_shrinked_locs.")
         raise ValueError("Signal and location arrays must not be empty.")
 
-    # Compute histogram for all locations
     hist_full, _ = np.histogram(signal[all_locations], bins=num_bins, density=True)
     logger.debug(f"Computed full histogram with {num_bins} bins.")
 
-    # Initialize distances array
     distances = np.full(len(shrinked_locations), np.nan)
 
-    # Compute distances for subsets starting from size 100
     for size in range(100, len(shrinked_locations)):
         hist_temp, _ = np.histogram(
             signal[shrinked_locations[:size]], bins=num_bins, density=True
         )
-        distances[size] = cdist(
-            hist_full.reshape(1, -1), hist_temp.reshape(1, -1), metric="euclidean"
-        )[0, 0]
+        # distances[size] = cdist(
+        #     hist_full.reshape(1, -1), hist_temp.reshape(1, -1), metric="euclidean"
+        # )[0, 0]
+        distances[size] = euclidean(hist_full, hist_temp)
         logger.debug(f"Computed distance {distances[size]:.4f} for subset size {size}.")
 
-    # Find best subset
     best_size = np.nanargmin(distances)
     best_locations = shrinked_locations[:best_size]
     logger.info(f"Best subset size: {best_size} with distance {distances[best_size]:.4f}.")
