@@ -264,8 +264,8 @@ def time_varying_causality(
         mode = causal_params["estim_mode"]
         coeff = stats[mode]["At"][t, :, :]
         residual_cov = stats[mode]["Sigma_Et"][t, :, :]
-
-        a_square = coeff.reshape(nvar, nvar, causal_params["morder"])
+        
+        a_square = coeff.reshape(nvar, nvar, causal_params["morder"], order="F")
         b = a_square[0, 1, :]
         sigy = residual_cov[0, 0] or np.finfo(float).eps
         c = a_square[1, 0, :]
