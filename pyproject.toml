@@ -1,20 +1,77 @@
 [project]
 name = "dynamic-causal-strength"
 version = "0.1.0"
-description = "A package for dynamic causal strength analysis."
+description = "A Python package for quantifying causal relationships in multivariate time series data using dynamic causal strength (DCS) methods."
 authors = [{ name = "Salar Nouri", email = "salr.nouri@gmail.com" }]
+maintainers = [{ name = "Salar Nouri", email = "salr.nouri@gmail.com" }]
 license = { text = "BSD-2-Clause" }
+readme = "README.md"
+requires-python = ">=3.12"
+keywords = ["causality", "time-series", "neuroscience", "statistics", "causal-inference"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
 dependencies = [
     "numpy>=1.26",
-    "scipy>=1.14"
+    "scipy>=1.14",
+    "matplotlib>=3.9",
+    "scikit-learn>=1.3",
 ]
 
+[project.urls]
+Homepage = "https://github.com/CMC-lab/dcs"
+Documentation = "https://dynamic-causal-strength.readthedocs.io"
+Repository = "https://github.com/CMC-lab/dcs"
+"Bug Tracker" = "https://github.com/CMC-lab/dcs/issues"
+
 [build-system]
-requires = ["setuptools>=64.0"]
+requires = ["setuptools>=64.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
-dev = ["pytest", "flake8", "black"]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "flake8>=6.0",
+    "black>=23.0",
+    "mypy>=1.0",
+    "pre-commit>=3.0",
+]
+docs = [
+    "sphinx>=6.0",
+    "sphinx_rtd_theme>=1.0",
+    "sphinx-sitemap>=2.0",
+    "myst-parser>=1.0",
+]
+test = ["pytest>=7.0", "pytest-cov>=4.0"]
 
 [tool.setuptools.package-data]
 "dcs" = ["py.typed"]
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=dcs --cov-report=term-missing --cov-report=html"
