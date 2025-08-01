@@ -9,8 +9,50 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[dev,test]
+
+      - name: Run linting
+        run: |
+          flake8 dcs/ tests/
+          black --check dcs/ tests/
+
+      - name: Run type checking
+        run: |
+          mypy dcs/
+
+      - name: Run tests with coverage
+        run: |
+          pytest --cov=dcs --cov-report=xml --cov-report=term-missing
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
 
     steps:
       - name: Checkout repository
@@ -24,39 +66,42 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install .[dev] flake8 black pytest build
-
-      - name: Run flake8
-        run: flake8 dcs/ tests/
-
-      - name: Run black --check
-        run: black --check dcs/ tests/
-
-      - name: Run tests
-        run: pytest
-
-  deploy:
-    name: Publish to PyPI
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+          pip install build
 
       - name: Build package
         run: |
-          python -m pip install --upgrade pip
-          pip install build
           python -m build
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+
+  docs:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[docs]
+
+      - name: Build documentation
+        run: |
+          cd docs
+          make html
+
+      - name: Deploy to ReadTheDocs
+        uses: readthedocs/actions/deploy@v1
+        with:
+          readthedocs-project-name: dynamic-causal-strength
+          readthedocs-token: ${{ secrets.READTHEDOCS_TOKEN }}
