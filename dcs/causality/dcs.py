@@ -124,11 +124,11 @@ class DCSCalculator(BaseAnalyzer):
                     current_data, lagged_data, cov_xp, cov_yp, c_xyp, c_yxp,
                     result_arrays, data.shape[2], data.shape[0]
                 )
-                # self._adjust_outputs_for_inhomo(result_arrays)
+                self._adjust_outputs_for_inhomo(result_arrays)
             else:
                 self._compute_homogeneous_causality(
                     current_data, lagged_data, cov_xp, cov_yp, c_xyp, c_yxp,
-                    result_arrays, data.shape[2]
+                    result_arrays, data.shape[2], data.shape[0]
                 )
             
             self._log_analysis_complete()
@@ -311,14 +311,18 @@ class DCSCalculator(BaseAnalyzer):
         c_yxp: np.ndarray,
         result_arrays: Dict[str, np.ndarray],
         ntrials: int,
+        nvar: int,
     ) -> None:
         """Compute homogeneous causality exactly like the previous implementation."""
+        n_time_steps = current_data.shape[1] - 1
+        
         coeff, residual_cov = estimate_coefficients(current_data, lagged_data, ntrials)
         
         for t in range(result_arrays["coefficients"].shape[0]):
             result_arrays["coefficients"][t] = coeff.T
         
-        a_square = coeff[:, :-1].reshape(2, 2, self.config["model_order"])
+        
+        a_square = coeff[:, :-1].reshape(nvar, nvar, self.config["model_order"])
         b = a_square[0, 1, :]  # X -> Y
         c = a_square[1, 0, :]  # Y -> X
         sigy = residual_cov[0, 0] or np.finfo(float).eps
