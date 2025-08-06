@@ -6,7 +6,7 @@ from scipy.spatial.distance import cdist, euclidean
 
 logger = logging.getLogger(__name__)
 
-def find_best_shrinked_locs(
+def find_best_shrinked_locations(
     signal: np.ndarray,
     shrinked_locations: np.ndarray,
     all_locations: np.ndarray,
@@ -59,7 +59,7 @@ def find_best_shrinked_locs(
     return best_locations, distances
 
 
-def shrink_locs_resample_uniform(
+def shrink_locations_resample_uniform(
     locations: np.ndarray, min_distance: int
 ) -> np.ndarray:
     """
@@ -107,7 +107,7 @@ def shrink_locs_resample_uniform(
     return result
 
 
-def find_peak_loc(
+def find_peak_locations(
     signal: np.ndarray, candidate_locations: np.ndarray, window_size: int
 ) -> np.ndarray:
     """
