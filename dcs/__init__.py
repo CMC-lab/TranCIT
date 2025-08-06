@@ -1,17 +1,188 @@
-__license__ = "MIT"
+"""
+Dynamic Causal Strength (DCS) Package
+
+A Python package for quantifying causal relationships in multivariate time series data
+using dynamic causal strength (DCS) methods.
+
+This package provides methods for analyzing directional influences using model-based
+statistical tools, inspired by information-theoretic and autoregressive frameworks.
+
+The package implements several causality measures:
+- Dynamic Causal Strength (DCS): Time-varying causal relationships
+- Transfer Entropy (TE): Information-theoretic causality measures  
+- Granger Causality (GC): Linear causality detection
+- Relative Dynamic Causal Strength (rDCS): Event-based causality
+
+Example
+-------
+>>> import numpy as np
+>>> from dcs import DCSCalculator
+>>> 
+>>> # Create calculator
+>>> calculator = DCSCalculator(model_order=4, time_mode="inhomo")
+>>> 
+>>> # Generate sample data
+>>> data = np.random.randn(2, 1000, 20)  # (n_vars, n_obs, n_trials)
+>>> 
+>>> # Perform analysis
+>>> result = calculator.analyze(data)
+>>> print(f"DCS shape: {result.causal_strength.shape}")
+"""
+
 __version__ = "0.1.0"
 __author__ = "Salar Nouri"
 __email__ = "salr.nouri@gmail.com"
+__license__ = "BSD-2-Clause"
 
-from .causality import (compute_causal_strength_nonzero_mean,
-                        time_varying_causality)
-from .logger_config import setup_logging
-from .models import (compute_BIC_for_model, compute_multi_trial_BIC,
-                     estimate_var_coefficients, select_model_order)
-from .pipeline import snapshot_detect_analysis_pipeline
-from .simulation import (generate_signals, simulate_ar_event,
-                         simulate_ar_event_bootstrap)
+# Core functionality imports
+from dcs.core.base import BaseAnalyzer, BaseResult, BaseConfig
+from dcs.core.exceptions import (
+    DCSError,
+    ValidationError,
+    ComputationError,
+    ConfigurationError,
+    DataError,
+    ConvergenceError,
+    SingularMatrixError,
+)
+
+# Configuration imports
+from dcs.config import (
+    BicParams,
+    CausalParams,
+    DeSnapParams,
+    DetectionParams,
+    MonteCParams,
+    OutputParams,
+    PipelineConfig,
+    PipelineOptions,
+)
+
+# Causality analysis imports
+from dcs.causality.dcs import DCSCalculator, DCSResult
+from dcs.causality.transfer_entropy import TransferEntropyCalculator, TransferEntropyResult
+from dcs.causality.granger import GrangerCausalityCalculator, GrangerCausalityResult
+from dcs.causality.rdcs import RelativeDCSCalculator, RelativeDCSResult, time_varying_causality
+
+# Model estimation imports
+from dcs.models.var_estimation import VAREstimator
+from dcs.models.bic_selection import BICSelector, compute_multi_trial_BIC, compute_BIC_for_model
+from dcs.models.model_validation import ModelValidator
+
+# Pipeline imports
+from dcs.pipeline.orchestrator import PipelineOrchestrator, PipelineResult, snapshot_detect_analysis_pipeline
+from dcs.pipeline.stages import (
+    InputValidationStage,
+    EventDetectionStage,
+    BorderRemovalStage,
+    BICSelectionStage,
+    SnapshotExtractionStage,
+    ArtifactRemovalStage,
+    StatisticsComputationStage,
+    CausalityAnalysisStage,
+    BootstrapAnalysisStage,
+    DeSnapAnalysisStage,
+    OutputPreparationStage,
+)
+
+# Simulation imports
+from dcs.simulation import (
+    generate_signals,
+    simulate_ar_event,
+    simulate_ar_event_bootstrap,
+    simulate_ar_nonstat_innomean,
+    generate_ensemble_nonstat_innomean,
+    generate_var_nonstat,
+    morlet,
+)
+
+# Utility imports
+from dcs.utils import (
+    compute_event_statistics,
+    perform_desnap_analysis,
+    estimate_residuals,
+    extract_event_snapshots,
+    get_residuals,
+    remove_artifact_trials,
+    find_peak_locations,
+    shrink_locations_resample_uniform,
+    find_best_shrinked_locations,
+)
+
+# Setup logging
+from dcs.logger_config import setup_logging
 
 setup_logging(log_file="dcs_log.txt")
 
-__all__ = ["causality", "config", "models", "pipeline", "simulation", "utils"]
+# Public API definition
+__all__ = [
+    # Core classes
+    "BaseAnalyzer",
+    "BaseResult", 
+    "BaseConfig",
+    # Exceptions
+    "DCSError",
+    "ValidationError",
+    "ComputationError",
+    "ConfigurationError",
+    "DataError",
+    "ConvergenceError",
+    "SingularMatrixError",
+    # Configuration classes
+    "PipelineConfig",
+    "PipelineOptions",
+    "DetectionParams",
+    "BicParams",
+    "CausalParams",
+    "MonteCParams",
+    "OutputParams",
+    "DeSnapParams",
+    # Causality analysis
+    "DCSCalculator",
+    "DCSResult",
+    "TransferEntropyCalculator",
+    "TransferEntropyResult",
+    "GrangerCausalityCalculator",
+    "GrangerCausalityResult",
+    "RelativeDCSCalculator",
+    "RelativeDCSResult",
+    "time_varying_causality",
+    # Model estimation
+    "VAREstimator",
+    "BICSelector",
+    "ModelValidator",
+    "compute_multi_trial_BIC",
+    "compute_BIC_for_model",
+    # Pipeline stages
+    "PipelineOrchestrator",
+    "PipelineResult",
+    "InputValidationStage",
+    "EventDetectionStage",
+    "BorderRemovalStage",
+    "BICSelectionStage",
+    "SnapshotExtractionStage",
+    "ArtifactRemovalStage",
+    "StatisticsComputationStage",
+    "CausalityAnalysisStage",
+    "BootstrapAnalysisStage",
+    "DeSnapAnalysisStage",
+    "OutputPreparationStage",
+    # Simulation functions
+    "generate_signals",
+    "simulate_ar_event",
+    "simulate_ar_event_bootstrap", 
+    "simulate_ar_nonstat_innomean",
+    "generate_ensemble_nonstat_innomean",
+    "generate_var_nonstat",
+    "morlet",
+    # Utility functions
+    "compute_event_statistics",
+    "perform_desnap_analysis",
+    "estimate_residuals",
+    "extract_event_snapshots",
+    "get_residuals",
+    "remove_artifact_trials",
+    "find_peak_locations",
+    "shrink_locations_resample_uniform",
+    "find_best_shrinked_locations",
+]
