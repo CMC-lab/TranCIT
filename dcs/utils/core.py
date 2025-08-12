@@ -110,7 +110,7 @@ def extract_event_windows(
 def compute_event_statistics(
     event_data: np.ndarray, 
     model_order: int, 
-    epsilon: float = 1e-4
+    epsilon: float = 1e-5
 ) -> Dict[str, Union[np.ndarray, Dict]]:
     """
     Compute conditional statistics for VAR time series events.
@@ -185,7 +185,6 @@ def compute_event_statistics(
         for t in range(event_data.shape[1]):
             try:
                 temp = event_data[:, t, :] - stats["mean"][:, t, np.newaxis]
-                
                 stats["Sigma"][t, :, :] = np.dot(temp, temp.T) / event_data.shape[2]
                 
                 Sigma_sub_matrix = stats["Sigma"][t, :nvar, nvar:]
@@ -197,8 +196,7 @@ def compute_event_statistics(
                 else:
                     logger.warning(f"Singular Sigma_past at time {t}, using regularization")
                     Sigma_past_regularized = regularize_if_singular(Sigma_past, epsilon=epsilon)
-                    Sigma_past_inv = np.linalg.inv(Sigma_past_regularized)
-                    stats["OLS"]["At"][t, :, :] = np.dot(Sigma_sub_matrix, Sigma_past_inv)
+                    stats["OLS"]["At"][t, :, :] = np.linalg.solve(Sigma_past_regularized, Sigma_sub_matrix.T).T
                     
             except Exception as e:
                 logger.error(f"Failed to compute statistics at time {t}: {e}")
