@@ -169,14 +169,7 @@ class PipelineOrchestrator(BaseAnalyzer):
             
             # pipeline_state = self._execute_stage("output_preparation", pipeline_state)
             
-            # Create basic results if pipeline stages are not executed
-            if "final_results" not in pipeline_state:
-                pipeline_state["final_results"] = {
-                    "status": "completed",
-                    "message": "Pipeline executed with minimal stages",
-                    "original_signal_shape": original_signal.shape,
-                    "detection_signal_shape": detection_signal.shape,
-                }
+            self._ensure_final_results(pipeline_state, original_signal, detection_signal)
             
             self._log_analysis_complete()
             
