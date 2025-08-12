@@ -95,6 +95,31 @@ class PipelineOrchestrator(BaseAnalyzer):
             "output_preparation": OutputPreparationStage(self.config),
         }
     
+    def analyze(self, data: np.ndarray, **kwargs) -> PipelineResult:
+        """
+        Perform pipeline analysis on the given data.
+        
+        This method implements the BaseAnalyzer interface and serves as a wrapper
+        around the run method for compatibility.
+        
+        Parameters
+        ----------
+        data : np.ndarray
+            Original time series signal (first argument)
+        **kwargs
+            Additional parameters including:
+            - detection_signal: Signal used for event detection
+            
+        Returns
+        -------
+        PipelineResult
+            Pipeline analysis results
+        """
+        if 'detection_signal' not in kwargs:
+            raise ValueError("detection_signal must be provided in kwargs")
+        
+        return self.run(data, kwargs['detection_signal'])
+    
     def run(
         self,
         original_signal: np.ndarray,
