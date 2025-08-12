@@ -243,13 +243,15 @@ def time_varying_causality(
     
     _, nobs, ntrials = event_data.shape
     nvar = stats["OLS"]["At"].shape[1]
-    ref_time = causal_params["ref_time"]
+    ref_time = _normalize_ref_time(causal_params["ref_time"], nobs)
     estim_mode = causal_params["estim_mode"]
     morder = causal_params["morder"]
     diag_flag = causal_params["diag_flag"]
     old_version = causal_params["old_version"]
 
-    logger.info(f"Computing time-varying causality: mode={estim_mode}, morder={morder}, ref_time={ref_time}")
+    logger.info(
+        f"Computing time-varying causality: mode={estim_mode}, morder={morder}, ref_time={ref_time}"
+    )
 
     causality_measures = {
         "TE": np.zeros((nobs, 2)),
@@ -319,9 +321,49 @@ def _validate_time_varying_causality_inputs(
     
     if causal_params["estim_mode"] not in ["OLS", "RLS"]:
         raise ValidationError("estim_mode must be 'OLS' or 'RLS'", "estim_mode", causal_params["estim_mode"])
-    
-    if causal_params["ref_time"] < 0:
-        raise ValidationError("ref_time must be non-negative", "ref_time", causal_params["ref_time"])
+
+    # Validate ref_time format (basic validation without nobs)
+    rt = causal_params["ref_time"]
+    if isinstance(rt, (int, np.integer)):
+        if rt < 0:
+            raise ValidationError("ref_time must be non-negative", "ref_time", rt)
+    else:
+        try:
+            values = list(rt)
+        except Exception:
+            raise ValidationError("ref_time must be an int or an iterable of ints", "ref_time", type(rt))
+        if len(values) == 0:
+            raise ValidationError("ref_time iterable must be non-empty", "ref_time", values)
+        if np.any(np.array(values) < 0):
+            raise ValidationError("ref_time iterable values must be non-negative", "ref_time", values)
+
+
+def _normalize_ref_time(ref_time: object, nobs: int) -> int:
+    """
+    Normalize ref_time to an integer suitable for slicing [:ref_time].
+
+    - If ref_time is an int, return it clamped to [0, nobs].
+    - If ref_time is an iterable (e.g., range/list/ndarray), use max(ref_time),
+      then clamp to [0, nobs].
+    """
+    if isinstance(ref_time, (int, np.integer)):
+        idx = int(ref_time)
+    else:
+        try:
+            values = list(ref_time)
+        except Exception:
+            raise ValidationError("ref_time must be an int or an iterable of ints", "ref_time", type(ref_time))
+        if len(values) == 0:
+            raise ValidationError("ref_time iterable must be non-empty", "ref_time", values)
+        if np.any(np.array(values) < 0):
+            raise ValidationError("ref_time iterable values must be non-negative", "ref_time", values)
+        idx = int(np.max(values))
+
+    if idx < 0:
+        raise ValidationError("ref_time must be non-negative", "ref_time", idx)
+    if idx > nobs:
+        idx = nobs
+    return idx
 
 
 def _compute_causality_at_timepoint(
@@ -378,12 +420,20 @@ def _compute_causality_at_timepoint(
     sigy = residual_cov[0, 0] or np.finfo(float).eps
     sigx = residual_cov[1, 1] or np.finfo(float).eps
 
-    cov_xp = stats["Sigma"][t, 3::2, 3::2]  # X past covariance
-    cov_yp = stats["Sigma"][t, 2::2, 2::2]  # Y past covariance
-    c_xyp = stats["Sigma"][t, 3::2, 2::2]   # X past - Y past cross-covariance
-    c_yxp = stats["Sigma"][t, 2::2, 3::2]   # Y past - X past cross-covariance
-    mean_xp = stats["mean"][3::2, t]         # X past mean
-    mean_yp = stats["mean"][2::2, t]         # Y past mean
+    # Get the correct indices based on model order
+    # For model order m, we have: [current_X, current_Y, past_X_1, past_Y_1, ..., past_X_m, past_Y_m]
+    # So X past indices start at 3 (0-based) and Y past indices start at 2 (0-based)
+    x_past_start = 3
+    y_past_start = 2
+    x_past_indices = slice(x_past_start, x_past_start + 2 * morder, 2)  # 3, 5, 7, ..., 3+2*(morder-1)
+    y_past_indices = slice(y_past_start, y_past_start + 2 * morder, 2)  # 2, 4, 6, ..., 2+2*(morder-1)
+    
+    cov_xp = stats["Sigma"][t, x_past_indices, x_past_indices]  # X past covariance
+    cov_yp = stats["Sigma"][t, y_past_indices, y_past_indices]  # Y past covariance
+    c_xyp = stats["Sigma"][t, x_past_indices, y_past_indices]   # X past - Y past cross-covariance
+    c_yxp = stats["Sigma"][t, y_past_indices, x_past_indices]   # Y past - X past cross-covariance
+    mean_xp = stats["mean"][x_past_indices, t]                  # X past mean
+    mean_yp = stats["mean"][y_past_indices, t]                  # Y past mean
 
     cov_xp_reg = regularize_if_singular(cov_xp)
     cov_yp_reg = regularize_if_singular(cov_yp)
@@ -393,8 +443,8 @@ def _compute_causality_at_timepoint(
         cov_xp_reg, cov_yp_reg, causality_measures
     )
 
-    mean_x_ref = np.mean(stats["mean"][3::2, :ref_time], axis=1)
-    mean_y_ref = np.mean(stats["mean"][2::2, :ref_time], axis=1)
+    mean_x_ref = np.mean(stats["mean"][x_past_indices, :ref_time], axis=1)  # X past mean
+    mean_y_ref = np.mean(stats["mean"][y_past_indices, :ref_time], axis=1)  # Y past mean
     
     cov_xp_ref = (
         cov_xp
@@ -411,8 +461,8 @@ def _compute_causality_at_timepoint(
         + mean_y_ref @ mean_y_ref.T
     )
 
-    ref_cov_xp = np.mean(stats["Sigma"][:ref_time, 3::2, 3::2], axis=0)
-    ref_cov_yp = np.mean(stats["Sigma"][:ref_time, 2::2, 2::2], axis=0)
+    ref_cov_xp = np.mean(stats["Sigma"][:ref_time, x_past_indices, x_past_indices], axis=0)  # X past
+    ref_cov_yp = np.mean(stats["Sigma"][:ref_time, y_past_indices, y_past_indices], axis=0)  # Y past
 
     _compute_causal_strength_measures(
         t, b, c, sigy, sigx, cov_xp, cov_yp, cov_xp_ref, cov_yp_ref,
@@ -559,7 +609,7 @@ def _compute_causal_strength_measures(
         if old_version:
             _compute_old_version_rdcs(
                 t, b, c, sigy, sigx, ref_cov_xp, ref_cov_yp, lagged_vars,
-                stats, ntrials, ref_time, causality_measures
+                stats, ntrials, ref_time, morder, causality_measures
             )
         else:
             _compute_new_version_rdcs(
@@ -577,7 +627,7 @@ def _compute_causal_strength_measures(
         if old_version:
             _compute_old_version_rdcs_diagonal(
                 t, b, c, sigy, sigx, ref_cov_xp, ref_cov_yp, lagged_vars,
-                stats, ntrials, ref_time, causality_measures
+                stats, ntrials, ref_time, morder, causality_measures
             )
         else:
             _compute_new_version_rdcs_diagonal(
@@ -598,16 +648,17 @@ def _compute_old_version_rdcs(
     stats: Dict,
     ntrials: int,
     ref_time: int,
+    morder: int,
     causality_measures: Dict[str, np.ndarray]
 ) -> None:
     """Compute old version of rDCS with full covariance."""
     cov_xp_lag = (
         np.dot(
             lagged_vars
-            - np.mean(stats["mean"][2:, :ref_time], axis=1),
+            - np.mean(stats["mean"][3:, :ref_time], axis=1),  # MATLAB: 3:end
             (
                 lagged_vars
-                - np.mean(stats["mean"][2:, :ref_time], axis=1)
+                - np.mean(stats["mean"][3:, :ref_time], axis=1)
             ).T,
         )
         / ntrials
@@ -616,13 +667,13 @@ def _compute_old_version_rdcs(
     causality_measures["rDCS"][t, 1] = (
         0.5 * np.log((sigy + b.T @ ref_cov_xp @ b) / sigy)
         - 0.5
-        + 0.5 * (sigy + b.T @ cov_xp_lag[1::2, 1::2] @ b) / (sigy + b.T @ ref_cov_xp @ b)
+        + 0.5 * (sigy + b.T @ cov_xp_lag[2::2, 2::2] @ b) / (sigy + b.T @ ref_cov_xp @ b)  # MATLAB: 2:2:end
     )
 
     causality_measures["rDCS"][t, 0] = (
         (0.5 * np.log((sigx + c.T @ ref_cov_yp @ c) / sigx))
         - 0.5
-        + (0.5 * (sigx + c.T @ cov_xp_lag[0::2, 0::2] @ c) / (sigx + c.T @ ref_cov_yp @ c))
+        + (0.5 * (sigx + c.T @ cov_xp_lag[1::2, 1::2] @ c) / (sigx + c.T @ ref_cov_yp @ c))  # MATLAB: 1:2:end-1
     )
 
 
@@ -664,16 +715,17 @@ def _compute_old_version_rdcs_diagonal(
     stats: Dict,
     ntrials: int,
     ref_time: int,
+    morder: int,
     causality_measures: Dict[str, np.ndarray]
 ) -> None:
     """Compute old version of rDCS with diagonal covariance."""
     cov_xp_lag = (
         np.dot(
             lagged_vars
-            - np.mean(stats["mean"][2:, :ref_time], axis=1)[:, np.newaxis],
+            - np.mean(stats["mean"][3:, :ref_time], axis=1)[:, np.newaxis],  # MATLAB: 3:end
             (
                 lagged_vars
-                - np.mean(stats["mean"][2:, :ref_time], axis=1)[
+                - np.mean(stats["mean"][3:, :ref_time], axis=1)[
                     :, np.newaxis
                 ]
             ).T,
@@ -684,13 +736,13 @@ def _compute_old_version_rdcs_diagonal(
     causality_measures["rDCS"][t, 1] = (
         (0.5 * np.log((sigy + b.T @ np.diag(np.diag(ref_cov_xp)) @ b) / sigy))
         - 0.5
-        + (0.5 * (sigy + b.T @ np.diag(np.diag(cov_xp_lag[1::2, 1::2])) @ b) / (sigy + b.T @ np.diag(np.diag(ref_cov_xp)) @ b))
+        + (0.5 * (sigy + b.T @ np.diag(np.diag(cov_xp_lag[2::2, 2::2])) @ b) / (sigy + b.T @ np.diag(np.diag(ref_cov_xp)) @ b))  # MATLAB: 2:2:end
     )
     
     causality_measures["rDCS"][t, 0] = (
         (0.5 * np.log((sigx + c.T @ np.diag(np.diag(ref_cov_yp)) @ c) / sigx))
         - 0.5
-        + (0.5 * (sigx + c.T @ np.diag(np.diag(cov_xp_lag[0::2, 0::2])) @ c) / (sigx + c.T @ np.diag(np.diag(ref_cov_yp)) @ c))
+        + (0.5 * (sigx + c.T @ np.diag(np.diag(cov_xp_lag[1::2, 1::2])) @ c) / (sigx + c.T @ np.diag(np.diag(ref_cov_yp)) @ c))  # MATLAB: 1:2:end-1
     )
 
 

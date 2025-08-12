@@ -66,11 +66,11 @@ from dcs.causality.rdcs import RelativeDCSCalculator, RelativeDCSResult, time_va
 
 # Model estimation imports
 from dcs.models.var_estimation import VAREstimator
-from dcs.models.bic_selection import BICSelector, compute_multi_trial_BIC, compute_BIC_for_model
+from dcs.models.bic_selection import BICSelector
 from dcs.models.model_validation import ModelValidator
 
 # Pipeline imports
-from dcs.pipeline.orchestrator import PipelineOrchestrator, PipelineResult, snapshot_detect_analysis_pipeline
+from dcs.pipeline.orchestrator import PipelineOrchestrator, PipelineResult
 from dcs.pipeline.stages import (
     InputValidationStage,
     EventDetectionStage,
@@ -151,8 +151,7 @@ __all__ = [
     "VAREstimator",
     "BICSelector",
     "ModelValidator",
-    "compute_multi_trial_BIC",
-    "compute_BIC_for_model",
+
     # Pipeline stages
     "PipelineOrchestrator",
     "PipelineResult",
