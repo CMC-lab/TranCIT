@@ -238,7 +238,7 @@ class ArtifactRemovalStage(PipelineStage):
         
         if self.config.detection.remove_artif:
             try:
-                threshold = -15000
+                threshold = self.config.detection.remove_artif_threshold
                 logger.info(f"Removing artifact trials below threshold {threshold}...")
                 
                 cleaned_snapshots, cleaned_locs = remove_artifact_trials(
@@ -322,6 +322,7 @@ class CausalityAnalysisStage(PipelineStage):
             causal_output = None
         
         self._log_stage_complete("causality analysis")
+        
         return {"causal_output": causal_output}
 
 
