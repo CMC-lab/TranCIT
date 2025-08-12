@@ -197,7 +197,8 @@ def compute_event_statistics(
                 else:
                     logger.warning(f"Singular Sigma_past at time {t}, using regularization")
                     Sigma_past_regularized = regularize_if_singular(Sigma_past, epsilon=epsilon)
-                    stats["OLS"]["At"][t, :, :] = np.dot(Sigma_sub_matrix.T, Sigma_past_regularized)
+                    Sigma_past_inv = np.linalg.inv(Sigma_past_regularized)
+                    stats["OLS"]["At"][t, :, :] = np.dot(Sigma_sub_matrix, Sigma_past_inv)
                     
             except Exception as e:
                 logger.error(f"Failed to compute statistics at time {t}: {e}")
