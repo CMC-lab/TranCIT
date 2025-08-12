@@ -9,7 +9,8 @@ from typing import Dict, Tuple
 
 import numpy as np
 
-from ..utils import compute_event_statistics
+from dcs.utils import compute_event_statistics
+from dcs import PipelineConfig
 
 logger = logging.getLogger(__name__)
 
@@ -22,29 +23,26 @@ class BICSelector:
     model orders for Vector Autoregression (VAR) models.
     """
     
-    def __init__(self, max_order: int, mode: str = "biased"):
+    def __init__(self, config: PipelineConfig):
         """
         Initialize BIC selector.
         
         Parameters
         ----------
-        max_order : int
-            Maximum model order to evaluate
-        mode : str
-            BIC mode: 'biased' or 'debiased'
+        config : PipelineConfig
+            Pipeline configuration
         """
-        self.max_order = max_order
-        self.mode = mode
+        self.config = config
         self._validate_parameters()
     
     def _validate_parameters(self) -> None:
         """Validate initialization parameters."""
-        if self.max_order <= 0:
+        if self.config.bic.momax <= 0:
             raise ValueError("max_order must be positive")
-        if self.mode not in ["biased", "debiased"]:
+        if self.config.bic.mode not in ["biased", "debiased"]:
             raise ValueError("mode must be 'biased' or 'debiased'")
     
-    def compute_multi_trial_BIC(self, event_data_max_order: np.ndarray, bic_params: Dict) -> Dict:
+    def _compute_multi_trial_bic(self, event_data_max_order: np.ndarray) -> Dict:
         """
         Calculate Bayesian Information Criterion (BIC) for multiple model orders across trial data.
 
@@ -75,7 +73,8 @@ class BICSelector:
         ValueError
             If input data shape is inconsistent with expected dimensions.
         """
-        max_order = bic_params["Params"]["BIC"]["momax"]
+        max_order = self.config.bic.momax
+        print(f"max_order: {max_order}")
         total_var_lag, n_observations, n_trials = event_data_max_order.shape
         n_vars = total_var_lag // (max_order + 1)
 
@@ -96,8 +95,8 @@ class BICSelector:
             logger.info(f"Calculating BIC for model order: {model_order}")
             data_subset = event_data_max_order[: n_vars * (model_order + 1), :, :]
 
-            log_likelihood, sum_log_det_hessian = self._compute_BIC_for_model(
-                data_subset, model_order, bic_params
+            log_likelihood, sum_log_det_hessian = self._compute_bic_for_model(
+                data_subset, model_order, self.config
             )
             bic_outputs["log_likelihood"][model_order - 1] = log_likelihood
             bic_outputs["sum_log_det_hessian"][model_order - 1] = sum_log_det_hessian
@@ -130,8 +129,8 @@ class BICSelector:
 
         return bic_outputs
     
-    def _compute_BIC_for_model(
-        self, event_data: np.ndarray, model_order: int, bic_params: Dict
+    def _compute_bic_for_model(
+        self, event_data: np.ndarray, model_order: int, config: PipelineConfig
     ) -> Tuple[float, float]:
         """
         Compute log-likelihood and sum of log determinant of Hessian for a specific model order.
@@ -164,7 +163,7 @@ class BICSelector:
         total_var_lag, n_observations, n_trials = event_data.shape
         n_vars = total_var_lag // (model_order + 1)
 
-        mode = bic_params["Params"]["BIC"]["mode"]
+        mode = config.bic.mode
         if mode not in ["biased"]:
             raise ValueError(f"Unsupported mode '{mode}'; only 'biased' is implemented.")
 
@@ -176,7 +175,7 @@ class BICSelector:
         log_det_hessian = np.zeros(n_observations)
         residual_determinants = np.zeros(n_observations)
 
-        estim_mode = bic_params["EstimMode"]
+        estim_mode = config.bic.estim_mode
         if estim_mode not in ["OLS", "RLS"]:
             raise ValueError(f"Invalid EstimMode '{estim_mode}'; must be 'OLS' or 'RLS'.")
 

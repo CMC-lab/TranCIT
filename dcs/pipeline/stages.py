@@ -154,16 +154,6 @@ class BICSelectionStage(PipelineStage):
             from dcs.models.bic_selection import BICSelector
             
             try:
-                bic_params = {
-                    "Params": {
-                        "BIC": {
-                            "momax": self.config.bic.momax,
-                            "mode": self.config.bic.mode
-                        }
-                    },
-                    "EstimMode": "OLS"
-                }
-                
                 event_snapshots_momax = extract_event_snapshots(
                     original_signal,
                     locs,
@@ -173,8 +163,8 @@ class BICSelectionStage(PipelineStage):
                     self.config.detection.l_extract,
                 )
                 
-                bic_selector = BICSelector(event_snapshots_momax, bic_params)
-                bic_outputs = bic_selector.compute_bic()
+                bic_selector = BICSelector(self.config)
+                bic_outputs = bic_selector._compute_multi_trial_bic(event_snapshots_momax)
                 
                 if 'mobic' in bic_outputs and bic_outputs['mobic'] is not None and len(bic_outputs['mobic']) > 1:
                     selected_morder = bic_outputs['mobic'][1]
@@ -194,6 +184,7 @@ class BICSelectionStage(PipelineStage):
             logger.info("Skipping BIC model selection.")
             bic_outputs = None
 
+        self.config.bic.morder = morder
         self._log_stage_complete("BIC selection")
         return {"bic_outputs": bic_outputs, "morder": morder}
 

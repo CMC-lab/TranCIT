@@ -37,9 +37,7 @@ Example
 
 from .var_estimation import VAREstimator
 from .bic_selection import (
-    BICSelector, 
-    compute_multi_trial_BIC, 
-    compute_BIC_for_model,
+    BICSelector
 )
 from .model_selection import select_model_order
 from .model_validation import ModelValidator
@@ -48,7 +46,5 @@ __all__ = [
     "VAREstimator",
     "BICSelector", 
     "ModelValidator",
-    "compute_multi_trial_BIC",
-    "compute_BIC_for_model",
     "select_model_order",
 ] 
