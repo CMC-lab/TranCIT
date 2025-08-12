@@ -94,6 +94,7 @@ class BicParams:
     momax: Optional[int] = None
     tau: Optional[int] = None
     mode: Optional[str] = None
+    estim_mode: Optional[str] = None
 
 
 @dataclass
