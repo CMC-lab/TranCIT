@@ -365,6 +365,7 @@ class BootstrapAnalysisStage(PipelineStage):
             }
             
             for n_btsp in range(1, self.config.monte_carlo.n_btsp + 1):
+                logger.info(f"Bootstrap trial {n_btsp} of {self.config.monte_carlo.n_btsp}")
                 try:
                     btsp_snapshots = simulate_ar_event_bootstrap(
                         simobj_dict_bootstrap, event_snapshots, event_stats, residuals_for_btsp
