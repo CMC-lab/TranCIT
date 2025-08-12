@@ -101,8 +101,8 @@ def remove_artifact_trials(
 def regularize_if_singular(
     matrix: np.ndarray, 
     samples: Optional[int] = None, 
-    epsilon: float = 1e-6, 
-    threshold: float = 1e-6
+    epsilon: float = 1e-4, 
+    threshold: float = 1e-4
 ) -> np.ndarray:
     """
     Check if a matrix is singular and regularize it by adding epsilon to the diagonal if needed.
