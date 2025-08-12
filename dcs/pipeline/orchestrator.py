@@ -208,3 +208,13 @@ class PipelineOrchestrator(BaseAnalyzer):
         
         if data.shape[0] != 2:
             raise ValidationError("Input signals must be bivariate (n_vars=2)", "n_vars", data.shape[0]) 
+    
+    def _ensure_final_results(self, pipeline_state: Dict[str, Any], original_signal: np.ndarray, detection_signal: np.ndarray) -> None:
+        """Ensure final results are present in the pipeline state."""
+        if "final_results" not in pipeline_state:
+            pipeline_state["final_results"] = {
+                "status": "completed",
+                "message": "Pipeline executed with minimal stages",
+                "original_signal_shape": original_signal.shape,
+                "detection_signal_shape": detection_signal.shape,
+                }
