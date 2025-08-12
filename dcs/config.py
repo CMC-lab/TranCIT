@@ -71,6 +71,7 @@ class DetectionParams:
     shrink_flag: bool = False
     locs: Optional[np.ndarray] = None
     remove_artif: bool = False
+    remove_artif_threshold: float = -15000
 
 
 @dataclass
