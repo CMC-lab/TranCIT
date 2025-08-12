@@ -322,7 +322,6 @@ class CausalityAnalysisStage(PipelineStage):
             causal_output = None
         
         self._log_stage_complete("causality analysis")
-        
         return {"causal_output": causal_output}
 
 

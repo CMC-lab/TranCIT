@@ -107,7 +107,7 @@ def extract_event_windows(
     return event_windows
 
 
-def compute_conditional_event_statistics(
+def compute_event_statistics(
     event_data: np.ndarray, 
     model_order: int, 
     epsilon: float = 1e-4
@@ -188,8 +188,6 @@ def compute_conditional_event_statistics(
                 
                 stats["Sigma"][t, :, :] = np.dot(temp, temp.T) / event_data.shape[2]
                 
-                stats["Sigma"][t, :, :] = regularize_if_singular(stats["Sigma"][t, :, :], epsilon=epsilon)
-                
                 Sigma_sub_matrix = stats["Sigma"][t, :nvar, nvar:]
                 Sigma_past = stats["Sigma"][t, nvar:, nvar:]
                 
@@ -197,16 +195,14 @@ def compute_conditional_event_statistics(
                     Sigma_past_inv = np.linalg.inv(Sigma_past)
                     stats["OLS"]["At"][t, :, :] = np.dot(Sigma_sub_matrix, Sigma_past_inv)
                 else:
-                    logger.warning(f"Singular Sigma_past at time {t}, using pseudoinverse")
-                    Sigma_past_inv = np.linalg.pinv(Sigma_past)
-                    stats["OLS"]["At"][t, :, :] = np.dot(Sigma_sub_matrix.T, Sigma_past_inv)
+                    logger.warning(f"Singular Sigma_past at time {t}, using regularization")
+                    Sigma_past_regularized = regularize_if_singular(Sigma_past, epsilon=epsilon)
+                    stats["OLS"]["At"][t, :, :] = np.dot(Sigma_sub_matrix.T, Sigma_past_regularized)
                     
             except Exception as e:
                 logger.error(f"Failed to compute statistics at time {t}: {e}")
                 raise ComputationError(f"Statistics computation failed at time {t}", "statistics_computation", t)
 
-        stats["morder"] = model_order
-        
         stats["OLS"]["bt"], stats["OLS"]["Sigma_Et"], stats["OLS"]["sigma_Et"] = estimate_residuals(stats)
         
         logger.info(f"Successfully computed statistics for {event_data.shape[1]} time points")
@@ -321,43 +317,6 @@ def extract_event_snapshots(
     except Exception as e:
         logger.error(f"Snapshot extraction failed: {e}")
         raise ComputationError(f"Snapshot extraction failed: {e}", "snapshot_extraction", None)
-
-
-def compute_event_statistics(event_data: np.ndarray, model_order: int) -> Dict[str, Union[np.ndarray, Dict]]:
-    """
-    Compute event statistics for VAR time series data.
-
-    This function computes comprehensive statistics for VAR time series events,
-    including mean, covariance, and OLS coefficients. It's a wrapper around
-    compute_conditional_event_statistics with additional validation.
-
-    Parameters
-    ----------
-    event_data : np.ndarray
-        Event data of shape (nvar * (model_order + 1), time_points, trials).
-    model_order : int
-        Model order for the VAR process.
-
-    Returns
-    -------
-    Dict[str, Union[np.ndarray, Dict]]
-        Dictionary containing event statistics (see compute_conditional_event_statistics).
-
-    Raises
-    ------
-    ValidationError
-        If input parameters are invalid.
-    ComputationError
-        If computation fails due to numerical issues.
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> event_data = np.random.randn(6, 50, 10)  # (nvar * (morder + 1), time, trials)
-    >>> stats = compute_event_statistics(event_data, model_order=2)
-    >>> print(f"Statistics keys: {list(stats.keys())}")
-    """
-    return compute_conditional_event_statistics(event_data, model_order)
 
 
 def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray, Dict]]:
