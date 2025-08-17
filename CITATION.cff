@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+title: "Dynamic Causal Strength (DCS): A Python package for transient neural causal inference"
+message: "If you use this software, please cite it as below."
+authors:
+  - given-names: Salar
+    family-names: Nouri
+    email: salr.nouri@gmail.com
+    orcid: "https://orcid.org/0000-0002-8846-9318"
+    affiliation: "School of Electrical and Computer Engineering, College of Engineering, University of Tehran, Tehran, Iran"
+  - given-names: Kaidi
+    family-names: Shao
+    orcid: "https://orcid.org/0000-0002-3027-0090"
+    affiliation: "International Center for Primate Brain Research (ICPBR), Center for Excellence in Brain Science and Intelligence Technology (CEBSIT), Chinese Academy of Sciences (CAS), Shanghai, China"
+  - given-names: Shervin
+    family-names: Safavi
+    orcid: "https://orcid.org/0000-0002-2868-530X"
+    affiliation: "Computational Neuroscience, Department of Child and Adolescent Psychiatry, Faculty of Medicine, Technische Universität Dresden, Dresden 01307, Germany"
+repository-code: "https://github.com/CMC-lab/dcs"
+url: "https://dynamic-causal-strength.readthedocs.io"
+license: BSD-2-Clause
+version: 0.1.0
+date-released: 2025-08-17
+keywords:
+  - causality
+  - time-series
+  - neuroscience
+  - statistics
+  - causal-inference
+  - dynamic-causal-strength
+  - transfer-entropy
+  - granger-causality
+  - transient-neural-events
+  - local-field-potential
+  - electroencephalogram
+  - magnetoencephalography 
