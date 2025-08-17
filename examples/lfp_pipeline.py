@@ -1,71 +1,79 @@
 import os
-from configparser import ConfigParser
-from typing import Optional
 
 import numpy as np
 import scipy.io as sio
-from scipy.signal import filtfilt, firwin
+from dcs import PipelineOrchestrator
+from dcs.config import (BicParams, CausalParams, DeSnapParams, DetectionParams,
+                        MonteCParams, OutputParams, PipelineConfig,
+                        PipelineOptions)
+from scipy.signal import firwin, lfilter
 
-try:
-    from dcs import snapshot_detect_analysis_pipeline
-    from dcs.config import (
-        BicParams,
-        CausalParams,
-        DetectionParams,
-        MonteCParams,
-        OutputParams,
-        PipelineConfig,
-        PipelineOptions,
-    )
-except ImportError as e:
-    print(f"Error importing dcs package: {e}")
-    print("Ensure the package is installed and configured correctly.")
-    exit()
 
-# --- Define Pipeline Configuration ---
-# Using the dataclasses defined in dcs.config or dcs.pipeline
-pipeline_config = PipelineConfig(
+def _remove_boundary_locations(y, locs, L_start, L_event):
+    """Remove boundary locations that would cause out-of-bounds extraction."""
+    locs = locs[locs >= L_start]
+    locs = locs[locs <= len(y) - L_event]
+    return locs
+
+
+config = PipelineConfig(
     options=PipelineOptions(
-        detection=True,  # Let the pipeline handle detection
-        bic=True,  # Enable BIC
-        causal_analysis=True,  # Enable Causality
-        bootstrap=True,  # Enable Bootstrap
-        save_flag=False,  # Don't save from pipeline in this example
+        detection=True,        # Perform detection in pipeline
+        bic=True,              # Enable BIC model selection
+        causal_analysis=True,  # Enable Causality analysis
+        bootstrap=False,       # Enable bootstrapping
+        debiased_stats=False,   # Disable DeSnap in this example
+        save_flag=False,         # Set True to align
     ),
     detection=DetectionParams(
-        thres_ratio=5,  # Threshold for detection signal
-        align_type="peak",  # Align detected events to signal peak
-        l_extract=401,  # Length of snapshot window to extract
-        l_start=200,  # Start window 200 samples before alignment point
-        shrink_flag=False,  # Not used for peak alignment
-        locs=None,  # Let pipeline find locs since detection=True
-        remove_artif=False,  # Disable artifact rejection for now
+        l_start=200,           # Start offset for snapshot extraction
+        l_extract=401,         # Length of extracted snapshots
+        thres_ratio=5.0,       # Threshold ratio for event detection
+        align_type='peak',     # Align to peaks
+        locs=np.array([]) if True else None,  # Conditional on options.detection
+        shrink_flag=False,     # Disable shrinking
+        remove_artif=False     # Disable artifact removal
     ),
     bic=BicParams(
-        morder=7,  # Default/fallback model order
-        momax=10,  # Max order for BIC check
-        tau=1,  # Lag step for BIC snapshot extraction
-        mode="biased",  # BIC mode
+        morder=7,              # Default model order
+        momax=10,              # Max order for BIC
+        tau=1,                 # Lag step for snapshot extraction in BIC
+        mode='biased',         # BIC mode
+        estim_mode='OLS'       # Ordinary Least Squares estimation
     ),
     causal=CausalParams(
-        old_version=False,
-        diag_flag=False,
-        ref_time=range(
-            1, 101
-        ),  # Example: Middle of pre-alignment window (if L_start=200)
-        estim_mode="OLS",
+        old_version=False,     # Use new version of rDCS calculation
+        diag_flag=False,        # Disable diagonal covariance approximation
+        ref_time=range(1, 201),  # Reference time range (middle of pre-alignment window)
+        estim_mode='OLS'       # Ordinary Least Squares estimation
     ),
     output=OutputParams(
-        file_keyword="example_lfp_run"  # Base keyword if saving were enabled
+        file_keyword="example_lfp_run",  # Base keyword for output files
+        save_path=""  # Empty path for this example
     ),
     monte_carlo=MonteCParams(
-        n_btsp=100  # Number of bootstrap samples if bootstrap=True
+        n_btsp=100  # Number of bootstrap samples
     ),
+    desnap=DeSnapParams(
+        detection_signal=None,
+        original_signal=None,
+        event_stats=None,
+        morder=None,
+        tau=None,
+        l_start=None,
+        l_extract=None,
+        maxStdRatio=7.0,
+        d0_max=None,
+        d0=0.0,
+        N_d=50,
+    )
 )
 
-# --- Load Data ---
-event_rdcs_dir = ""
-sess_name = "example_session"
+print("--- Pipeline Configuration ---")
+print(config)
+
+event_rdcs_dir = "/Users/sali/Documents/Projects/cmcLab/repos/rtdac/localdata/causal_analysis/event_rdcs/"
+sess_name = "vvp01_2006-4-9_18-43-47"
 ca3_mat_path = os.path.join(event_rdcs_dir, f"{sess_name}_CA3.mat")
 ca1_mat_path = os.path.join(event_rdcs_dir, f"{sess_name}_CA1.mat")
 
@@ -84,7 +92,7 @@ except KeyError:
 print(f"Loading CA1 data from: {ca1_mat_path}")
 try:
     ca1_data = sio.loadmat(ca1_mat_path)
-    ca1_lfp = ca1_data["CA1_lfp"]  # Assuming key is 'CA1_lfp'
+    ca1_lfp = ca1_data["CA1_lfp"]
     print(f"Loaded CA1 LFP shape: {ca1_lfp.shape}")
 except FileNotFoundError:
     print(f"Error: CA1 file not found at {ca1_mat_path}")
@@ -93,88 +101,67 @@ except KeyError:
     print(f"Error: Key 'CA1_lfp' not found in {ca1_mat_path}")
     exit()
 
-# --- Channel Setup ---
-ca1_channels = np.arange(0, 32)  # Example: Channels 0-31
-ca3_channels = np.arange(0, 8)  # Example: Channels 0-7
-print(f"Processing CA1 channels: {ca1_channels}")
-print(f"Processing CA3 channels: {ca3_channels}")
+ca1_channels = np.arange(0, 4)
+ca3_channels = np.arange(0, 4)
 
-# --- Filtering Setup ---
-Fs = 1252  # Example: Sampling frequency in Hz
-passband = [140, 230]  # Example: Passband in Hz
-filter_order = 50  # Example: Filter order (even number needed for firwin type 1)
+filter_order = 49
+B = firwin(
+    numtaps=filter_order + 1,
+    cutoff=config.passband,
+    pass_zero=False,
+    window='hamming',
+    fs=config.sampling_rate * 1.0
+)
 
-# Design the FIR filter coefficients
-try:
-    filter_coeffs = firwin(
-        filter_order + 1, np.array(passband) / (0.5 * Fs), pass_zero=False
-    )
-    print(
-        f"Designed FIR filter (Order: {filter_order}, Passband: {passband} Hz, Fs: {Fs} Hz)"
-    )
-except NameError:
-    print("Error: 'Fs' or 'passband' not defined. Cannot design filter.")
-    exit()
-except Exception as e:
-    print(f"Error designing FIR filter: {e}")
-    exit()
+delay = filter_order // 2
 
-# --- Process Channel Pairs ---
-results_all_pairs = {}  # Dictionary to store results per pair
-n_chpair_total = len(ca3_channels) * len(ca1_channels)
-n_chpair_count = 0
+num_total_channel_pairs = len(ca3_channels) * len(ca1_channels)
+print(f"The total number of channel pairs: {num_total_channel_pairs}")
 
-print(f"\nStarting analysis for {n_chpair_total} channel pairs...")
+num_channel_pairs_processed = 0
+
+orchestrator = PipelineOrchestrator(config)
 
 for i in ca3_channels:
     for j in ca1_channels:
-        n_chpair_count += 1
-        pair_key = f"CA3_{i}-CA1_{j}"
-        print(
-            f"\n--- Processing Pair {n_chpair_count}/{n_chpair_total}: {pair_key} ---"
-        )
-
-        # 1. Prepare bivariate signal for this pair
-        if i >= ca3_lfp.shape[1] or j >= ca1_lfp.shape[1]:
-            print(
-                f"Warning: Channel index out of bounds for pair ({i}, {j}). Skipping."
-            )
-            continue
-        y = np.vstack((ca3_lfp[:, i], ca1_lfp[:, j]))  # Shape (2, L_signal)
-
-        # 2. Filter the data (zero-phase)
-        # Using filtfilt avoids phase distortion and manual delay compensation
-        try:
-            yf = filtfilt(filter_coeffs, 1.0, y, axis=1)
-        except Exception as e:
-            print(f"Error filtering data for pair {pair_key}: {e}. Skipping.")
-            continue
-
-        # 3. Run the pipeline
-        # Pass the *filtered* data as BOTH original_signal and detection_signal
-        # The pipeline will internally handle detection based on detection_signal[1,:]
-        # (or adjust which channel to use for detection if needed via config or modification)
-        print("Running snapshot_detect_analysis_pipeline...")
-        try:
-            # Assume detection should happen on the second channel (CA1)
-            # If detection needed on CA3, swap order in detection_signal or adjust pipeline logic
-            detection_signal_input = np.vstack(
-                (yf[0, :], yf[1, :])
-            )  # Example: Detect on CA1 (index 1)
-
-            snapshot_output, _, _ = snapshot_detect_analysis_pipeline(
-                original_signal=yf,  # Use filtered data for analysis
-                detection_signal=detection_signal_input,  # Use filtered data for detection
-                config=pipeline_config,  # Pass the configured object
-            )
-            print(f"Pipeline finished for {pair_key}.")
-            # Store results for this pair
-            results_all_pairs[pair_key] = snapshot_output
-
-        except (ValueError, TypeError, KeyError) as e:
-            print(f"Pipeline Error for pair {pair_key}: {e}. Skipping.")
-        except Exception as e:
-            print(f"Unexpected Pipeline Error for pair {pair_key}: {e}. Skipping.")
+        print(f"Processing: {num_channel_pairs_processed}/{num_total_channel_pairs}")
+        
+        y = np.vstack((ca3_lfp[:, i], ca1_lfp[:, j]))
+        
+        yf = lfilter(B, 1, y.squeeze(), axis=-1)
+        yf = yf[..., delay:]
+        
+        temp_idx = np.where(yf[1, :] >= np.mean(yf[1, :]) + config.detection.thres_ratio * np.std(yf[1, :]))[0]
+        temp_idx = _remove_boundary_locations(yf[1, :], temp_idx, config.detection.l_start, config.detection.l_extract)
+        
+        yf_labels = np.zeros(yf[0, :].shape)
+        
+        for idx in temp_idx:
+            start_idx = idx - config.detection.l_start
+            end_idx = start_idx + config.detection.l_extract
+            
+            if start_idx >= 0 and end_idx <= len(yf_labels):
+                yf_labels[start_idx:end_idx] = np.ones(config.detection.l_extract)
+        
+        for channel in ['ca3', 'ca1']:
+            aligned_signal = yf[0 if channel == 'ca3' else 1, :] * yf_labels
+            
+            config.output.file_keyword = os.path.join(config.output.save_path,
+                                                f"ca3_ca1_{sess_name}_chpair_{num_channel_pairs_processed}_{channel}_{config.detection.align_type}")
+            
+            try:
+                detection_signal_input = np.vstack((aligned_signal, aligned_signal))
+                
+                result = orchestrator.run(
+                    original_signal=yf,
+                    detection_signal=detection_signal_input
+                )
+                print(f"Pipeline completed for {channel} channel in pair {num_channel_pairs_processed}")
+                
+            except Exception as e:
+                print(f"Pipeline Error for {channel} channel in pair {num_channel_pairs_processed}: {e}")
+        
+        num_channel_pairs_processed += 1
+        print(f"Completed {num_channel_pairs_processed}/{num_total_channel_pairs} channel pairs")
 
 print(f"\n--- Analysis Complete ---")
-print(f"Processed {len(results_all_pairs)} out of {n_chpair_total} channel pairs.")
