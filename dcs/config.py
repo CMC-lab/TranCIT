@@ -187,7 +187,7 @@ class DeSnapParams:
 
     detection_signal: np.ndarray
     original_signal: np.ndarray
-    Yt_stats_cond: Dict
+    event_stats: Dict
     morder: int
     tau: int
     l_start: int
