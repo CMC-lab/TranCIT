@@ -151,21 +151,21 @@ class PipelineOrchestrator(BaseAnalyzer):
             }
             
             pipeline_state = self._execute_stage("input_validation", pipeline_state)
-            # pipeline_state = self._execute_stage("event_detection", pipeline_state)
-            # pipeline_state = self._execute_stage("border_removal", pipeline_state)
-            # pipeline_state = self._execute_stage("bic_selection", pipeline_state)
-            # pipeline_state = self._execute_stage("snapshot_extraction", pipeline_state)
-            # pipeline_state = self._execute_stage("artifact_removal", pipeline_state)
-            # pipeline_state = self._execute_stage("statistics_computation", pipeline_state)
+            pipeline_state = self._execute_stage("event_detection", pipeline_state)
+            pipeline_state = self._execute_stage("border_removal", pipeline_state)
+            pipeline_state = self._execute_stage("bic_selection", pipeline_state)
+            pipeline_state = self._execute_stage("snapshot_extraction", pipeline_state)
+            pipeline_state = self._execute_stage("artifact_removal", pipeline_state)
+            pipeline_state = self._execute_stage("statistics_computation", pipeline_state)
             
-            # if self.config.options.causal_analysis:
-            #     pipeline_state = self._execute_stage("causality_analysis", pipeline_state)
+            if self.config.options.causal_analysis:
+                pipeline_state = self._execute_stage("causality_analysis", pipeline_state)
             
-            # if self.config.options.bootstrap:
-            #     pipeline_state = self._execute_stage("bootstrap_analysis", pipeline_state)
+            if self.config.options.bootstrap:
+                pipeline_state = self._execute_stage("bootstrap_analysis", pipeline_state)
             
-            # if self.config.options.debiased_stats:
-            #     pipeline_state = self._execute_stage("desnap_analysis", pipeline_state)
+            if self.config.options.debiased_stats:
+                pipeline_state = self._execute_stage("desnap_analysis", pipeline_state)
             
             # pipeline_state = self._execute_stage("output_preparation", pipeline_state)
             
