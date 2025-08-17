@@ -63,7 +63,6 @@ from .core import (
     perform_desnap_analysis,
     extract_event_snapshots,
     extract_event_windows,
-    compute_conditional_event_statistics,
 )
 
 # Preprocessing utilities - Data cleaning and validation
@@ -113,7 +112,6 @@ _public_api = [
     "compute_event_statistics",
     "perform_desnap_analysis",
     "extract_event_windows",
-    "compute_conditional_event_statistics",
     
     # Preprocessing
     "remove_artifact_trials",

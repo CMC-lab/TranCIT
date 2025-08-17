@@ -341,7 +341,7 @@ def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray,
             - 'd_bin_bar': Mean D values for each bin
             - 'mean_Yt_cond': Mean Yt events per bin of D
             - 'mu_D': Estimated unconditional mean of D
-            - 'Yt_stats_uncond': Unconditional statistics
+            - 'event_stats_uncond': Unconditional statistics
             - 'cov_pt': Covariance related to p_t
             - 'c': Covariance adjustment factor
 
@@ -393,16 +393,14 @@ def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray,
         d_bin_edges = np.arange(inputs.d0, inputs.d0_max + bin_step + 1e-12, bin_step)
         num_bins = len(d_bin_edges)
         
-        d_bin_mean_D = np.full(num_bins, np.nan)
+        d_bin_mean_detection = np.full(num_bins, np.nan)
         num_input_channels = inputs.original_signal.shape[0]
         num_snapshot_vars = num_input_channels * (inputs.morder + 1)
         mean_events_cond_binned = np.full((num_bins, num_snapshot_vars, inputs.l_extract), np.nan)
         
         DeSnap_results = {
             'loc_size': np.full(num_bins, np.nan),
-            'Yt_stats_cond': inputs.Yt_stats_cond,
-            'D_values': inputs.detection_signal - inputs.d0,
-            'bin_centers': (d_bin_edges[:-1] + d_bin_edges[1:]) / 2,
+            'event_stats': inputs.event_stats,
         }
         
         logger.info("Processing bins of conditioning variable D ...")
@@ -411,12 +409,12 @@ def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray,
         for n, current_bin_lolim in enumerate(d_bin_edges):
             mask = (inputs.detection_signal >= current_bin_lolim) & (inputs.detection_signal < current_bin_uplim)
             
-            d_bin_mean_D[n] = np.mean(inputs.detection_signal[mask])
+            d_bin_mean_detection[n] = np.mean(inputs.detection_signal[mask])
             temp_loc = np.where(mask)[0]
             
             valid_locs = temp_loc.copy()
-            valid_locs = valid_locs[inputs.original_signal.shape[0] - valid_locs >= inputs.l_extract - inputs.l_start]
-            valid_locs = valid_locs[valid_locs - inputs.l_start - (inputs.morder * inputs.tau) >= 0]
+            # valid_locs = valid_locs[inputs.original_signal.shape[0] - valid_locs >= inputs.l_extract - inputs.l_start]
+            # valid_locs = valid_locs[valid_locs - inputs.l_start - (inputs.morder * inputs.tau) >= 0]
             
             DeSnap_results['loc_size'][n] = len(valid_locs)
             
@@ -439,10 +437,10 @@ def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray,
         logger.info("Performing first linear regression for p_t and q_t...")
         try:
             from .helpers import compute_multi_variable_linear_regression
-            p_t, q_t = compute_multi_variable_linear_regression(d_bin_mean_D, mean_events_cond_binned)
+            p_t, q_t = compute_multi_variable_linear_regression(d_bin_mean_detection, mean_events_cond_binned)
             DeSnap_results["p_t"] = p_t
             DeSnap_results["q_t"] = q_t
-            DeSnap_results["d_bin_bar"] = d_bin_mean_D
+            DeSnap_results["d_bin_bar"] = d_bin_mean_detection
             DeSnap_results["mean_Yt_cond"] = mean_events_cond_binned
         except Exception as e:
             logger.error(f"First linear regression failed: {e}")
@@ -465,8 +463,8 @@ def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray,
             logger.error(f"Second linear regression failed: {e}")
             raise ComputationError(f"Second linear regression failed: {e}", "linear_regression_2", None)
         
-        DeSnap_results['Yt_stats_uncond'] = {}
-        DeSnap_results['Yt_stats_uncond']['mean'] = q_t + p_t * DeSnap_results['mu_D']
+        DeSnap_results['event_stats_uncond'] = {}
+        DeSnap_results['event_stats_uncond']['mean'] = q_t + p_t * DeSnap_results['mu_D']
         
         # Third Linear Regression: Compute Covariance Adjustment Factor 'c'
         logger.info("Performing third linear regression for covariance adjustment factor 'c'...")
@@ -477,11 +475,11 @@ def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray,
         try:
             if inputs.diff_flag:
                 x_reg_c = np.diff(DeSnap_results['cov_pt'], axis=0)
-                y_reg_c = np.diff(inputs.Yt_stats_cond['Sigma'], axis=0)
+                y_reg_c = np.diff(inputs.event_stats['Sigma'], axis=0)
                 DeSnap_results['c'] = np.linalg.lstsq(x_reg_c.reshape(-1, 1), y_reg_c.reshape(-1), rcond=None)[0][0]
             else:
                 x_reg_c_levels = DeSnap_results['cov_pt'][:, 0, 0]
-                y_reg_c_levels = inputs.Yt_stats_cond['Sigma'][:, 0, 0]
+                y_reg_c_levels = inputs.event_stats['Sigma'][:, 0, 0]
                 X_design_c = np.vstack([np.ones_like(x_reg_c_levels), x_reg_c_levels]).T
                 temp_coeffs_c = np.linalg.lstsq(X_design_c, y_reg_c_levels, rcond=None)[0]
                 DeSnap_results['c'] = temp_coeffs_c[1]
@@ -489,32 +487,32 @@ def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray,
             logger.error(f"Third linear regression failed: {e}")
             raise ComputationError(f"Third linear regression failed: {e}", "linear_regression_3", None)
         
-        DeSnap_results['Yt_stats_uncond']['Sigma'] = inputs.Yt_stats_cond['Sigma'] - DeSnap_results['c'] * DeSnap_results['cov_pt']
+        DeSnap_results['event_stats_uncond']['Sigma'] = inputs.event_stats['Sigma'] - DeSnap_results['c'] * DeSnap_results['cov_pt']
         
         logger.info("Calculating unconditional AR coefficients...")
         try:
-            nvar_actual = inputs.Yt_stats_cond['OLS']['At'].shape[1]
+            nvar_actual = inputs.event_stats['OLS']['At'].shape[1]
         except (KeyError, AttributeError, IndexError):
-            raise ValidationError("Could not determine 'nvar_actual' from inputs.Yt_stats_cond['OLS']['At']", "ols_at_structure", None)
+            raise ValidationError("Could not determine 'nvar_actual' from inputs.event_stats['OLS']['At']", "ols_at_structure", None)
             
-        DeSnap_results['Yt_stats_uncond']['OLS'] = {}
-        DeSnap_results['Yt_stats_uncond']['OLS']['At'] = np.full(
+        DeSnap_results['event_stats_uncond']['OLS'] = {}
+        DeSnap_results['event_stats_uncond']['OLS']['At'] = np.full(
             (inputs.l_extract, nvar_actual, nvar_actual * inputs.morder), np.nan
         )
         
         for t in range(inputs.l_extract):
             try:
-                Sigma_yx_uncond = DeSnap_results['Yt_stats_uncond']['Sigma'][t, :nvar_actual, nvar_actual:]
-                Sigma_xx_uncond = DeSnap_results['Yt_stats_uncond']['Sigma'][t, nvar_actual:, nvar_actual:]
+                Sigma_yx_uncond = DeSnap_results['event_stats_uncond']['Sigma'][t, :nvar_actual, nvar_actual:]
+                Sigma_xx_uncond = DeSnap_results['event_stats_uncond']['Sigma'][t, nvar_actual:, nvar_actual:]
                 
                 Sigma_xx_uncond_reg = regularize_if_singular(Sigma_xx_uncond)
                 if not np.allclose(Sigma_xx_uncond, Sigma_xx_uncond_reg):
                     logger.warning(f"DeSnap: Applied regularization to Sigma_xx_uncond at time step {t}")
                     
-                DeSnap_results['Yt_stats_uncond']["OLS"]["At"][t, :, :] = Sigma_yx_uncond @ np.linalg.inv(Sigma_xx_uncond_reg)
+                DeSnap_results['event_stats_uncond']["OLS"]["At"][t, :, :] = Sigma_yx_uncond @ np.linalg.inv(Sigma_xx_uncond_reg)
             except np.linalg.LinAlgError:
                 logger.warning(f"DeSnap: Singular matrix at time step {t}, using pseudo-inverse")
-                DeSnap_results['Yt_stats_uncond']["OLS"]["At"][t, :, :] = Sigma_yx_uncond @ np.linalg.pinv(Sigma_xx_uncond_reg)
+                DeSnap_results['event_stats_uncond']["OLS"]["At"][t, :, :] = Sigma_yx_uncond @ np.linalg.pinv(Sigma_xx_uncond_reg)
             except Exception as e:
                 logger.error(f"Failed to compute AR coefficients at time step {t}: {e}")
                 continue
