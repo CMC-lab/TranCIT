@@ -408,15 +408,12 @@ class DeSnapAnalysisStage(PipelineStage):
             desnap_params_instance = self.config.desnap
             desnap_params_instance.detection_signal = kwargs["detection_signal"][0]
             desnap_params_instance.original_signal = kwargs["original_signal"]
-            desnap_params_instance.Yt_stats_cond = kwargs["event_stats"]
+            desnap_params_instance.event_stats = kwargs["event_stats"]
+            desnap_params_instance.tau = self.config.bic.tau
+            desnap_params_instance.l_start = self.config.detection.l_start
+            desnap_params_instance.l_extract = self.config.detection.l_extract
             desnap_params_instance.morder = kwargs["morder"]
             desnap_params_instance.d0 = kwargs.get("d0_threshold", 0.0)
-            
-            if desnap_params_instance.d0_max is None and desnap_params_instance.maxStdRatio is not None:
-                desnap_params_instance.d0_max = (
-                    np.mean(kwargs["detection_signal"][0]) + 
-                    desnap_params_instance.maxStdRatio * np.std(kwargs["detection_signal"][0])
-                )
             
             desnap_full_output = perform_desnap_analysis(desnap_params_instance)
             
