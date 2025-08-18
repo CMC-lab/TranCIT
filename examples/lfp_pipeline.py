@@ -65,7 +65,7 @@ config = PipelineConfig(
         maxStdRatio=7.0,
         d0_max=None,
         d0=0.0,
-        N_d=50,
+        N_d=50
     )
 )
 
@@ -107,10 +107,10 @@ ca3_channels = np.arange(0, 4)
 filter_order = 49
 B = firwin(
     numtaps=filter_order + 1,
-    cutoff=config.passband,
+    cutoff=[140, 230],  # Default passband
     pass_zero=False,
     window='hamming',
-    fs=config.sampling_rate * 1.0
+    fs=1252  # Default sampling rate
 )
 
 delay = filter_order // 2
