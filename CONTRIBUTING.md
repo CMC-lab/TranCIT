@@ -12,7 +12,7 @@ Whether you're reporting bugs, suggesting features, improving documentation, or 
 The main code is organized under:
 
 ```bash
-    src/packages/dynamic-causal-strength/dcs/
+    dcs/
 ```
 
 Docs are under:
