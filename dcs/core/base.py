@@ -13,6 +13,28 @@ import numpy as np
 from .exceptions import ValidationError
 
 
+class BaseConfig:
+    """Base configuration class for all DCS components."""
+    
+    def __init__(self, **kwargs):
+        """Initialize configuration with keyword arguments."""
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+    
+    def __repr__(self) -> str:
+        """String representation of the configuration."""
+        attrs = [f"{k}={v}" for k, v in self.__dict__.items()]
+        return f"{self.__class__.__name__}({', '.join(attrs)})"
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert configuration to dictionary."""
+        return self.__dict__.copy()
+    
+    def validate(self) -> None:
+        """Validate configuration parameters. Override in subclasses."""
+        pass
+
+
 class BaseResult:
     """Base class for all result objects."""
     
