@@ -38,7 +38,7 @@ To install the latest development version from the source code:
 
    .. code-block:: bash
 
-      git clone https://github.com/sa-nouri/dcs.git
+      git clone https://github.com/CMC-lab/dcs.git
       cd dcs
 
 2. Install the package:
