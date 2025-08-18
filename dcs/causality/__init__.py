@@ -32,7 +32,7 @@ from .base import CausalityResult, BaseCausalityAnalyzer
 from .dcs import DCSCalculator, DCSResult
 from .transfer_entropy import TransferEntropyCalculator, TransferEntropyResult
 from .granger import GrangerCausalityCalculator, GrangerCausalityResult
-from .rdcs import RelativeDCSCalculator, RelativeDCSResult
+from .rdcs import RelativeDCSCalculator, RelativeDCSResult, time_varying_causality
 
 __all__ = [
     "CausalityResult",
@@ -45,4 +45,5 @@ __all__ = [
     "GrangerCausalityResult",
     "RelativeDCSCalculator",
     "RelativeDCSResult",
+    "time_varying_causality",
 ] 
