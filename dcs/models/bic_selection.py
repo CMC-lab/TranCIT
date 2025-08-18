@@ -11,6 +11,7 @@ import numpy as np
 
 from dcs.utils import compute_event_statistics
 from dcs import PipelineConfig
+from ..core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -38,9 +39,9 @@ class BICSelector:
     def _validate_parameters(self) -> None:
         """Validate initialization parameters."""
         if self.config.bic.momax <= 0:
-            raise ValueError("max_order must be positive")
+            raise ValidationError("max_order must be positive", "max_order", self.config.bic.momax)
         if self.config.bic.mode not in ["biased", "debiased"]:
-            raise ValueError("mode must be 'biased' or 'debiased'")
+            raise ValidationError("mode must be 'biased' or 'debiased'", "mode", self.config.bic.mode)
     
     def _compute_multi_trial_bic(self, event_data_max_order: np.ndarray) -> Dict:
         """
