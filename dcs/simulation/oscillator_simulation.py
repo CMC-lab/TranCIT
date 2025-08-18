@@ -51,11 +51,12 @@ def generate_signals(
     Returns
     -------
     Tuple[np.ndarray, np.ndarray, np.ndarray]
-        - X : Generated signals, shape (2, T - 500, Ntrial). Contains x and y signals after discarding the first 500 points.
+        - X : Generated signals, shape (2, T - burnin, Ntrial). Contains x and y signals after discarding burn-in points.
         - ns_x : Noise variance profile for the x signal, shape (T + 1,).
         - ns_y : Noise variance profile for the y signal, shape (T + 1,).
     """
-    X = np.zeros((2, T - 500, Ntrial))
+    burnin = min(500, T // 4)  # Use smaller burnin for short series
+    X = np.zeros((2, T - burnin, Ntrial))
 
     if apply_morlet == True:
         ns_x = 0.02 * np.concatenate(
@@ -89,7 +90,7 @@ def generate_signals(
                 + h**2 * c1 * x[-2],
             )
 
-        u = np.array([x[500:], y[500:]])
+        u = np.array([x[burnin:], y[burnin:]])
         X[:, :, N] = u
 
     return X, ns_x, ns_y 
