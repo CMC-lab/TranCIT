@@ -6,7 +6,8 @@
 [![CI](https://github.com/CMC-lab/dcs/actions/workflows/ci.yml/badge.svg)](https://github.com/CMC-lab/dcs/actions/workflows/ci.yml)
 [![Documentation](https://readthedocs.org/projects/dynamic-causal-strength/badge/?version=latest)](https://dynamic-causal-strength.readthedocs.io/en/latest/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1234567.svg)](https://doi.org/10.5281/zenodo.1234567)
+<!-- DOI Badge will be added after first Zenodo release -->
+<!-- [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXX) -->
 
 Dynamic Causal Strength (DCS) is a Python package for quantifying causal relationships in multivariate time series data. It provides methods for analyzing directional influences using model-based statistical tools, inspired by information-theoretic and autoregressive frameworks.
 
@@ -199,7 +200,7 @@ And cite this software package:
   author={Nouri, Salar and Shao, Kaidi and Logothetis, Nikos K. and Besserve, Michel},
   year={2025},
   url={https://github.com/CMC-lab/dcs},
-  doi={10.5281/zenodo.1234567}
+  doi={10.5281/zenodo.XXXXXX}
 }
 ```
 
