@@ -42,9 +42,9 @@ class VAREstimator:
     def _validate_parameters(self) -> None:
         """Validate initialization parameters."""
         if self.model_order <= 0:
-            raise ValueError("model_order must be positive")
+            raise ValidationError("model_order must be positive", "model_order", self.model_order)
         if self.time_mode not in ["inhomo", "homo"]:
-            raise ValueError("time_mode must be 'inhomo' or 'homo'")
+            raise ValidationError("time_mode must be 'inhomo' or 'homo'", "time_mode", self.time_mode)
     
     def estimate_var_coefficients(
         self,
