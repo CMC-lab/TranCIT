@@ -10,7 +10,7 @@ Prerequisites
 
 Before installing **Dynamic Causal Strength (DCS)**, ensure your environment includes:
 
-* Python 3.12 or higher
+* Python 3.9 or higher
 * NumPy 1.26 or higher
 * SciPy 1.14 or higher
 
