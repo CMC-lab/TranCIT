@@ -1,6 +1,6 @@
 [project]
 name = "dynamic-causal-strength"
-version = "0.1.0"
+dynamic = ["version"]
 description = "A Python package for quantifying causal relationships in multivariate time series data using dynamic causal strength (DCS) methods."
 authors = [{ name = "Salar Nouri", email = "salr.nouri@gmail.com" }]
 maintainers = [{ name = "Salar Nouri", email = "salr.nouri@gmail.com" }]
@@ -36,7 +36,7 @@ Repository = "https://github.com/CMC-lab/dcs"
 "Bug Tracker" = "https://github.com/CMC-lab/dcs/issues"
 
 [build-system]
-requires = ["setuptools>=64.0", "wheel"]
+requires = ["setuptools>=64.0", "setuptools_scm>=8.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
@@ -79,3 +79,8 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-v --cov=dcs --cov-report=term-missing --cov-report=html"
+
+[tool.setuptools_scm]
+write_to = "dcs/_version.py"
+version_scheme = "post-release"
+local_scheme = "dirty-tag"
