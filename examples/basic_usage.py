@@ -6,7 +6,7 @@ causal inference in time series data.
 """
 
 import numpy as np
-from dcs import generate_signals, snapshot_detect_analysis_pipeline
+from dcs import generate_signals, PipelineOrchestrator
 from dcs.config import (
     BicParams,
     CausalParams,
@@ -168,11 +168,12 @@ def run_analysis(
     """
     try:
         # Run the complete analysis pipeline
-        results, final_config, event_snapshots = snapshot_detect_analysis_pipeline(
-            original_signal=original_signal,
-            detection_signal=detection_signal,
-            config=config,
-        )
+        orchestrator = PipelineOrchestrator(config)
+        pipeline_result = orchestrator.run(original_signal, detection_signal)
+        
+        results = pipeline_result.results
+        final_config = pipeline_result.config
+        event_snapshots = pipeline_result.event_snapshots
         
         print("✓ Pipeline completed successfully!")
         return results
