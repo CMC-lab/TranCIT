@@ -29,7 +29,12 @@ Example
 >>> print(f"DCS shape: {result.causal_strength.shape}")
 """
 
-__version__ = "0.1.0"
+# Version is automatically set by setuptools_scm from git tags
+try:
+    from ._version import version as __version__
+except ImportError:
+    # Fallback for development installs without setuptools_scm
+    __version__ = "0.1.0-dev"
 __author__ = "Salar Nouri"
 __email__ = "salr.nouri@gmail.com"
 __license__ = "BSD-2-Clause"
