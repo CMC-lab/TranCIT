@@ -10,6 +10,7 @@ from typing import Tuple
 
 import numpy as np
 
+from ..core.exceptions import ValidationError, DataError, ComputationError
 from ..utils.preprocess import regularize_if_singular
 
 logger = logging.getLogger(__name__)
@@ -125,35 +126,29 @@ class VAREstimator:
     ) -> None:
         """Validate input data and parameters."""
         if not isinstance(time_series_data, np.ndarray):
-            raise TypeError("Input 'time_series_data' must be a NumPy array.")
+            raise ValidationError("time_series_data must be a NumPy array", "time_series_data_type", type(time_series_data))
 
         if time_series_data.ndim != 3:
-            raise ValueError(
-                f"Input 'time_series_data' must be 3-dimensional (n_vars, n_observations, n_trials), got {time_series_data.ndim} dimensions."
-            )
+            raise ValidationError("time_series_data must be 3-dimensional (n_vars, n_observations, n_trials)", "time_series_data_ndim", time_series_data.ndim)
 
         n_vars, n_observations, n_trials = time_series_data.shape
         if n_vars <= 1:
-            raise ValueError(
-                f"Input must be multivariate (n_vars > 1), got n_vars={n_vars}."
-            )
+            raise ValidationError("Input must be multivariate (n_vars > 1)", "n_vars", n_vars)
 
         if np.isnan(time_series_data).any() or np.isinf(time_series_data).any():
-            logger.warning("Input 'time_series_data' contains NaN or Inf values.")
+            raise DataError("time_series_data contains NaN or Inf values", time_series_data.shape, "float64")
 
         if not isinstance(model_order, int) or model_order <= 0:
-            raise ValueError("Input 'model_order' must be a positive integer.")
+            raise ValidationError("model_order must be a positive integer", "model_order", model_order)
 
         if time_mode not in ["inhomo", "homo"]:
-            raise ValueError("Invalid time_mode; must be 'inhomo' or 'homo'.")
+            raise ValidationError("time_mode must be 'inhomo' or 'homo'", "time_mode", time_mode)
 
         if lag_mode not in ["infocrit", "var"]:
-            raise ValueError("Invalid lag_mode; must be 'infocrit' or 'var'.")
+            raise ValidationError("lag_mode must be 'infocrit' or 'var'", "lag_mode", lag_mode)
 
         if n_observations <= model_order:
-            raise ValueError(
-                f"Number of observations ({n_observations}) must be greater than the model order ({model_order})."
-            )
+            raise ValidationError(f"Number of observations ({n_observations}) must be greater than model_order ({model_order})", "n_observations_vs_model_order", (n_observations, model_order))
     
     def _prepare_extended_data(
         self, 
