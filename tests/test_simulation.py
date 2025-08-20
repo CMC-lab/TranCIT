@@ -1,4 +1,5 @@
 import numpy as np
+
 from dcs.simulation import (
     generate_ensemble_nonstat_innomean,
     generate_signals,

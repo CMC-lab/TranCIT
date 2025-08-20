@@ -1,11 +1,12 @@
 import numpy as np
+from numpy.testing import assert_allclose
+
 from dcs.utils.core import (
     compute_conditional_event_statistics,
     compute_event_statistics,
     extract_event_snapshots,
     extract_event_windows,
 )
-from numpy.testing import assert_allclose
 
 
 def test_extract_event_windows():

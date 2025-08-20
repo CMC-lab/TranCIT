@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+
 from dcs.models import estimate_var_coefficients
 from dcs.simulation import generate_ensemble_nonstat_innomean
 

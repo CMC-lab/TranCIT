@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+
 from dcs.utils.preprocess import regularize_if_singular, remove_artifact_trials
 
 

@@ -1,9 +1,9 @@
 import pytest
+
 from dcs.config import (
     BicParams,
     CausalParams,
     DetectionParams,
-    MonteCParams,
     OutputParams,
     PipelineConfig,
     PipelineOptions,

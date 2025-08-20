@@ -6,7 +6,8 @@ causal inference in time series data.
 """
 
 import numpy as np
-from dcs import generate_signals, PipelineOrchestrator
+
+from dcs import PipelineOrchestrator, generate_signals
 from dcs.config import (
     BicParams,
     CausalParams,
@@ -21,7 +22,7 @@ from dcs.config import (
 def main() -> None:
     """
     Demonstrate basic usage of the DCS package.
-    
+
     This function shows how to:
     1. Generate synthetic time series data
     2. Configure the analysis pipeline
@@ -59,7 +60,7 @@ def main() -> None:
 def generate_synthetic_data() -> np.ndarray:
     """
     Generate synthetic time series data for demonstration.
-    
+
     Returns
     -------
     np.ndarray
@@ -84,19 +85,19 @@ def generate_synthetic_data() -> np.ndarray:
         Omega1=Omega1,
         Omega2=Omega2,
     )
-    
+
     return data
 
 
 def prepare_signals(data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     Prepare signals for causal analysis.
-    
+
     Parameters
     ----------
     data : np.ndarray
         Raw time series data with shape (2, T, Ntrial)
-    
+
     Returns
     -------
     tuple[np.ndarray, np.ndarray]
@@ -105,17 +106,17 @@ def prepare_signals(data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     # Compute trial-averaged signal
     original_signal = np.mean(data, axis=2)
-    
+
     # Create detection signal (amplified version for event detection)
     detection_signal = original_signal * 1.5
-    
+
     return original_signal, detection_signal
 
 
 def create_pipeline_config() -> PipelineConfig:
     """
     Create configuration for the analysis pipeline.
-    
+
     Returns
     -------
     PipelineConfig
@@ -151,7 +152,7 @@ def run_analysis(
 ) -> dict:
     """
     Run the causal analysis pipeline.
-    
+
     Parameters
     ----------
     original_signal : np.ndarray
@@ -160,7 +161,7 @@ def run_analysis(
         Signal used for event detection
     config : PipelineConfig
         Pipeline configuration
-    
+
     Returns
     -------
     dict
@@ -170,14 +171,14 @@ def run_analysis(
         # Run the complete analysis pipeline
         orchestrator = PipelineOrchestrator(config)
         pipeline_result = orchestrator.run(original_signal, detection_signal)
-        
+
         results = pipeline_result.results
-        final_config = pipeline_result.config
-        event_snapshots = pipeline_result.event_snapshots
-        
+        pipeline_result.config
+        pipeline_result.event_snapshots
+
         print("✓ Pipeline completed successfully!")
         return results
-        
+
     except Exception as e:
         print(f"✗ Pipeline failed with error: {e}")
         raise
@@ -186,7 +187,7 @@ def run_analysis(
 def display_results(results: dict) -> None:
     """
     Display and interpret analysis results.
-    
+
     Parameters
     ----------
     results : dict
@@ -194,24 +195,24 @@ def display_results(results: dict) -> None:
     """
     print(f"Number of detected events: {len(results.get('locs', []))}")
     print(f"Model order used: {results.get('morder', 'N/A')}")
-    
+
     if results.get("CausalOutput"):
         causal_output = results["CausalOutput"]["OLS"]
-        
+
         # Display DCS results
         if "DCS" in causal_output:
             dcs_values = causal_output["DCS"]
             print(f"DCS result shape: {dcs_values.shape}")
             print(f"Mean DCS (X→Y): {np.mean(dcs_values[:, 0]):.4f}")
             print(f"Mean DCS (Y→X): {np.mean(dcs_values[:, 1]):.4f}")
-        
+
         # Display Transfer Entropy results
         if "TE" in causal_output:
             te_values = causal_output["TE"]
             print(f"Transfer Entropy shape: {te_values.shape}")
             print(f"Mean TE (X→Y): {np.mean(te_values[:, 0]):.4f}")
             print(f"Mean TE (Y→X): {np.mean(te_values[:, 1]):.4f}")
-        
+
         # Display rDCS results
         if "rDCS" in causal_output:
             rdcs_values = causal_output["rDCS"]
