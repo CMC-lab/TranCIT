@@ -9,8 +9,9 @@ from typing import Dict, Tuple
 
 import numpy as np
 
-from dcs.utils import compute_event_statistics
 from dcs import PipelineConfig
+from dcs.utils import compute_event_statistics
+
 from ..core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
@@ -19,15 +20,15 @@ logger = logging.getLogger(__name__)
 class BICSelector:
     """
     Bayesian Information Criterion (BIC) selector for VAR model order selection.
-    
+
     This class provides methods for computing BIC values and selecting optimal
     model orders for Vector Autoregression (VAR) models.
     """
-    
+
     def __init__(self, config: PipelineConfig):
         """
         Initialize BIC selector.
-        
+
         Parameters
         ----------
         config : PipelineConfig
@@ -35,14 +36,18 @@ class BICSelector:
         """
         self.config = config
         self._validate_parameters()
-    
+
     def _validate_parameters(self) -> None:
         """Validate initialization parameters."""
         if self.config.bic.momax <= 0:
-            raise ValidationError("max_order must be positive", "max_order", self.config.bic.momax)
+            raise ValidationError(
+                "max_order must be positive", "max_order", self.config.bic.momax
+            )
         if self.config.bic.mode not in ["biased", "debiased"]:
-            raise ValidationError("mode must be 'biased' or 'debiased'", "mode", self.config.bic.mode)
-    
+            raise ValidationError(
+                "mode must be 'biased' or 'debiased'", "mode", self.config.bic.mode
+            )
+
     def _compute_multi_trial_bic(self, event_data_max_order: np.ndarray) -> Dict:
         """
         Calculate Bayesian Information Criterion (BIC) for multiple model orders across trial data.
@@ -129,7 +134,7 @@ class BICSelector:
         logger.info(f"Optimal model orders for BIC variants: {optimal_orders}")
 
         return bic_outputs
-    
+
     def _compute_bic_for_model(
         self, event_data: np.ndarray, model_order: int, config: PipelineConfig
     ) -> Tuple[float, float]:
@@ -166,7 +171,9 @@ class BICSelector:
 
         mode = config.bic.mode
         if mode not in ["biased"]:
-            raise ValueError(f"Unsupported mode '{mode}'; only 'biased' is implemented.")
+            raise ValueError(
+                f"Unsupported mode '{mode}'; only 'biased' is implemented."
+            )
 
         if mode == "biased":
             stats = compute_event_statistics(event_data, model_order)
@@ -178,7 +185,9 @@ class BICSelector:
 
         estim_mode = config.bic.estim_mode
         if estim_mode not in ["OLS", "RLS"]:
-            raise ValueError(f"Invalid EstimMode '{estim_mode}'; must be 'OLS' or 'RLS'.")
+            raise ValueError(
+                f"Invalid EstimMode '{estim_mode}'; must be 'OLS' or 'RLS'."
+            )
 
         for t in range(n_observations):
             covariance_current = stats["Sigma"][t, n_vars:, n_vars:]

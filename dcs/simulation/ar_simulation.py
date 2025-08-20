@@ -6,6 +6,7 @@ including bootstrapping and non-stationary variants.
 """
 
 from typing import Dict
+
 import numpy as np
 
 
@@ -50,7 +51,9 @@ def simulate_ar_event_bootstrap(
 
         rand_trial = np.random.randint(0, Yt_event.shape[2])
         rand_Yt0 = Yt_event[:, 0, rand_trial]  # Shape: (nvar*(morder+1),)
-        lagged_vars = rand_Yt0[2:].reshape(2, simobj["morder"])[::-1]  # Shape: (2, morder), reversed
+        lagged_vars = rand_Yt0[2:].reshape(2, simobj["morder"])[
+            ::-1
+        ]  # Shape: (2, morder), reversed
         y = np.hstack((lagged_vars, y))  # Shape: (nvar, morder + L)
 
         for ktime in range(morder, y.shape[1]):
@@ -62,7 +65,9 @@ def simulate_ar_event_bootstrap(
 
         Yt_event_btsp[0:nvar, :, n] = y[:, morder:]
         for delay in range(1, morder + 1):
-            Yt_event_btsp[nvar * delay : nvar * (delay + 1), :, n] = y[:, morder - delay : L - delay + morder]
+            Yt_event_btsp[nvar * delay : nvar * (delay + 1), :, n] = y[
+                :, morder - delay : L - delay + morder
+            ]
 
     return Yt_event_btsp
 
@@ -151,4 +156,4 @@ def simulate_ar_nonstat_innomean(
         temp = np.flip(y[:, t - morder : t], axis=1).reshape(nvar * morder, 1)
         y[:, t] += (A @ temp).squeeze()
 
-    return y 
+    return y

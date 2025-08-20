@@ -8,11 +8,11 @@ the DCS package for consistent error handling.
 
 class DCSError(Exception):
     """Base exception for all DCS-related errors."""
-    
+
     def __init__(self, message: str, details: str = None):
         """
         Initialize DCS error.
-        
+
         Parameters
         ----------
         message : str
@@ -27,11 +27,11 @@ class DCSError(Exception):
 
 class ValidationError(DCSError):
     """Exception raised when input validation fails."""
-    
+
     def __init__(self, message: str, field: str = None, value: any = None):
         """
         Initialize validation error.
-        
+
         Parameters
         ----------
         message : str
@@ -48,11 +48,11 @@ class ValidationError(DCSError):
 
 class ComputationError(DCSError):
     """Exception raised when computation fails."""
-    
+
     def __init__(self, message: str, step: str = None, data_shape: tuple = None):
         """
         Initialize computation error.
-        
+
         Parameters
         ----------
         message : str
@@ -69,11 +69,11 @@ class ComputationError(DCSError):
 
 class ConfigurationError(DCSError):
     """Exception raised when configuration is invalid."""
-    
+
     def __init__(self, message: str, config_key: str = None, expected_type: str = None):
         """
         Initialize configuration error.
-        
+
         Parameters
         ----------
         message : str
@@ -90,11 +90,11 @@ class ConfigurationError(DCSError):
 
 class DataError(DCSError):
     """Exception raised when data is invalid or corrupted."""
-    
+
     def __init__(self, message: str, data_shape: tuple = None, data_type: str = None):
         """
         Initialize data error.
-        
+
         Parameters
         ----------
         message : str
@@ -111,11 +111,13 @@ class DataError(DCSError):
 
 class ConvergenceError(ComputationError):
     """Exception raised when numerical algorithms fail to converge."""
-    
-    def __init__(self, message: str, max_iterations: int = None, tolerance: float = None):
+
+    def __init__(
+        self, message: str, max_iterations: int = None, tolerance: float = None
+    ):
         """
         Initialize convergence error.
-        
+
         Parameters
         ----------
         message : str
@@ -132,11 +134,13 @@ class ConvergenceError(ComputationError):
 
 class SingularMatrixError(ComputationError):
     """Exception raised when encountering singular matrices."""
-    
-    def __init__(self, message: str, matrix_shape: tuple = None, condition_number: float = None):
+
+    def __init__(
+        self, message: str, matrix_shape: tuple = None, condition_number: float = None
+    ):
         """
         Initialize singular matrix error.
-        
+
         Parameters
         ----------
         message : str
@@ -148,4 +152,4 @@ class SingularMatrixError(ComputationError):
         """
         self.matrix_shape = matrix_shape
         self.condition_number = condition_number
-        super().__init__(message, "matrix_inversion", matrix_shape) 
+        super().__init__(message, "matrix_inversion", matrix_shape)

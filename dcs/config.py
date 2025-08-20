@@ -16,7 +16,7 @@ import numpy as np
 class PipelineOptions:
     """
     Options to control which pipeline steps are executed.
-    
+
     Attributes
     ----------
     detection : bool
@@ -45,7 +45,7 @@ class PipelineOptions:
 class DetectionParams:
     """
     Parameters for the event detection step.
-    
+
     Attributes
     ----------
     thres_ratio : float
@@ -78,7 +78,7 @@ class DetectionParams:
 class BicParams:
     """
     Parameters for BIC model order selection.
-    
+
     Attributes
     ----------
     morder : int
@@ -102,7 +102,7 @@ class BicParams:
 class CausalParams:
     """
     Parameters for causality calculation.
-    
+
     Attributes
     ----------
     ref_time : int
@@ -125,7 +125,7 @@ class CausalParams:
 class MonteCParams:
     """
     Parameters for Monte Carlo bootstrapping.
-    
+
     Attributes
     ----------
     n_btsp : int
@@ -139,7 +139,7 @@ class MonteCParams:
 class OutputParams:
     """
     Parameters for output file naming.
-    
+
     Attributes
     ----------
     file_keyword : str
@@ -156,7 +156,7 @@ class OutputParams:
 class DeSnapParams:
     """
     Input structure for the de-snapshotting analysis.
-    
+
     Attributes
     ----------
     detection_signal : np.ndarray
@@ -203,10 +203,10 @@ class DeSnapParams:
 class PipelineConfig:
     """
     Main configuration object for the analysis pipeline.
-    
+
     This class combines all configuration parameters into a single object
     for easy management and validation of pipeline settings.
-    
+
     Attributes
     ----------
     options : PipelineOptions

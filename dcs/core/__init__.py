@@ -13,22 +13,22 @@ The core module includes:
 Example
 -------
 >>> from dcs.core import BaseAnalyzer, BaseResult
->>> 
+>>>
 >>> class MyAnalyzer(BaseAnalyzer):
 ...     def analyze(self, data):
 ...         return BaseResult(result=data.sum())
->>> 
+>>>
 >>> analyzer = MyAnalyzer(param1=1, param2=2)
 >>> result = analyzer.analyze(np.array([1, 2, 3]))
 """
 
 from .base import BaseAnalyzer, BaseResult
-from .exceptions import DCSError, ValidationError, ComputationError
+from .exceptions import ComputationError, DCSError, ValidationError
 
 __all__ = [
     "BaseAnalyzer",
-    "BaseResult", 
+    "BaseResult",
     "DCSError",
     "ValidationError",
     "ComputationError",
-] 
+]

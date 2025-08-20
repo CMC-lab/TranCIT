@@ -2,9 +2,10 @@ import logging
 from typing import Tuple
 
 import numpy as np
-from scipy.spatial.distance import cdist, euclidean
+from scipy.spatial.distance import euclidean
 
 logger = logging.getLogger(__name__)
+
 
 def find_best_shrinked_locations(
     signal: np.ndarray,
@@ -54,7 +55,9 @@ def find_best_shrinked_locations(
 
     best_size = np.nanargmin(distances)
     best_locations = shrinked_locations[:best_size]
-    logger.info(f"Best subset size: {best_size} with distance {distances[best_size]:.4f}.")
+    logger.info(
+        f"Best subset size: {best_size} with distance {distances[best_size]:.4f}."
+    )
 
     return best_locations, distances
 
@@ -134,22 +137,28 @@ def find_peak_locations(
         logger.error("Negative window_size provided.")
         raise ValueError("window_size must be non-negative.")
 
-    valid_candidates = np.sort(candidate_locations[
-        (candidate_locations >= window_size)
-        & (candidate_locations <= len(signal) - window_size)
-    ].astype(np.intp))
+    valid_candidates = np.sort(
+        candidate_locations[
+            (candidate_locations >= window_size)
+            & (candidate_locations <= len(signal) - window_size)
+        ].astype(np.intp)
+    )
     logger.debug(f"Filtered to {len(valid_candidates)} valid candidates.")
 
     preliminary_peaks = []
     idx_start = 0
     idx_end = 0
     while idx_end < len(valid_candidates) - 1:
-        while idx_end + 1 < len(valid_candidates) and valid_candidates[idx_end + 1] - valid_candidates[idx_start] < window_size:
+        while (
+            idx_end + 1 < len(valid_candidates)
+            and valid_candidates[idx_end + 1] - valid_candidates[idx_start]
+            < window_size
+        ):
             idx_end += 1
         if idx_end == len(valid_candidates) - 1:
             break
-        
-        group = valid_candidates[idx_start: idx_end + 1]
+
+        group = valid_candidates[idx_start : idx_end + 1]
         group_signal = signal[group]
         max_idx = np.argmax(group_signal)
         preliminary_peaks.append(group[max_idx])

@@ -6,7 +6,9 @@ commonly used in neuroscience and physics applications.
 """
 
 from typing import Tuple
+
 import numpy as np
+
 from .utils import morlet
 
 
@@ -58,7 +60,7 @@ def generate_signals(
     burnin = min(500, T // 4)  # Use smaller burnin for short series
     X = np.zeros((2, T - burnin, Ntrial))
 
-    if apply_morlet == True:
+    if apply_morlet is True:
         ns_x = 0.02 * np.concatenate(
             [np.ones(650), np.ones(201) - morlet(-0.29, 0.29, 201), np.ones(150)]
         )
@@ -93,4 +95,4 @@ def generate_signals(
         u = np.array([x[burnin:], y[burnin:]])
         X[:, :, N] = u
 
-    return X, ns_x, ns_y 
+    return X, ns_x, ns_y

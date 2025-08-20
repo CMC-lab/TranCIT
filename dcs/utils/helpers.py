@@ -10,16 +10,14 @@ from typing import Tuple
 
 import numpy as np
 
-from ..core.exceptions import ValidationError, ComputationError
+from ..core.exceptions import ComputationError, ValidationError
 from .preprocess import regularize_if_singular
 
 logger = logging.getLogger(__name__)
 
 
 def compute_covariances(
-    lagged_data_array: np.ndarray, 
-    n_time_steps: int, 
-    model_order: int
+    lagged_data_array: np.ndarray, n_time_steps: int, model_order: int
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Compute covariance matrices for lagged data.
@@ -65,25 +63,49 @@ def compute_covariances(
     >>> print(f"Covariance shapes: {cov_Xp.shape}, {cov_Yp.shape}")
     """
     if not isinstance(lagged_data_array, np.ndarray) or lagged_data_array.ndim != 4:
-        raise ValidationError("lagged_data_array must be a 4D numpy array", "lagged_data_ndim", lagged_data_array.ndim if hasattr(lagged_data_array, 'ndim') else None)
-    
+        raise ValidationError(
+            "lagged_data_array must be a 4D numpy array",
+            "lagged_data_ndim",
+            lagged_data_array.ndim if hasattr(lagged_data_array, "ndim") else None,
+        )
+
     if not isinstance(n_time_steps, int) or n_time_steps <= 0:
-        raise ValidationError("n_time_steps must be a positive integer", "n_time_steps", n_time_steps)
-    
+        raise ValidationError(
+            "n_time_steps must be a positive integer", "n_time_steps", n_time_steps
+        )
+
     if not isinstance(model_order, int) or model_order <= 0:
-        raise ValidationError("model_order must be a positive integer", "model_order", model_order)
-    
+        raise ValidationError(
+            "model_order must be a positive integer", "model_order", model_order
+        )
+
     if lagged_data_array.shape[0] != 2:
-        raise ValidationError("lagged_data_array must have exactly 2 variables", "n_vars", lagged_data_array.shape[0])
-    
+        raise ValidationError(
+            "lagged_data_array must have exactly 2 variables",
+            "n_vars",
+            lagged_data_array.shape[0],
+        )
+
     if lagged_data_array.shape[1] != model_order:
-        raise ValidationError("lagged_data_array model_order dimension doesn't match", "model_order_dim", lagged_data_array.shape[1])
-    
+        raise ValidationError(
+            "lagged_data_array model_order dimension doesn't match",
+            "model_order_dim",
+            lagged_data_array.shape[1],
+        )
+
     if lagged_data_array.shape[2] != n_time_steps:
-        raise ValidationError("lagged_data_array time dimension doesn't match n_time_steps", "time_dim", lagged_data_array.shape[2])
-    
+        raise ValidationError(
+            "lagged_data_array time dimension doesn't match n_time_steps",
+            "time_dim",
+            lagged_data_array.shape[2],
+        )
+
     if lagged_data_array.shape[3] < 2:
-        raise ValidationError("At least 2 trials required for covariance computation", "n_trials", lagged_data_array.shape[3])
+        raise ValidationError(
+            "At least 2 trials required for covariance computation",
+            "n_trials",
+            lagged_data_array.shape[3],
+        )
 
     try:
         cov_Xp = np.zeros((n_time_steps, model_order, model_order))
@@ -99,8 +121,12 @@ def compute_covariances(
                 cov_Xp[t] = np.cov(X_past, rowvar=False)  # Covariance of X past
                 cov_Yp[t] = np.cov(Y_past, rowvar=False)  # Covariance of Y past
                 full_cov = np.cov(X_past, Y_past, rowvar=False)
-                C_XYp[t] = full_cov[:model_order, model_order:]  # Cross-covariance X to Y
-                C_YXp[t] = full_cov[model_order:, :model_order]  # Cross-covariance Y to X
+                C_XYp[t] = full_cov[
+                    :model_order, model_order:
+                ]  # Cross-covariance X to Y
+                C_YXp[t] = full_cov[
+                    model_order:, :model_order
+                ]  # Cross-covariance Y to X
 
                 if np.any(np.isnan(cov_Xp[t])):
                     logger.error(f"NaN values detected in cov_Xp at time step {t}")
@@ -114,16 +140,16 @@ def compute_covariances(
 
         logger.info(f"Successfully computed covariances for {n_time_steps} time steps")
         return cov_Xp, cov_Yp, C_XYp, C_YXp
-        
+
     except Exception as e:
         logger.error(f"Covariance computation failed: {e}")
-        raise ComputationError(f"Covariance computation failed: {e}", "covariance_computation", None)
+        raise ComputationError(
+            f"Covariance computation failed: {e}", "covariance_computation", None
+        )
 
 
 def estimate_coefficients(
-    current_data_matrix: np.ndarray, 
-    lagged_data_matrix: np.ndarray, 
-    n_trials: int
+    current_data_matrix: np.ndarray, lagged_data_matrix: np.ndarray, n_trials: int
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Compute regression coefficients and residual covariance for a VAR model.
@@ -170,29 +196,41 @@ def estimate_coefficients(
 
     try:
         lagged_data_augmented = np.hstack([lagged_data_matrix, np.ones((n_trials, 1))])
-        
-        cross_cov_current = np.dot(current_data_matrix.T, current_data_matrix) / n_trials
-        cross_cov_between = np.dot(current_data_matrix.T, lagged_data_augmented) / n_trials
-        auto_cov_lagged = np.dot(lagged_data_augmented.T, lagged_data_augmented) / n_trials
-        
+
+        cross_cov_current = (
+            np.dot(current_data_matrix.T, current_data_matrix) / n_trials
+        )
+        cross_cov_between = (
+            np.dot(current_data_matrix.T, lagged_data_augmented) / n_trials
+        )
+        auto_cov_lagged = (
+            np.dot(lagged_data_augmented.T, lagged_data_augmented) / n_trials
+        )
+
         auto_cov_lagged_reg = regularize_if_singular(auto_cov_lagged)
         if not np.allclose(auto_cov_lagged, auto_cov_lagged_reg):
-            logger.warning("Applied regularization to auto_cov_lagged due to singularity")
-    
+            logger.warning(
+                "Applied regularization to auto_cov_lagged due to singularity"
+            )
+
         coefficients = np.linalg.solve(auto_cov_lagged_reg, cross_cov_between.T).T
 
         residual_covariance = cross_cov_current - np.dot(
-        coefficients, np.dot(auto_cov_lagged_reg, coefficients.T)
-    )
+            coefficients, np.dot(auto_cov_lagged_reg, coefficients.T)
+        )
         logger.info(f"Successfully estimated coefficients for {n_vars} variables")
         return coefficients, residual_covariance
-        
+
     except Exception as e:
         logger.error(f"Coefficient estimation failed: {e}")
-        raise ComputationError(f"Coefficient estimation failed: {e}", "coefficient_estimation", None)
+        raise ComputationError(
+            f"Coefficient estimation failed: {e}", "coefficient_estimation", None
+        )
 
 
-def compute_multi_variable_linear_regression(X: np.ndarray, Y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def compute_multi_variable_linear_regression(
+    X: np.ndarray, Y: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Perform multiple linear regressions for each slice of Y against X.
 
@@ -240,9 +278,9 @@ def compute_multi_variable_linear_regression(X: np.ndarray, Y: np.ndarray) -> Tu
     """
     if Y.ndim != 3:
         raise ValueError(f"Dependent variable Y must be 3-dimensional, got {Y.ndim}.")
-    
+
     N, N2, N3 = Y.shape
-    
+
     if X.ndim != 1 or X.shape[0] != N:
         raise ValueError(
             f"Independent variable X must be 1D with length {N} "
@@ -254,16 +292,18 @@ def compute_multi_variable_linear_regression(X: np.ndarray, Y: np.ndarray) -> Tu
         )
     if np.any(np.isnan(X)) or np.any(np.isnan(Y)):
         raise ValueError("Input arrays X and Y must not contain NaN values.")
-    
+
     X_design = np.vstack([np.ones(N), X]).T
     Y_flat = Y.reshape(N, -1)
-    
+
     betas, _, rank, _ = np.linalg.lstsq(X_design, Y_flat, rcond=None)
-    
+
     if rank < 2:
-        raise ValueError("Regression problem is ill-conditioned. Check your input data.")
-    
+        raise ValueError(
+            "Regression problem is ill-conditioned. Check your input data."
+        )
+
     intercept = betas[0].reshape(N2, N3)
     coeff = betas[1].reshape(N2, N3)
-    
+
     return coeff, intercept

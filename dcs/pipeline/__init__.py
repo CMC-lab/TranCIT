@@ -7,28 +7,26 @@ including stage-based processing and the legacy snapshot_detect_analysis_pipelin
 
 from .orchestrator import PipelineOrchestrator, PipelineResult
 from .stages import (
-    InputValidationStage,
-    EventDetectionStage,
-    BorderRemovalStage,
-    BICSelectionStage,
-    SnapshotExtractionStage,
     ArtifactRemovalStage,
-    StatisticsComputationStage,
-    CausalityAnalysisStage,
+    BICSelectionStage,
     BootstrapAnalysisStage,
+    BorderRemovalStage,
+    CausalityAnalysisStage,
     DeSnapAnalysisStage,
+    EventDetectionStage,
+    InputValidationStage,
     OutputPreparationStage,
+    SnapshotExtractionStage,
+    StatisticsComputationStage,
 )
-
 
 __all__ = [
     # Main pipeline classes
     "PipelineOrchestrator",
     "PipelineResult",
-    
     # Stage classes
     "InputValidationStage",
-    "EventDetectionStage", 
+    "EventDetectionStage",
     "BorderRemovalStage",
     "BICSelectionStage",
     "SnapshotExtractionStage",

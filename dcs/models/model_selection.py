@@ -10,7 +10,6 @@ from typing import Tuple
 
 import numpy as np
 
-from .bic_selection import BICSelector
 from .var_estimation import VAREstimator
 
 logger = logging.getLogger(__name__)
@@ -72,7 +71,7 @@ def select_model_order(
 
         # Create VAREstimator instance for this model order
         estimator = VAREstimator(model_order=model_order, time_mode=time_mode)
-        
+
         _, _, log_likelihoods[model_order - 1], sum_log_det_hessian[model_order - 1] = (
             estimator.estimate_var_coefficients(
                 time_series_data, model_order, max_model_order, time_mode, "infocrit"
@@ -114,4 +113,4 @@ def select_model_order(
     optimal_orders = np.nanargmin(bic_scores, axis=0) + 1
     logger.info(f"Optimal model orders: {optimal_orders}")
 
-    return bic_scores, optimal_orders, log_likelihoods, penalty_terms 
+    return bic_scores, optimal_orders, log_likelihoods, penalty_terms

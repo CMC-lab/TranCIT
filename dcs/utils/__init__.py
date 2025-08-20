@@ -40,17 +40,17 @@ Example
 -------
 >>> import numpy as np
 >>> from dcs.utils import extract_event_snapshots, compute_event_statistics
->>> 
+>>>
 >>> # Generate sample data
 >>> signal = np.random.randn(2, 1000)  # (n_vars, time)
 >>> locations = np.array([100, 200, 300])  # Event locations
->>> 
+>>>
 >>> # Extract event snapshots
 >>> snapshots = extract_event_snapshots(
 ...     signal, locations, model_order=4, lag_step=1,
 ...     start_offset=50, extract_length=100
 ... )
->>> 
+>>>
 >>> # Compute statistics
 >>> stats = compute_event_statistics(snapshots, model_order=4)
 >>> print(f"Snapshots shape: {snapshots.shape}")
@@ -60,43 +60,39 @@ Example
 # Core utilities - Event extraction and statistics
 from .core import (
     compute_event_statistics,
-    perform_desnap_analysis,
     extract_event_snapshots,
     extract_event_windows,
+    perform_desnap_analysis,
 )
 
 # Preprocessing utilities - Data cleaning and validation
-from .preprocess import (
-    remove_artifact_trials,
-    regularize_if_singular,
-)
+from .preprocess import regularize_if_singular, remove_artifact_trials
 
 # Residual computation - VAR model residuals
-from .residuals import (
-    estimate_residuals,
-    get_residuals,
-)
+from .residuals import estimate_residuals, get_residuals
 
 # Signal processing - Peak detection and alignment
 from .signal import (
+    find_best_shrinked_locations,
     find_peak_locations,
     shrink_locations_resample_uniform,
-    find_best_shrinked_locations,
 )
 
 # Helper functions - Covariance and coefficient estimation
 from .helpers import (
     compute_covariances,
-    estimate_coefficients,
     compute_multi_variable_linear_regression,
+    estimate_coefficients,
 )
 
 # Optional plotting utilities
 try:
     from .plotting import fill_std_known
+
     _plotting_available = True
 except ImportError:
     _plotting_available = False
+
     # Create a placeholder function for when matplotlib is not available
     def fill_std_known(*args, **kwargs):
         """Placeholder function when matplotlib is not available."""
@@ -105,6 +101,7 @@ except ImportError:
             "Install with: pip install matplotlib"
         )
 
+
 # Public API definition
 _public_api = [
     # Core utilities
@@ -112,20 +109,16 @@ _public_api = [
     "compute_event_statistics",
     "perform_desnap_analysis",
     "extract_event_windows",
-    
     # Preprocessing
     "remove_artifact_trials",
     "regularize_if_singular",
-    
     # Residual computation
     "get_residuals",
     "estimate_residuals",
-    
     # Signal processing
     "find_peak_locations",
     "shrink_locations_resample_uniform",
     "find_best_shrinked_locations",
-    
     # Helper functions
     "compute_covariances",
     "estimate_coefficients",

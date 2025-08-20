@@ -6,7 +6,9 @@ including non-stationary and ensemble variants.
 """
 
 from typing import Tuple
+
 import numpy as np
+
 from .utils import morlet
 
 
@@ -103,4 +105,4 @@ def generate_var_nonstat(
         X[:, t] = X[:, t] + Imp[:, t - morder]
 
     X = X[:, morder:]
-    return X, Imp 
+    return X, Imp

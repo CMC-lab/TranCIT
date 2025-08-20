@@ -9,7 +9,7 @@ statistical tools, inspired by information-theoretic and autoregressive framewor
 
 The package implements several causality measures:
 - Dynamic Causal Strength (DCS): Time-varying causal relationships
-- Transfer Entropy (TE): Information-theoretic causality measures  
+- Transfer Entropy (TE): Information-theoretic causality measures
 - Granger Causality (GC): Linear causality detection
 - Relative Dynamic Causal Strength (rDCS): Event-based causality
 
@@ -17,13 +17,13 @@ Example
 -------
 >>> import numpy as np
 >>> from dcs import DCSCalculator
->>> 
+>>>
 >>> # Create calculator
 >>> calculator = DCSCalculator(model_order=4, time_mode="inhomo")
->>> 
+>>>
 >>> # Generate sample data
 >>> data = np.random.randn(2, 1000, 20)  # (n_vars, n_obs, n_trials)
->>> 
+>>>
 >>> # Perform analysis
 >>> result = calculator.analyze(data)
 >>> print(f"DCS shape: {result.causal_strength.shape}")
@@ -39,16 +39,17 @@ __author__ = "Salar Nouri"
 __email__ = "salr.nouri@gmail.com"
 __license__ = "BSD-2-Clause"
 
-# Core functionality imports
-from dcs.core.base import BaseAnalyzer, BaseResult, BaseConfig
-from dcs.core.exceptions import (
-    DCSError,
-    ValidationError,
-    ComputationError,
-    ConfigurationError,
-    DataError,
-    ConvergenceError,
-    SingularMatrixError,
+# Causality analysis imports
+from dcs.causality.dcs import DCSCalculator, DCSResult
+from dcs.causality.granger import GrangerCausalityCalculator, GrangerCausalityResult
+from dcs.causality.rdcs import (
+    RelativeDCSCalculator,
+    RelativeDCSResult,
+    time_varying_causality,
+)
+from dcs.causality.transfer_entropy import (
+    TransferEntropyCalculator,
+    TransferEntropyResult,
 )
 
 # Configuration imports
@@ -63,59 +64,65 @@ from dcs.config import (
     PipelineOptions,
 )
 
-# Causality analysis imports
-from dcs.causality.dcs import DCSCalculator, DCSResult
-from dcs.causality.transfer_entropy import TransferEntropyCalculator, TransferEntropyResult
-from dcs.causality.granger import GrangerCausalityCalculator, GrangerCausalityResult
-from dcs.causality.rdcs import RelativeDCSCalculator, RelativeDCSResult, time_varying_causality
+# Core functionality imports
+from dcs.core.base import BaseAnalyzer, BaseConfig, BaseResult
+from dcs.core.exceptions import (
+    ComputationError,
+    ConfigurationError,
+    ConvergenceError,
+    DataError,
+    DCSError,
+    SingularMatrixError,
+    ValidationError,
+)
+
+# Setup logging
+from dcs.logger_config import setup_logging
+from dcs.models.bic_selection import BICSelector
+from dcs.models.model_validation import ModelValidator
 
 # Model estimation imports
 from dcs.models.var_estimation import VAREstimator
-from dcs.models.bic_selection import BICSelector
-from dcs.models.model_validation import ModelValidator
 
 # Pipeline imports
 from dcs.pipeline.orchestrator import PipelineOrchestrator, PipelineResult
 from dcs.pipeline.stages import (
-    InputValidationStage,
-    EventDetectionStage,
-    BorderRemovalStage,
-    BICSelectionStage,
-    SnapshotExtractionStage,
     ArtifactRemovalStage,
-    StatisticsComputationStage,
-    CausalityAnalysisStage,
+    BICSelectionStage,
     BootstrapAnalysisStage,
+    BorderRemovalStage,
+    CausalityAnalysisStage,
     DeSnapAnalysisStage,
+    EventDetectionStage,
+    InputValidationStage,
     OutputPreparationStage,
+    SnapshotExtractionStage,
+    StatisticsComputationStage,
 )
 
 # Simulation imports
 from dcs.simulation import (
+    generate_ensemble_nonstat_innomean,
     generate_signals,
+    generate_var_nonstat,
+    morlet,
     simulate_ar_event,
     simulate_ar_event_bootstrap,
     simulate_ar_nonstat_innomean,
-    generate_ensemble_nonstat_innomean,
-    generate_var_nonstat,
-    morlet,
 )
 
 # Utility imports
 from dcs.utils import (
     compute_event_statistics,
-    perform_desnap_analysis,
     estimate_residuals,
     extract_event_snapshots,
-    get_residuals,
-    remove_artifact_trials,
-    find_peak_locations,
-    shrink_locations_resample_uniform,
     find_best_shrinked_locations,
+    find_peak_locations,
+    get_residuals,
+    perform_desnap_analysis,
+    remove_artifact_trials,
+    shrink_locations_resample_uniform,
 )
-
-# Setup logging
-from dcs.logger_config import setup_logging
 
 setup_logging(log_file="dcs_log.txt")
 
@@ -123,7 +130,7 @@ setup_logging(log_file="dcs_log.txt")
 __all__ = [
     # Core classes
     "BaseAnalyzer",
-    "BaseResult", 
+    "BaseResult",
     "BaseConfig",
     # Exceptions
     "DCSError",
@@ -156,7 +163,6 @@ __all__ = [
     "VAREstimator",
     "BICSelector",
     "ModelValidator",
-
     # Pipeline stages
     "PipelineOrchestrator",
     "PipelineResult",
@@ -174,7 +180,7 @@ __all__ = [
     # Simulation functions
     "generate_signals",
     "simulate_ar_event",
-    "simulate_ar_event_bootstrap", 
+    "simulate_ar_event_bootstrap",
     "simulate_ar_nonstat_innomean",
     "generate_ensemble_nonstat_innomean",
     "generate_var_nonstat",
