@@ -20,8 +20,8 @@ help:
 lint-check:
 	@echo "🔍 Checking code style..."
 	black --check --diff dcs/ tests/ examples/
-	isort --check-only --diff dcs/ tests/ examples/
-	flake8 dcs/ tests/ examples/ --max-line-length=88 --extend-ignore=E203,W503,E712
+	isort --check-only --diff --skip dcs/_version.py dcs/ tests/ examples/
+	flake8 dcs/ tests/ examples/ --max-line-length=88 --extend-ignore=E203,W503,E712 --exclude=dcs/_version.py
 	@echo "✅ Lint check complete!"
 
 lint-fix:
@@ -34,7 +34,7 @@ lint: lint-check
 format:
 	@echo "🎨 Formatting code..."
 	autoflake --in-place --remove-unused-variables --remove-all-unused-imports -r dcs/ tests/ examples/
-	isort dcs/ tests/ examples/
+	isort --skip dcs/_version.py dcs/ tests/ examples/
 	black dcs/ tests/ examples/
 	@echo "✨ Formatting complete!"
 

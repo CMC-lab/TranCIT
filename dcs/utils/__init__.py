@@ -65,6 +65,13 @@ from .core import (
     perform_desnap_analysis,
 )
 
+# Helper functions - Covariance and coefficient estimation
+from .helpers import (
+    compute_covariances,
+    compute_multi_variable_linear_regression,
+    estimate_coefficients,
+)
+
 # Preprocessing utilities - Data cleaning and validation
 from .preprocess import regularize_if_singular, remove_artifact_trials
 
@@ -76,13 +83,6 @@ from .signal import (
     find_best_shrinked_locations,
     find_peak_locations,
     shrink_locations_resample_uniform,
-)
-
-# Helper functions - Covariance and coefficient estimation
-from .helpers import (
-    compute_covariances,
-    compute_multi_variable_linear_regression,
-    estimate_coefficients,
 )
 
 # Optional plotting utilities
