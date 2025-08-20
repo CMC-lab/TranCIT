@@ -28,11 +28,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install .[dev,test]
+          pip install black autoflake isort
 
       - name: Run linting
         run: |
-          flake8 dcs/ tests/
-          black --check dcs/ tests/
+          black --check --diff dcs/ tests/ examples/
+          isort --check-only --diff dcs/ tests/ examples/
+          flake8 dcs/ tests/ examples/ --max-line-length=88 --extend-ignore=E203,W503,E712
 
       - name: Run type checking
         run: |

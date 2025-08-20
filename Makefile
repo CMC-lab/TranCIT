@@ -2,23 +2,43 @@
 
 PYTHON := python3
 
-.PHONY: help lint format test docs clean
+.PHONY: help lint format test docs clean lint-check lint-fix format-and-lint
 
 help:
 	@echo "Usage: make <target>"
 	@echo ""
 	@echo "Targets:"
-	@echo "  lint        Run flake8 to lint code"
-	@echo "  format      Run black to format code"
+	@echo "  lint        Run all linting checks"
+	@echo "  lint-check  Check code style without fixing"
+	@echo "  lint-fix    Auto-fix linting issues"
+	@echo "  format      Format code with black, isort, autoflake"
+	@echo "  format-and-lint  Format code then run lint checks"
 	@echo "  test        Run tests with pytest"
 	@echo "  docs        Build Sphinx HTML documentation"
 	@echo "  clean       Remove build, dist, and cache files"
 
-lint:
-	flake8 dcs tests
+lint-check:
+	@echo "🔍 Checking code style..."
+	black --check --diff dcs/ tests/ examples/
+	isort --check-only --diff dcs/ tests/ examples/
+	flake8 dcs/ tests/ examples/ --max-line-length=88 --extend-ignore=E203,W503,E712
+	@echo "✅ Lint check complete!"
+
+lint-fix:
+	@echo "🔧 Auto-fixing linting issues..."
+	python fix_linting.py
+	@echo "✅ Auto-fixes complete!"
+
+lint: lint-check
 
 format:
-	black dcs tests
+	@echo "🎨 Formatting code..."
+	autoflake --in-place --remove-unused-variables --remove-all-unused-imports -r dcs/ tests/ examples/
+	isort dcs/ tests/ examples/
+	black dcs/ tests/ examples/
+	@echo "✨ Formatting complete!"
+
+format-and-lint: format lint-check
 
 test:
 	pytest tests
