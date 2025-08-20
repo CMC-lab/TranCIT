@@ -53,7 +53,8 @@ def generate_signals(
     Returns
     -------
     Tuple[np.ndarray, np.ndarray, np.ndarray]
-        - X : Generated signals, shape (2, T - burnin, Ntrial). Contains x and y signals after discarding burn-in points.
+        - X : Generated signals, shape (2, T - burnin, Ntrial). Contains x and y
+          signals after discarding burn-in points.
         - ns_x : Noise variance profile for the x signal, shape (T + 1,).
         - ns_y : Noise variance profile for the y signal, shape (T + 1,).
     """

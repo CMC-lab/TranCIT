@@ -182,4 +182,4 @@ for i in ca3_channels:
             f"Completed {num_channel_pairs_processed}/{num_total_channel_pairs} channel pairs"
         )
 
-print(f"\n--- Analysis Complete ---")
+print("\n--- Analysis Complete ---")

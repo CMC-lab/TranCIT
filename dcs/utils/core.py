@@ -138,7 +138,8 @@ def compute_event_statistics(
     Dict[str, Union[np.ndarray, Dict]]
         Dictionary containing the conditional statistics:
             - 'mean': Mean of the events (shape: (nvar * (model_order + 1), time_points))
-            - 'Sigma': Covariance matrices (shape: (time_points, nvar * (model_order + 1), nvar * (model_order + 1)))
+            - 'Sigma': Covariance matrices
+              (shape: (time_points, nvar * (model_order + 1), nvar * (model_order + 1)))
             - 'OLS': Dictionary with:
                 - 'At': OLS coefficients (shape: (time_points, nvar, nvar * model_order))
                 - 'bt': Residual biases

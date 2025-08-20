@@ -207,7 +207,8 @@ class BICSelector:
         sum_log_det_hessian = np.sum(log_det_hessian)
 
         logger.debug(
-            f"Model order {model_order}: log_likelihood={log_likelihood:.4f}, sum_log_det_hessian={sum_log_det_hessian:.4f}"
+            f"Model order {model_order}: log_likelihood={log_likelihood:.4f}, "
+            f"sum_log_det_hessian={sum_log_det_hessian:.4f}"
         )
 
         return log_likelihood, sum_log_det_hessian

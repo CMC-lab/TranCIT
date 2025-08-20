@@ -103,7 +103,7 @@ except ImportError:
 
 
 # Public API definition
-_public_api = [
+__all__ = [
     # Core utilities
     "extract_event_snapshots",
     "compute_event_statistics",
@@ -123,10 +123,8 @@ _public_api = [
     "compute_covariances",
     "estimate_coefficients",
     "compute_multi_variable_linear_regression",
+    # Plotting utilities
+    "fill_std_known",
 ]
 
-# Add plotting function if available
-if _plotting_available:
-    _public_api.append("fill_std_known")
-
-__all__ = _public_api
+# Note: __all__ is defined above and includes all public functions

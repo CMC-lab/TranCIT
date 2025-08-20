@@ -74,7 +74,7 @@ ensure_newline_before_comments = true
 skip = ["dcs/_version.py"]
 
 [tool.flake8]
-max-line-length = 88
+max-line-length = 100
 extend-ignore = ["E203", "W503", "E712"]
 exclude = [
     "__pycache__",

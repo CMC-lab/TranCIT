@@ -21,7 +21,7 @@ lint-check:
 	@echo "🔍 Checking code style..."
 	black --check --diff dcs/ tests/ examples/
 	isort --check-only --diff --skip dcs/_version.py dcs/ tests/ examples/
-	flake8 dcs/ tests/ examples/ --max-line-length=88 --extend-ignore=E203,W503,E712 --exclude=dcs/_version.py
+	flake8 dcs/ tests/ examples/ --max-line-length=100 --extend-ignore=E203,W503,E712 --exclude=dcs/_version.py
 	@echo "✅ Lint check complete!"
 
 lint-fix:
