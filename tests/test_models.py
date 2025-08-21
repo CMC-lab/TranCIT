@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 
+from dcs.core.exceptions import ValidationError
 from dcs.models import VAREstimator
 from dcs.simulation import generate_ensemble_nonstat_innomean
-from dcs.core.exceptions import ValidationError
 
 
 # --- Setup function for generating data (optional, makes tests cleaner) ---
