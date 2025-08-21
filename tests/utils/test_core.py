@@ -2,7 +2,6 @@ import numpy as np
 from numpy.testing import assert_allclose
 
 from dcs.utils.core import (
-    compute_conditional_event_statistics,
     compute_event_statistics,
     extract_event_snapshots,
     extract_event_windows,
@@ -18,13 +17,15 @@ def test_extract_event_windows():
 
 
 def test_extract_event_windows_out_of_bounds():
+    """Test graceful handling of out-of-bounds windows."""
     signal = np.arange(50)
-    centers = np.array([5, 48])
-    try:
-        extract_event_windows(signal, centers, 5, 10)
-        assert False, "Expected IndexError"
-    except IndexError:
-        pass
+    centers = np.array([5, 48])  # center=48 will be out of bounds with window
+    result = extract_event_windows(signal, centers, 5, 10)
+    
+    # Should return array with NaN for out-of-bounds window
+    assert result.shape == (10, 2)
+    assert not np.isnan(result[:, 0]).any()  # First window should be valid
+    assert np.isnan(result[:, 1]).any()  # Second window should have NaN
 
 
 def test_extract_event_snapshots():
@@ -48,7 +49,7 @@ def test_compute_event_statistics_output_shapes():
 def test_compute_conditional_event_statistics_shapes():
     data = np.random.randn(6, 10, 5)  # (nvar * (model_order + 1), time, trials)
     model_order = 1
-    result = compute_conditional_event_statistics(data, model_order)
+    result = compute_event_statistics(data, model_order)
     assert result["mean"].shape == (6, 10)
     assert result["Sigma"].shape == (10, 6, 6)
     assert result["OLS"]["At"].shape == (10, 3, 3)

@@ -39,6 +39,9 @@ Repository = "https://github.com/CMC-lab/dcs"
 requires = ["setuptools>=64.0", "setuptools_scm>=8.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+packages = ["dcs"]
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
