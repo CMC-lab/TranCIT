@@ -144,7 +144,7 @@ def compute_covariances(
     except Exception as e:
         logger.error(f"Covariance computation failed: {e}")
         raise ComputationError(
-            f"Covariance computation failed: {e}", "covariance_computation", None
+            f"Covariance computation failed: {e}", "covariance_computation", ()
         )
 
 

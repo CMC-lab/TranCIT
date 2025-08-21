@@ -234,7 +234,7 @@ def compute_event_statistics(
                 raise ComputationError(
                     f"Statistics computation failed at time {t}",
                     "statistics_computation",
-                    t,
+                    (t,),
                 )
 
         stats["OLS"]["bt"], stats["OLS"]["Sigma_Et"], stats["OLS"]["sigma_Et"] = (
@@ -249,7 +249,7 @@ def compute_event_statistics(
     except Exception as e:
         logger.error(f"Statistics computation failed: {e}")
         raise ComputationError(
-            f"Statistics computation failed: {e}", "statistics_computation", None
+            f"Statistics computation failed: {e}", "statistics_computation", ()
         )
 
 
@@ -670,4 +670,4 @@ def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray,
 
     except Exception as e:
         logger.error(f"DeSnap analysis failed: {e}")
-        raise ComputationError(f"DeSnap analysis failed: {e}", "desnap_analysis", None)
+        raise ComputationError(f"DeSnap analysis failed: {e}", "desnap_analysis", ())

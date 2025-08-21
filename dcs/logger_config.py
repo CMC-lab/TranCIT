@@ -1,5 +1,6 @@
 import logging
 import sys
+from typing import Optional
 
 LOG_LEVEL_DEFAULT = logging.INFO
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -8,12 +9,12 @@ LOGGER_NAME = "dcs"
 
 
 def setup_logging(
-    name=LOGGER_NAME,
-    level=LOG_LEVEL_DEFAULT,
-    log_format=LOG_FORMAT,
-    date_format=DATE_FORMAT,
-    log_file=None,
-):
+    name: str = LOGGER_NAME,
+    level: int = LOG_LEVEL_DEFAULT,
+    log_format: str = LOG_FORMAT,
+    date_format: str = DATE_FORMAT,
+    log_file: Optional[str] = None,
+) -> logging.Logger:
     """
     Configures logging for the 'dcs' package.
 

@@ -211,7 +211,7 @@ class PipelineOrchestrator(BaseAnalyzer):
 
         except Exception as e:
             logger.error(f"Stage {stage_name} failed: {e}")
-            raise ComputationError(f"Stage {stage_name} failed: {e}", stage_name, None)
+            raise ComputationError(f"Stage {stage_name} failed: {e}", stage_name, ())
 
     def _validate_input_data(self, data: np.ndarray) -> None:
         """Validate input data format and dimensions."""
