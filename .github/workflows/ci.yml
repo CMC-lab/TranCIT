@@ -34,7 +34,7 @@ jobs:
         run: |
           black --check --diff dcs/ tests/ examples/
           isort --check-only --diff --skip dcs/_version.py dcs/ tests/ examples/
-          flake8 dcs/ tests/ examples/ --max-line-length=100 --extend-ignore=E203,W503,E712 --exclude=dcs/_version.py
+          flake8 dcs/ tests/ examples/ --max-line-length=88 --extend-ignore=E203,W503,E712 --exclude=dcs/_version.py
 
       - name: Run type checking
         run: |
@@ -101,9 +101,3 @@ jobs:
         run: |
           cd docs
           make html
-
-      - name: Deploy to ReadTheDocs
-        uses: readthedocs/actions/deploy@v1
-        with:
-          readthedocs-project-name: dynamic-causal-strength
-          readthedocs-token: ${{ secrets.READTHEDOCS_TOKEN }}
