@@ -24,6 +24,16 @@ lint-check:
 	flake8 dcs/ tests/ examples/ --max-line-length=100 --extend-ignore=E203,W503,E712 --exclude=dcs/_version.py
 	@echo "✅ Lint check complete!"
 
+type-check:
+	@echo "🔍 Checking types with acceptable threshold..."
+	python run_mypy_with_threshold.py
+	@echo "✅ Type check complete!"
+
+type-check-simple:
+	@echo "🔍 Running simple type check (research code friendly)..."
+	mypy dcs/ --config-file=mypy_simple.ini
+	@echo "✅ Simple type check complete!"
+
 lint-fix:
 	@echo "🔧 Auto-fixing linting issues..."
 	python fix_linting.py

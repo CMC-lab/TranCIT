@@ -173,7 +173,9 @@ class RelativeDCSCalculator(BaseAnalyzer):
                 self.config["estimation_mode"],
             )
 
-    def _validate_input_data(self, event_data: np.ndarray, stats: Dict) -> None:  # type: ignore[override]
+    def _validate_input_data(  # type: ignore[override]
+        self, event_data: np.ndarray, stats: Dict
+    ) -> None:
         """Validate input data format and dimensions."""
         super()._validate_input_data(event_data)
 
