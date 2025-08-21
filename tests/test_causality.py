@@ -20,7 +20,7 @@ from dcs.causality import (
     TransferEntropyResult,
     time_varying_causality,
 )
-from dcs.core.exceptions import ValidationError, ComputationError
+from dcs.core.exceptions import ComputationError, ValidationError
 
 
 @pytest.fixture
