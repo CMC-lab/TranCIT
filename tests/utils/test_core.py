@@ -21,7 +21,7 @@ def test_extract_event_windows_out_of_bounds():
     signal = np.arange(50)
     centers = np.array([5, 48])  # center=48 will be out of bounds with window
     result = extract_event_windows(signal, centers, 5, 10)
-    
+
     # Should return array with NaN for out-of-bounds window
     assert result.shape == (10, 2)
     assert not np.isnan(result[:, 0]).any()  # First window should be valid

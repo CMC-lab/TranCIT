@@ -150,7 +150,9 @@ def test_estimate_var_coeffs_invalid_nobs(valid_data):
 def test_estimate_var_coeffs_invalid_time_mode(valid_data):
     """Test error for invalid time_mode."""
     with pytest.raises(ValidationError, match="time_mode must be"):
-        estimator = VAREstimator(model_order=1, time_mode="inhomo")  # This will be overridden
+        estimator = VAREstimator(
+            model_order=1, time_mode="inhomo"
+        )  # This will be overridden
         estimator.estimate_var_coefficients(valid_data, 1, 1, "bad_mode", "var")
 
 
