@@ -238,9 +238,9 @@ class TestPipelineStages:
         # Mock the BIC computation since it requires proper data setup
         with patch("dcs.models.bic_selection.BICSelector") as mock_selector:
             mock_bic = MagicMock()
-            mock_bic.compute_multi_trial_BIC.return_value = {
+            mock_bic._compute_multi_trial_bic.return_value = {
                 "BIC": np.array([10.0, 8.0, 12.0, 15.0]),
-                "morder": 2,
+                "mobic": [1.0, 2.0],  # BIC expects [index, selected_model_order]
             }
             mock_selector.return_value = mock_bic
 
@@ -256,7 +256,8 @@ class TestPipelineStages:
         stage = StatisticsComputationStage(full_config)
 
         # Create mock event snapshots
-        event_snapshots = np.random.randn(2, 50, 20)  # (n_vars, n_obs, n_trials)
+        # With model_order=4 and n_vars=2, first dim should be n_vars*(model_order+1) = 2*(4+1) = 10
+        event_snapshots = np.random.randn(10, 50, 20)  # (n_vars*(morder+1), n_obs, n_trials)
 
         with patch("dcs.utils.core.compute_event_statistics") as mock_stats:
             mock_stats.return_value = {
@@ -297,7 +298,10 @@ class TestPipelineStages:
             }
 
             result = stage.execute(
-                event_data=event_data, event_stats=event_stats, morder=4
+                event_data=event_data, 
+                event_stats=event_stats, 
+                event_snapshots=event_data,  # Add the missing event_snapshots
+                morder=4
             )
 
             assert "causal_output" in result
@@ -353,18 +357,15 @@ class TestPipelineErrorHandling:
 
     def test_invalid_config_handling(self):
         """Test handling of invalid configuration."""
-        # Create config with missing required parameters
-        invalid_config = PipelineConfig(
-            options=PipelineOptions(detection=False),  # detection off
-            detection=DetectionParams(locs=None),  # but no locations provided
-            bic=BicParams(),
-            causal=CausalParams(),
-            output=OutputParams(),
-        )
-
         # Should raise validation error during config validation
         with pytest.raises(ValueError, match="detection.locs must be provided"):
-            PipelineOrchestrator(invalid_config)
+            PipelineConfig(
+                options=PipelineOptions(detection=False),  # detection off
+                detection=DetectionParams(thres_ratio=1.0, align_type="peak", l_extract=30, l_start=15, locs=None),  # but no locations provided
+                bic=BicParams(morder=4),
+                causal=CausalParams(ref_time=25),
+                output=OutputParams(file_keyword="test"),
+            )
 
 
 if __name__ == "__main__":

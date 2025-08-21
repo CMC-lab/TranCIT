@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+from dcs.core.exceptions import ValidationError
 from dcs.utils.preprocess import regularize_if_singular, remove_artifact_trials
 
 
@@ -45,7 +46,7 @@ def test_regularize_if_singular_non_square_matrix():
     Test that a non-square matrix raises a ValueError.
     """
     non_square_matrix = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
-    with pytest.raises(ValueError, match="Input matrix must be square"):
+    with pytest.raises(ValidationError, match="matrix must be square"):
         regularize_if_singular(non_square_matrix)
 
 
