@@ -1,13 +1,20 @@
 include README.md
 include LICENSE
 include CITATION.cff
-include CONTRIBUTING.md
 include pyproject.toml
-include setup.py
 
-# Include your docs and examples
-recursive-include docs *
-recursive-include examples *
+# Include package data
+recursive-include dcs *.py *.typed
 
-# Include static files or other package data
-global-include *.txt *.rst *.md
+# Exclude development files from distribution
+prune tests
+prune tools  
+prune docs
+prune examples
+prune venv
+prune .github
+prune .pytest_cache
+prune *.egg-info
+prune build
+prune dist
+global-exclude *.pyc __pycache__
