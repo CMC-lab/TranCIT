@@ -257,7 +257,9 @@ class TestPipelineStages:
 
         # Create mock event snapshots
         # With model_order=4 and n_vars=2, first dim should be n_vars*(model_order+1) = 2*(4+1) = 10
-        event_snapshots = np.random.randn(10, 50, 20)  # (n_vars*(morder+1), n_obs, n_trials)
+        event_snapshots = np.random.randn(
+            10, 50, 20
+        )  # (n_vars*(morder+1), n_obs, n_trials)
 
         with patch("dcs.utils.core.compute_event_statistics") as mock_stats:
             mock_stats.return_value = {
@@ -298,10 +300,10 @@ class TestPipelineStages:
             }
 
             result = stage.execute(
-                event_data=event_data, 
-                event_stats=event_stats, 
+                event_data=event_data,
+                event_stats=event_stats,
                 event_snapshots=event_data,  # Add the missing event_snapshots
-                morder=4
+                morder=4,
             )
 
             assert "causal_output" in result
@@ -361,7 +363,13 @@ class TestPipelineErrorHandling:
         with pytest.raises(ValueError, match="detection.locs must be provided"):
             PipelineConfig(
                 options=PipelineOptions(detection=False),  # detection off
-                detection=DetectionParams(thres_ratio=1.0, align_type="peak", l_extract=30, l_start=15, locs=None),  # but no locations provided
+                detection=DetectionParams(
+                    thres_ratio=1.0,
+                    align_type="peak",
+                    l_extract=30,
+                    l_start=15,
+                    locs=None,
+                ),  # but no locations provided
                 bic=BicParams(morder=4),
                 causal=CausalParams(ref_time=25),
                 output=OutputParams(file_keyword="test"),

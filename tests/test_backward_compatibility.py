@@ -195,7 +195,9 @@ class TestIntegrationScenarios:
         """Test end-to-end causality analysis workflow."""
         # Generate synthetic data with known causal structure
         np.random.seed(123)
-        data, _, _ = generate_signals(T=150, Ntrial=8, h=0.1, gamma1=0.5, gamma2=0.5, Omega1=1.0, Omega2=1.2)
+        data, _, _ = generate_signals(
+            T=150, Ntrial=8, h=0.1, gamma1=0.5, gamma2=0.5, Omega1=1.0, Omega2=1.2
+        )
 
         # Perform DCS analysis
         calculator = DCSCalculator(model_order=3, time_mode="inhomo")
@@ -218,7 +220,9 @@ class TestIntegrationScenarios:
     def test_pipeline_with_different_configurations(self):
         """Test pipeline with various configuration options."""
         np.random.seed(456)
-        data, _, _ = generate_signals(T=120, Ntrial=6, h=0.1, gamma1=0.5, gamma2=0.5, Omega1=1.0, Omega2=1.2)
+        data, _, _ = generate_signals(
+            T=120, Ntrial=6, h=0.1, gamma1=0.5, gamma2=0.5, Omega1=1.0, Omega2=1.2
+        )
         original_signal = np.mean(data, axis=2)
         detection_signal = original_signal * 1.5
 
@@ -290,8 +294,12 @@ class TestRegressionPrevention:
         result = calculator.analyze(data)
 
         # Check that results have expected shapes (relax non-negative requirement due to implementation issues)
-        assert result.causal_strength.shape[1] == 2, "DCS should have 2 directional values"
-        assert result.transfer_entropy.shape[1] == 2, "TE should have 2 directional values"
+        assert (
+            result.causal_strength.shape[1] == 2
+        ), "DCS should have 2 directional values"
+        assert (
+            result.transfer_entropy.shape[1] == 2
+        ), "TE should have 2 directional values"
         # Note: Current implementation may produce negative/NaN values due to numerical issues
 
     def test_causality_measures_finite(self):
@@ -303,9 +311,15 @@ class TestRegressionPrevention:
         result = calculator.analyze(data)
 
         # Check that results have expected shapes and are not all NaN
-        assert result.causal_strength.shape[1] == 2, "DCS should have 2 directional values"
-        assert result.transfer_entropy.shape[1] == 2, "TE should have 2 directional values"
-        assert result.granger_causality.shape[1] == 2, "GC should have 2 directional values"
+        assert (
+            result.causal_strength.shape[1] == 2
+        ), "DCS should have 2 directional values"
+        assert (
+            result.transfer_entropy.shape[1] == 2
+        ), "TE should have 2 directional values"
+        assert (
+            result.granger_causality.shape[1] == 2
+        ), "GC should have 2 directional values"
         assert result.coefficients.ndim == 3, "Coefficients should be 3D array"
         # Note: Current implementation may produce NaN/infinite values due to numerical issues
 

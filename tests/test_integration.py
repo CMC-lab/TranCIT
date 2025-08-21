@@ -226,7 +226,9 @@ class TestErrorHandlingIntegration:
                 np.random.randn(2, 100), np.random.randn(2, 80)  # Different length
             )
 
-    @pytest.mark.skip(reason="Current implementation may not properly validate insufficient data constraints")
+    @pytest.mark.skip(
+        reason="Current implementation may not properly validate insufficient data constraints"
+    )
     def test_insufficient_data_handling(self):
         """Test handling of insufficient data scenarios."""
         # Very short signals
@@ -250,7 +252,9 @@ class TestConfigurationIntegration:
             # Minimal config
             PipelineConfig(
                 options=PipelineOptions(detection=True),
-                detection=DetectionParams(thres_ratio=1.0, align_type="peak", l_extract=30, l_start=15),
+                detection=DetectionParams(
+                    thres_ratio=1.0, align_type="peak", l_extract=30, l_start=15
+                ),
                 bic=BicParams(morder=4),
                 causal=CausalParams(ref_time=25),
                 output=OutputParams(file_keyword="test1"),
@@ -258,7 +262,9 @@ class TestConfigurationIntegration:
             # BIC-enabled config
             PipelineConfig(
                 options=PipelineOptions(detection=True, bic=True),
-                detection=DetectionParams(thres_ratio=2.0, align_type="peak", l_extract=50, l_start=25),
+                detection=DetectionParams(
+                    thres_ratio=2.0, align_type="peak", l_extract=50, l_start=25
+                ),
                 bic=BicParams(morder=3, momax=5, tau=1, mode="biased"),
                 causal=CausalParams(ref_time=25),
                 output=OutputParams(file_keyword="test2"),

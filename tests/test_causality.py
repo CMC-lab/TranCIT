@@ -92,7 +92,9 @@ class TestDCSCalculator:
         assert result.coefficients.shape[1] == 2  # n_vars
         assert result.te_residual_cov.shape[1] == 2
 
-    @pytest.mark.skip(reason="Homogeneous mode currently broken due to dimension mismatch in estimate_coefficients")
+    @pytest.mark.skip(
+        reason="Homogeneous mode currently broken due to dimension mismatch in estimate_coefficients"
+    )
     def test_analyze_homogeneous_mode(self, sample_bivariate_data):
         """Test DCS analysis in homogeneous mode."""
         calculator = DCSCalculator(model_order=2, time_mode="homo")
