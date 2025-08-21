@@ -209,7 +209,7 @@ def regularize_if_singular(
     except Exception as e:
         logger.error(f"Matrix regularization failed: {e}")
         raise ComputationError(
-            f"Matrix regularization failed: {e}", "matrix_regularization", None
+            f"Matrix regularization failed: {e}", "matrix_regularization", ()
         )
 
 

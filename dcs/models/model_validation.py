@@ -186,7 +186,7 @@ class ModelValidator(BaseAnalyzer):
                 self.config["stability_threshold"],
             )
 
-    def _validate_input_data(
+    def _validate_input_data(  # type: ignore[override]
         self, coefficients: np.ndarray, residuals: np.ndarray, design_matrix: np.ndarray
     ) -> None:
         """Validate input data format and dimensions."""

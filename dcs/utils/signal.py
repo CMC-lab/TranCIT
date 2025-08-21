@@ -88,7 +88,7 @@ def shrink_locations_resample_uniform(
         logger.error("Negative min_distance provided.")
         raise ValueError("min_distance must be non-negative.")
 
-    selected_locations = []
+    selected_locations: list[int] = []
     available_locations = locations.copy()
     max_number_generation = len(available_locations)
     logger.debug(

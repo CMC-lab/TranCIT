@@ -5,7 +5,7 @@ This module provides functions for simulating vector autoregressive processes,
 including non-stationary and ensemble variants.
 """
 
-from typing import Tuple
+from typing import Tuple, Union
 
 import numpy as np
 
@@ -89,7 +89,7 @@ def generate_var_nonstat(
         nvar, L_event + morder
     )  # "SIG" is actually Cholesky matrix
     if L_perturb == 1:
-        Imp_shape = amp * 1
+        Imp_shape: Union[float, np.ndarray] = amp * 1
     else:
         Imp_shape = amp * morlet(-4, 4, L_perturb)  # 101 point long morlet wave
 
