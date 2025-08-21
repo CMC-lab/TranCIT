@@ -61,7 +61,8 @@ def test_estimate_var_coefficients_recover_var1_params():
     # Coefficients are time-varying in 'inhomo' mode. Average them for comparison.
     A_est_mean = np.mean(coeffs_est, axis=0)
 
-    # Check if estimated A is close to true A (allow some tolerance for numerical precision)
+    # Check if estimated A is close to true A (allow some tolerance for
+    # numerical precision)
     np.testing.assert_allclose(A_est_mean, A_true, atol=0.3)
 
     # Check residual covariance Omega (should be close to SIG @ SIG.T)

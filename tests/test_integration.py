@@ -166,7 +166,8 @@ class TestFullPipelineIntegration:
                 assert np.all(np.isfinite(result.causal_strength))
 
             except Exception as e:
-                # Some configurations might fail due to insufficient data or numerical issues
+                # Some configurations might fail due to insufficient data or
+                # numerical issues
                 pytest.skip(f"Configuration {i} failed: {e}")
 
     def test_data_flow_consistency(self, sample_data: Tuple[np.ndarray, np.ndarray]):
@@ -227,7 +228,8 @@ class TestErrorHandlingIntegration:
             )
 
     @pytest.mark.skip(
-        reason="Current implementation may not properly validate insufficient data constraints"
+        reason="Current implementation may not properly validate insufficient "
+        "data constraints"
     )
     def test_insufficient_data_handling(self):
         """Test handling of insufficient data scenarios."""

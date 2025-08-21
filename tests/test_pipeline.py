@@ -256,7 +256,8 @@ class TestPipelineStages:
         stage = StatisticsComputationStage(full_config)
 
         # Create mock event snapshots
-        # With model_order=4 and n_vars=2, first dim should be n_vars*(model_order+1) = 2*(4+1) = 10
+        # With model_order=4 and n_vars=2, first dim should be
+        # n_vars*(model_order+1) = 2*(4+1) = 10
         event_snapshots = np.random.randn(
             10, 50, 20
         )  # (n_vars*(morder+1), n_obs, n_trials)

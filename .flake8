@@ -1,0 +1,12 @@
+[flake8]
+max-line-length = 88
+extend-ignore = E203, W503, E712
+exclude = 
+    __pycache__,
+    *.egg-info,
+    build,
+    dist,
+    .git,
+    .pytest_cache,
+    .mypy_cache,
+    dcs/_version.py

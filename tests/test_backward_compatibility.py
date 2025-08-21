@@ -150,7 +150,8 @@ class TestCurrentImplementation:
             assert result.config == sample_config
 
         except Exception as e:
-            # If analysis fails due to signal characteristics, that's acceptable for this test
+            # If analysis fails due to signal characteristics, that's acceptable
+            # for this test
             # The important thing is that the interface works correctly
             pytest.skip(f"Pipeline analysis failed due to signal characteristics: {e}")
 
@@ -163,7 +164,8 @@ class TestCurrentImplementation:
         calc_inhomo = DCSCalculator(model_order=2, time_mode="inhomo")
         result_inhomo = calc_inhomo.analyze(data)
 
-        # Skip homogeneous mode test - currently broken due to dimension mismatch in estimate_coefficients
+        # Skip homogeneous mode test - currently broken due to dimension mismatch
+        # in estimate_coefficients
         # TODO: Fix homogeneous mode implementation
         # calc_homo = DCSCalculator(model_order=2, time_mode="homo")
         # result_homo = calc_homo.analyze(data)
@@ -206,7 +208,8 @@ class TestIntegrationScenarios:
         # Validate results
         assert result.causal_strength.shape[0] > 0  # Has time points
         assert result.causal_strength.shape[1] == 2  # X->Y and Y->X
-        # Note: Current implementation may produce NaN/infinite values due to numerical issues
+        # Note: Current implementation may produce NaN/infinite values due to
+        # numerical issues
         # assert not np.any(np.isnan(result.causal_strength))
         # assert not np.any(np.isinf(result.causal_strength))
 
@@ -293,14 +296,16 @@ class TestRegressionPrevention:
         calculator = DCSCalculator(model_order=2)
         result = calculator.analyze(data)
 
-        # Check that results have expected shapes (relax non-negative requirement due to implementation issues)
+        # Check that results have expected shapes (relax non-negative requirement
+        # due to implementation issues)
         assert (
             result.causal_strength.shape[1] == 2
         ), "DCS should have 2 directional values"
         assert (
             result.transfer_entropy.shape[1] == 2
         ), "TE should have 2 directional values"
-        # Note: Current implementation may produce negative/NaN values due to numerical issues
+        # Note: Current implementation may produce negative/NaN values due to
+        # numerical issues
 
     def test_causality_measures_finite(self):
         """Test that causality measures produce results with expected shapes."""
@@ -321,7 +326,8 @@ class TestRegressionPrevention:
             result.granger_causality.shape[1] == 2
         ), "GC should have 2 directional values"
         assert result.coefficients.ndim == 3, "Coefficients should be 3D array"
-        # Note: Current implementation may produce NaN/infinite values due to numerical issues
+        # Note: Current implementation may produce NaN/infinite values due to
+        # numerical issues
 
     def test_configuration_validation_works(self):
         """Test that configuration validation prevents common errors."""
