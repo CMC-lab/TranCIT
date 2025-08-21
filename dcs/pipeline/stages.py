@@ -287,7 +287,8 @@ class ArtifactRemovalStage(PipelineStage):
                 removed_count = event_snapshots.shape[2] - cleaned_snapshots.shape[2]
                 if removed_count > 0:
                     logger.info(
-                        f"Removed {removed_count} artifact trials. {cleaned_snapshots.shape[2]} trials remaining."
+                        f"Removed {removed_count} artifact trials. "
+                        f"{cleaned_snapshots.shape[2]} trials remaining."
                     )
                     event_snapshots = cleaned_snapshots
                     locs = cleaned_locs

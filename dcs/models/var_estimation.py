@@ -180,7 +180,8 @@ class VAREstimator:
 
         if n_observations <= model_order:
             raise ValidationError(
-                f"Number of observations ({n_observations}) must be greater than model_order ({model_order})",
+                f"Number of observations ({n_observations}) must be greater "
+                f"than model_order ({model_order})",
                 "n_observations_vs_model_order",
                 (n_observations, model_order),
             )

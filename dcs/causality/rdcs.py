@@ -213,7 +213,8 @@ def time_varying_causality(
     stats : Dict
         Model statistics with keys:
         - 'OLS' or 'RLS': Sub-dict with 'At' (coefficients) and 'Sigma_Et' (residual covariance).
-        - 'Sigma': Covariance matrices of shape (nobs, nvar * (model_order + 1), nvar * (model_order + 1)).
+        - 'Sigma': Covariance matrices of shape
+          (nobs, nvar * (model_order + 1), nvar * (model_order + 1)).
         - 'mean': Mean values of shape (nvar * (model_order + 1), nobs).
     causal_params : Dict
         Parameters with keys:
@@ -229,7 +230,8 @@ def time_varying_causality(
         Causality measures:
         - 'TE': Transfer Entropy, shape (nobs, 2) where [:, 0] is Y->X, [:, 1] is X->Y.
         - 'DCS': Dynamic Causal Strength, shape (nobs, 2) where [:, 0] is Y->X, [:, 1] is X->Y.
-        - 'rDCS': Relative Dynamic Causal Strength, shape (nobs, 2) where [:, 0] is Y->X, [:, 1] is X->Y.
+        - 'rDCS': Relative Dynamic Causal Strength, shape (nobs, 2)
+          where [:, 0] is Y->X, [:, 1] is X->Y.
 
     Raises
     ------
@@ -250,7 +252,10 @@ def time_varying_causality(
     --------
     >>> event_data = np.random.randn(6, 50, 10)  # (nvar * (morder + 1), nobs, ntrials)
     >>> stats = {
-    ...     'OLS': {'At': np.random.randn(50, 2, 4), 'Sigma_Et': np.array([np.eye(2) for _ in range(50)])},
+    ...     'OLS': {
+    ...         'At': np.random.randn(50, 2, 4),
+    ...         'Sigma_Et': np.array([np.eye(2) for _ in range(50)])
+    ...     },
     ...     'Sigma': np.random.randn(50, 6, 6),
     ...     'mean': np.random.randn(6, 50)
     ... }

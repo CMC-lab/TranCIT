@@ -84,7 +84,8 @@ def get_residuals(event_data: np.ndarray, stats: Dict) -> np.ndarray:
 
         if coeff.shape[1] != Xp.shape[0]:
             raise ValueError(
-                f"Shape mismatch at time {t}: coeff.shape[1]={coeff.shape[1]}, Xp.shape[0]={Xp.shape[0]}"
+                f"Shape mismatch at time {t}: coeff.shape[1]={coeff.shape[1]}, "
+                f"Xp.shape[0]={Xp.shape[0]}"
             )
 
         residuals[:, t, :] = Xt - np.dot(coeff, Xp)

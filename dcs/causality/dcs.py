@@ -414,7 +414,8 @@ class DCSCalculator(BaseAnalyzer):
         result_arrays["granger_causality"][0, 0] = np.log(sigx_r / sigx)
 
     def _adjust_outputs_for_inhomo(self, result_arrays: Dict[str, np.ndarray]) -> None:
-        """Adjust outputs for inhomogeneous mode by adding NaN blocks exactly like the previous implementation."""
+        """Adjust outputs for inhomogeneous mode by adding NaN blocks exactly
+        like the previous implementation."""
         if self.config["time_mode"] == "inhomo":
             nan_block = np.full((self.config["model_order"], 2), np.nan)
             result_arrays["granger_causality"] = np.vstack(

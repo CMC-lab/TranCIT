@@ -78,7 +78,10 @@ config = PipelineConfig(
 print("--- Pipeline Configuration ---")
 print(config)
 
-event_rdcs_dir = "/Users/sali/Documents/Projects/cmcLab/repos/rtdac/localdata/causal_analysis/event_rdcs/"
+event_rdcs_dir = (
+    "/Users/sali/Documents/Projects/cmcLab/repos/rtdac/localdata/"
+    "causal_analysis/event_rdcs/"
+)
 sess_name = "vvp01_2006-4-9_18-43-47"
 ca3_mat_path = os.path.join(event_rdcs_dir, f"{sess_name}_CA3.mat")
 ca1_mat_path = os.path.join(event_rdcs_dir, f"{sess_name}_CA1.mat")
@@ -159,7 +162,8 @@ for i in ca3_channels:
 
             config.output.file_keyword = os.path.join(
                 config.output.save_path,
-                f"ca3_ca1_{sess_name}_chpair_{num_channel_pairs_processed}_{channel}_{config.detection.align_type}",
+                f"ca3_ca1_{sess_name}_chpair_{num_channel_pairs_processed}_"
+                f"{channel}_{config.detection.align_type}",
             )
 
             try:

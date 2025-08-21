@@ -74,7 +74,8 @@ def simulate_ar_event_bootstrap(
 
 def simulate_ar_event(simobj: Dict, Yt_stats: Dict) -> np.ndarray:
     """
-    Simulates AR events with non-stationary innovations using the specified simulation object and statistics.
+    Simulates AR events with non-stationary innovations using the specified
+    simulation object and statistics.
 
     Parameters:
     - simobj (dict): Simulation settings with fields:

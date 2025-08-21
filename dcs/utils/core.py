@@ -353,7 +353,8 @@ def extract_event_snapshots(
 
     if min_location < 0 or max_location >= n_time_points:
         raise IndexError(
-            f"Event locations {min_location}-{max_location} out of bounds for time series length {n_time_points}"
+            f"Event locations {min_location}-{max_location} out of bounds "
+            f"for time series length {n_time_points}"
         )
 
     try:
@@ -501,7 +502,9 @@ def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray,
             temp_loc = np.where(mask)[0]
 
             valid_locs = temp_loc.copy()
-            # valid_locs = valid_locs[inputs.original_signal.shape[0] - valid_locs >= inputs.l_extract - inputs.l_start]
+            # valid_locs = valid_locs[
+            #     inputs.original_signal.shape[0] - valid_locs >= inputs.l_extract - inputs.l_start
+            # ]
             # valid_locs = valid_locs[valid_locs - inputs.l_start - (inputs.morder * inputs.tau) >= 0]
 
             DeSnap_results["loc_size"][n] = len(valid_locs)
