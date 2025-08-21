@@ -113,9 +113,7 @@ def remove_artifact_trials(
 
     except Exception as e:
         logger.error(f"Artifact removal failed: {e}")
-        raise ComputationError(
-            f"Artifact removal failed: {e}", "artifact_removal", ()
-        )
+        raise ComputationError(f"Artifact removal failed: {e}", "artifact_removal", ())
 
 
 def regularize_if_singular(

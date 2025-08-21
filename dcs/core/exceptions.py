@@ -30,7 +30,9 @@ class DCSError(Exception):
 class ValidationError(DCSError):
     """Exception raised when input validation fails."""
 
-    def __init__(self, message: str, field: Optional[str] = None, value: Optional[Any] = None):
+    def __init__(
+        self, message: str, field: Optional[str] = None, value: Optional[Any] = None
+    ):
         """
         Initialize validation error.
 
@@ -51,7 +53,12 @@ class ValidationError(DCSError):
 class ComputationError(DCSError):
     """Exception raised when computation fails."""
 
-    def __init__(self, message: str, step: Optional[str] = None, data_shape: Optional[Tuple[Any, ...]] = None):
+    def __init__(
+        self,
+        message: str,
+        step: Optional[str] = None,
+        data_shape: Optional[Tuple[Any, ...]] = None,
+    ):
         """
         Initialize computation error.
 
@@ -72,7 +79,12 @@ class ComputationError(DCSError):
 class ConfigurationError(DCSError):
     """Exception raised when configuration is invalid."""
 
-    def __init__(self, message: str, config_key: Optional[str] = None, expected_type: Optional[str] = None):
+    def __init__(
+        self,
+        message: str,
+        config_key: Optional[str] = None,
+        expected_type: Optional[str] = None,
+    ):
         """
         Initialize configuration error.
 
@@ -93,7 +105,12 @@ class ConfigurationError(DCSError):
 class DataError(DCSError):
     """Exception raised when data is invalid or corrupted."""
 
-    def __init__(self, message: str, data_shape: Optional[Tuple[Any, ...]] = None, data_type: Optional[str] = None):
+    def __init__(
+        self,
+        message: str,
+        data_shape: Optional[Tuple[Any, ...]] = None,
+        data_type: Optional[str] = None,
+    ):
         """
         Initialize data error.
 
@@ -115,7 +132,10 @@ class ConvergenceError(ComputationError):
     """Exception raised when numerical algorithms fail to converge."""
 
     def __init__(
-        self, message: str, max_iterations: Optional[int] = None, tolerance: Optional[float] = None
+        self,
+        message: str,
+        max_iterations: Optional[int] = None,
+        tolerance: Optional[float] = None,
     ):
         """
         Initialize convergence error.
@@ -138,7 +158,10 @@ class SingularMatrixError(ComputationError):
     """Exception raised when encountering singular matrices."""
 
     def __init__(
-        self, message: str, matrix_shape: Optional[Tuple[Any, ...]] = None, condition_number: Optional[float] = None
+        self,
+        message: str,
+        matrix_shape: Optional[Tuple[Any, ...]] = None,
+        condition_number: Optional[float] = None,
     ):
         """
         Initialize singular matrix error.
