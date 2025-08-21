@@ -52,7 +52,8 @@ class BICSelector:
         """
         Calculate Bayesian Information Criterion (BIC) for multiple model orders across trial data.
 
-        This function computes BIC values for Vector Autoregression (VAR) models of orders 1 to momax,
+        This function computes BIC values for Vector Autoregression (VAR) models
+        of orders 1 to momax,
         supporting model selection with multiple BIC variants.
 
         Parameters

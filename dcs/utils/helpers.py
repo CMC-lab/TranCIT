@@ -154,7 +154,8 @@ def estimate_coefficients(
     """
     Compute regression coefficients and residual covariance for a VAR model.
 
-    This function estimates coefficients using ordinary least squares (OLS) and includes a bias term.
+    This function estimates coefficients using ordinary least squares (OLS)
+    and includes a bias term.
     The lagged data is augmented with a column of ones to account for the intercept.
 
     Parameters

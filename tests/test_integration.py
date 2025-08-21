@@ -103,7 +103,8 @@ class TestFullPipelineIntegration:
                     assert np.all(np.isfinite(causal_output["DCS"]))
 
         except Exception as e:
-            # Pipeline might fail due to signal characteristics - that's acceptable for integration test
+            # Pipeline might fail due to signal characteristics - that's acceptable
+            # for integration test
             pytest.skip(f"Pipeline failed due to signal characteristics: {e}")
 
     def test_causality_calculator_integration(self):

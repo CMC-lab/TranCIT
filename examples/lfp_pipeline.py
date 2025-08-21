@@ -173,12 +173,14 @@ for i in ca3_channels:
                     original_signal=yf, detection_signal=detection_signal_input
                 )
                 print(
-                    f"Pipeline completed for {channel} channel in pair {num_channel_pairs_processed}"
+                    f"Pipeline completed for {channel} channel "
+                    f"in pair {num_channel_pairs_processed}"
                 )
 
             except Exception as e:
                 print(
-                    f"Pipeline Error for {channel} channel in pair {num_channel_pairs_processed}: {e}"
+                    f"Pipeline Error for {channel} channel "
+                    f"in pair {num_channel_pairs_processed}: {e}"
                 )
 
         num_channel_pairs_processed += 1

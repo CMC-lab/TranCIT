@@ -128,7 +128,8 @@ def regularize_if_singular(
     Check if a matrix is singular and regularize it by adding epsilon to the diagonal if needed.
 
     This function checks if the determinant of the matrix is below a specified threshold.
-    If it is, the matrix is considered singular, and a small value (epsilon) is added to its diagonal
+    If it is, the matrix is considered singular, and a small value (epsilon)
+    is added to its diagonal
     to make it invertible. Otherwise, the original matrix is returned.
 
     Parameters

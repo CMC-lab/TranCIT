@@ -179,7 +179,8 @@ def compute_event_statistics(
     nvar = event_data.shape[0] // (model_order + 1)
     if event_data.shape[0] != nvar * (model_order + 1):
         raise ValidationError(
-            f"event_data shape {event_data.shape[0]} is not compatible with model_order {model_order}",
+            f"event_data shape {event_data.shape[0]} is not compatible "
+            f"with model_order {model_order}",
             "event_data_shape",
             event_data.shape,
         )
@@ -505,7 +506,9 @@ def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray,
             # valid_locs = valid_locs[
             #     inputs.original_signal.shape[0] - valid_locs >= inputs.l_extract - inputs.l_start
             # ]
-            # valid_locs = valid_locs[valid_locs - inputs.l_start - (inputs.morder * inputs.tau) >= 0]
+            # valid_locs = valid_locs[
+            #     valid_locs - inputs.l_start - (inputs.morder * inputs.tau) >= 0
+            # ]
 
             DeSnap_results["loc_size"][n] = len(valid_locs)
 
@@ -525,7 +528,8 @@ def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray,
                         )
                     else:
                         logger.warning(
-                            f"No snapshots extracted for bin {n+1} despite {len(valid_locs)} valid_locs"
+                            f"No snapshots extracted for bin {n+1} despite "
+                            f"{len(valid_locs)} valid_locs"
                         )
                 except Exception as e:
                     logger.error(f"Failed to extract snapshots for bin {n}: {e}")
