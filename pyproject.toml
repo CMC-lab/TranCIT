@@ -1,7 +1,7 @@
 [project]
-name = "dynamic-causal-strength"
+name = "trancit"
 dynamic = ["version"]
-description = "A Python package for quantifying causal relationships in multivariate time series data using dynamic causal strength (DCS) methods."
+description = "TranCIT: Transient Causal Interaction - A Python package for quantifying causal relationships in multivariate time series data."
 authors = [{ name = "Salar Nouri", email = "salr.nouri@gmail.com" }]
 maintainers = [{ name = "Salar Nouri", email = "salr.nouri@gmail.com" }]
 license = "BSD-2-Clause"
@@ -29,17 +29,17 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/CMC-lab/dcs"
-Documentation = "https://dynamic-causal-strength.readthedocs.io"
-Repository = "https://github.com/CMC-lab/dcs"
-"Bug Tracker" = "https://github.com/CMC-lab/dcs/issues"
+Homepage = "https://github.com/CMC-lab/TranCIT"
+Documentation = "https://trancit.readthedocs.io"
+Repository = "https://github.com/CMC-lab/TranCIT"
+"Bug Tracker" = "https://github.com/CMC-lab/TranCIT/issues"
 
 [build-system]
 requires = ["setuptools>=64.0", "setuptools_scm>=8.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = {find = {where = ["."], include = ["dcs*"]}}  # Only include dcs package
+packages = {find = {where = ["."], include = ["trancit*"]}}  # Only include trancit package
 
 [project.optional-dependencies]
 dev = [
@@ -59,7 +59,7 @@ docs = [
 test = ["pytest>=7.0", "pytest-cov>=4.0"]
 
 [tool.setuptools.package-data]
-"dcs" = ["py.typed"]
+"trancit" = ["py.typed"]
 
 [tool.black]
 line-length = 88
@@ -73,7 +73,7 @@ include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
-skip = ["dcs/_version.py"]
+skip = ["trancit/_version.py"]
 
 [tool.flake8]
 max-line-length = 100
@@ -86,7 +86,7 @@ exclude = [
     ".git",
     ".pytest_cache",
     ".mypy_cache",
-    "dcs/_version.py"
+    "trancit/_version.py"
 ]
 
 [tool.mypy]
@@ -100,9 +100,9 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --cov=dcs --cov-report=term-missing --cov-report=html"
+addopts = "-v --cov=trancit --cov-report=term-missing --cov-report=html"
 
 [tool.setuptools_scm]
-write_to = "dcs/_version.py"
+write_to = "trancit/_version.py"
 version_scheme = "post-release"
 local_scheme = "dirty-tag"

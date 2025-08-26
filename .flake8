@@ -9,4 +9,4 @@ exclude =
     .git,
     .pytest_cache,
     .mypy_cache,
-    dcs/_version.py
+    trancit/_version.py

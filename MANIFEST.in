@@ -4,7 +4,7 @@ include CITATION.cff
 include pyproject.toml
 
 # Include package data
-recursive-include dcs *.py *.typed
+recursive-include trancit *.py *.typed
 
 # Exclude development files from distribution
 prune tests

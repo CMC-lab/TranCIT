@@ -171,11 +171,11 @@ ehthumbs.db
 Thumbs.db
 
 # Project specific
-dcs/_version.py
+trancit/_version.py
 *.log
 htmlcov/
 .coverage
-dcs_log.txt
+trancit_log.txt
 
 # Temporary files
 *.tmp
