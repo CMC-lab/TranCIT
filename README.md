@@ -1,15 +1,15 @@
 
-# Dynamic Causal Strength (DCS)
+# TranCIT: Transient Causal Interaction
 
-[![PyPI version](https://img.shields.io/pypi/v/dynamic-causal-strength.svg)](https://pypi.org/project/dynamic-causal-strength/)
-[![License](https://img.shields.io/github/license/CMC-lab/dcs)](https://github.com/CMC-lab/dcs/blob/main/LICENSE)
-[![CI](https://github.com/CMC-lab/dcs/actions/workflows/ci.yml/badge.svg)](https://github.com/CMC-lab/dcs/actions/workflows/ci.yml)
-[![Documentation](https://readthedocs.org/projects/dynamic-causal-strength/badge/?version=latest)](https://dynamic-causal-strength.readthedocs.io/en/latest/)
+[![PyPI version](https://img.shields.io/pypi/v/trancit.svg)](https://pypi.org/project/trancit/)
+[![License](https://img.shields.io/github/license/CMC-lab/TranCIT)](https://github.com/CMC-lab/TranCIT/blob/main/LICENSE)
+[![CI](https://github.com/CMC-lab/TranCIT/actions/workflows/ci.yml/badge.svg)](https://github.com/CMC-lab/TranCIT/actions/workflows/ci.yml)
+[![Documentation](https://readthedocs.org/projects/trancit/badge/?version=latest)](https://trancit.readthedocs.io/en/latest/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 <!-- DOI Badge will be added after first Zenodo release -->
 <!-- [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXX) -->
 
-Dynamic Causal Strength (DCS) is a Python package for quantifying causal relationships in multivariate time series data. It provides methods for analyzing directional influences using model-based statistical tools, inspired by information-theoretic and autoregressive frameworks.
+TranCIT (Transient Causal Interaction) is a Python package for quantifying causal relationships in multivariate time series data. It provides methods for analyzing directional influences using model-based statistical tools, inspired by information-theoretic and autoregressive frameworks.
 
 ## 🚀 Features
 
@@ -28,22 +28,22 @@ Dynamic Causal Strength (DCS) is a Python package for quantifying causal relatio
 ### From PyPI (Recommended)
 
 ```bash
-pip install dynamic-causal-strength
+pip install trancit
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/CMC-lab/dcs.git
-cd dcs
+git clone https://github.com/CMC-lab/TranCIT.git
+cd TranCIT
 pip install -e .
 ```
 
 ### Development Installation
 
 ```bash
-git clone https://github.com/CMC-lab/dcs.git
-cd dcs
+git clone https://github.com/CMC-lab/TranCIT.git
+cd TranCIT
 pip install -e ".[dev]"
 ```
 
@@ -53,7 +53,7 @@ pip install -e ".[dev]"
 
 ```python
 import numpy as np
-from dcs import DCSCalculator, generate_signals
+from trancit import DCSCalculator, generate_signals
 
 # Generate synthetic data
 data, _, _ = generate_signals(T=1000, Ntrial=20, h=0.1, 
@@ -73,8 +73,8 @@ print(f"Transfer Entropy shape: {result.transfer_entropy.shape}")
 
 ```python
 import numpy as np
-from dcs import PipelineOrchestrator, generate_signals
-from dcs.config import PipelineConfig, PipelineOptions, DetectionParams, CausalParams
+from trancit import PipelineOrchestrator, generate_signals
+from trancit.config import PipelineConfig, PipelineOptions, DetectionParams, CausalParams
 
 # Generate data
 data, _, _ = generate_signals(T=1200, Ntrial=20, h=0.1, 
@@ -106,7 +106,7 @@ if result.results.get("CausalOutput"):
 
 ```python
 import numpy as np
-from dcs import VAREstimator, BICSelector, ModelValidator
+from trancit import VAREstimator, BICSelector, ModelValidator
 
 # Generate sample data
 data = np.random.randn(2, 1000, 20)  # (n_vars, n_obs, n_trials)
@@ -131,7 +131,7 @@ print(f"Model stable: {validation_result.model_stability}")
 
 For comprehensive documentation, tutorials, and API reference:
 
-👉 **[ReadTheDocs Documentation](https://dynamic-causal-strength.readthedocs.io)**
+👉 **[ReadTheDocs Documentation](https://trancit.readthedocs.io)**
 
 ### Examples
 
@@ -170,15 +170,15 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 ### Development Setup
 
 ```bash
-git clone https://github.com/CMC-lab/dcs.git
-cd dcs
+git clone https://github.com/CMC-lab/TranCIT.git
+cd TranCIT
 pip install -e ".[dev]"
 pre-commit install
 ```
 
 ## 📖 Citing This Work
 
-If you use **Dynamic Causal Strength (DCS)** in your research, please cite:
+If you use **TranCIT** in your research, please cite:
 
 ```bibtex
 @article{shao2023information,
@@ -196,10 +196,10 @@ And cite this software package:
 
 ```bibtex
 @software{nouri2025dynamic,
-  title={Dynamic Causal Strength (DCS): A Python package for quantifying causal relationships in multivariate time series data},
+  title={TranCIT: Transient Causal Interaction Toolbox},
   author={Nouri, Salar and Shao, Kaidi and Logothetis, Nikos K. and Besserve, Michel},
   year={2025},
-  url={https://github.com/CMC-lab/dcs},
+  url={https://github.com/CMC-lab/TranCIT},
   doi={10.5281/zenodo.XXXXXX}
 }
 ```
@@ -217,5 +217,5 @@ This project is licensed under the BSD 2-Clause License. See the [LICENSE](LICEN
 ## 📞 Contact
 
 - **Maintainer**: Salar Nouri (salr.nouri@gmail.com)
-- **Issues**: [GitHub Issues](https://github.com/CMC-lab/dcs/issues)
-- **Documentation**: [ReadTheDocs](https://dynamic-causal-strength.readthedocs.io)
+- **Issues**: [GitHub Issues](https://github.com/CMC-lab/TranCIT/issues)
+- **Documentation**: [ReadTheDocs](https://trancit.readthedocs.io)

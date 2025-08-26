@@ -1,6 +1,6 @@
-# Contributing to Dynamic Causal Strength (DCS)
+# Contributing to TranCIT: Transient Causal Interaction
 
-Thank you for considering contributing to the DCS project!
+Thank you for considering contributing to the TranCIT project!
 Your help is highly appreciated and essential for improving this package.
 
 Whether you're reporting bugs, suggesting features, improving documentation, or submitting code — you're welcome!
@@ -12,7 +12,7 @@ Whether you're reporting bugs, suggesting features, improving documentation, or 
 The main code is organized under:
 
 ```bash
-    dcs/
+    trancit/
 ```
 
 Docs are under:
@@ -34,15 +34,15 @@ Tests are typically under:
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/CMC-lab/dcs
-   cd dcs
+   git clone https://github.com/CMC-lab/TranCIT
+   cd TranCIT
    ```
 
 2. **Create a virtual environment**:
 
    ```bash
-   python -m venv dcs_env
-   source dcs_env/bin/activate
+   python -m venv trancit_env
+   source trancit_env/bin/activate
    ```
 
 3. **Install the package (editable mode) with dev dependencies**:
@@ -63,7 +63,7 @@ Tests are typically under:
 
 ### Bug Reports or Feature Requests
 
-- Use the [GitHub Issues](https://github.com/CMC-lab/dcs/issues) section.
+- Use the [GitHub Issues](https://github.com/CMC-lab/TranCIT/issues) section.
 - Please provide a clear description and, if possible, steps to reproduce the issue.
 
 ### Code Contributions
@@ -114,4 +114,4 @@ This project uses the BSD-2-Clause License. See [LICENSE](./LICENSE) for more de
 
 ---
 
-Thanks again for helping improve DCS! 🙏
+Thanks again for helping improve TranCIT! 🙏

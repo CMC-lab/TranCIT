@@ -1,15 +1,15 @@
-# Release Guide for Dynamic Causal Strength (DCS)
+# Release Guide for TranCIT: Transient Causal Interaction
 
-This document provides instructions for releasing new versions of the DCS package.
+This document provides instructions for releasing new versions of the TranCIT package.
 
 ## Release Process
 
 ### 1. Pre-Release Checklist
 
 - [ ] All tests pass: `pytest`
-- [ ] Code is properly formatted: `black dcs/ tests/`
-- [ ] Linting passes: `flake8 dcs/ tests/`
-- [ ] Type checking passes: `mypy dcs/`
+- [ ] Code is properly formatted: `black trancit/ tests/`
+- [ ] Linting passes: `flake8 trancit/ tests/`
+- [ ] Type checking passes: `mypy trancit/`
 - [ ] Documentation builds successfully: `cd docs && make html`
 - [ ] CHANGELOG.md is updated with new version
 - [ ] All dependencies are up to date
@@ -48,7 +48,7 @@ This package uses [setuptools_scm](https://github.com/pypa/setuptools_scm) for a
 
 3. **Verify version generation**:
    ```bash
-   python -c "import dcs; print(dcs.__version__)"
+   python -c "import trancit; print(trancit.__version__)"
    ```
 
 ### 3. Build and Test Package
@@ -64,7 +64,7 @@ python -m build
 twine check dist/*
 
 # Test installation (optional)
-pip install dist/dynamic_causal_strength-*.whl
+pip install dist/trancit-*.whl
 ```
 
 ### 4. Upload to PyPI
@@ -135,7 +135,7 @@ GitHub Actions automatically:
 ### Build Failures
 - Clean build directories: `rm -rf dist/ build/ *.egg-info/`
 - Update build dependencies: `pip install --upgrade build twine setuptools`
-- Check for syntax errors: `python -m py_compile dcs/*.py`
+- Check for syntax errors: `python -m py_compile trancit/*.py`
 
 ### PyPI Upload Issues
 - Verify credentials: `twine check dist/*`
@@ -145,6 +145,6 @@ GitHub Actions automatically:
 ## Support
 
 For release-related issues:
-- **Documentation**: https://dynamic-causal-strength.readthedocs.io
-- **Issues**: https://github.com/CMC-lab/dcs/issues
+- **Documentation**: https://trancit.readthedocs.io
+- **Issues**: https://github.com/CMC-lab/TranCIT/issues
 - **Maintainer**: Salar Nouri (salr.nouri@gmail.com)

@@ -108,7 +108,7 @@ For answers to common questions about this code of conduct, see the FAQ at https
 
 - **Code of Conduct Issues**: salr.nouri@gmail.com
 - **Project Maintainer**: Salar Nouri
-- **Project Repository**: https://github.com/CMC-lab/dcs
+- **Project Repository**: https://github.com/CMC-lab/TranCIT
 
 ---
 

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Dynamic Causal Strength (DCS) project will be documented in this file.
+All notable changes to the TranCIT: Transient Causal Interaction project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-01-18
 
 ### Added
-- **Initial Release** of Dynamic Causal Strength (DCS) package
+- **Initial Release** of TranCIT: Transient Causal Interaction package
 - **Core Functionality**:
   - Dynamic Causal Strength (DCS) analysis for time-varying causal relationships
   - Transfer Entropy (TE) computation for information-theoretic causality measures
@@ -63,14 +63,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Core Dependencies**: NumPy (≥1.19.5), SciPy (≥1.7.0), Matplotlib (≥3.5.0), Scikit-learn (≥1.0.0)
 - **Optional Dependencies**: Sphinx, pytest, black, flake8, mypy
 - **License**: BSD-2-Clause
-- **Documentation**: Available at https://dynamic-causal-strength.readthedocs.io
+- **Documentation**: Available at https://trancit.readthedocs.io
 
 ### Scientific Background
 This implementation is based on research from:
 - Shao, K., Logothetis, N. K., & Besserve, M. (2023). Information theoretic measures of causal influences during transient neural events. *Frontiers in Network Physiology*, 3, 1085347.
 
 ### Examples Included
-- Basic DCS analysis workflow
+- Basic TranCIT analysis workflow
 - LFP (Local Field Potential) analysis pipeline
 - Interactive Jupyter notebook demonstrations
 - Figure replication from scientific literature
@@ -92,6 +92,6 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ## Support
 
-- **Documentation**: https://dynamic-causal-strength.readthedocs.io
-- **Issues**: https://github.com/CMC-lab/dcs/issues
-- **Discussions**: https://github.com/CMC-lab/dcs/discussions
+- **Documentation**: https://trancit.readthedocs.io
+- **Issues**: https://github.com/CMC-lab/TranCIT/issues
+- **Discussions**: https://github.com/CMC-lab/TranCIT/discussions

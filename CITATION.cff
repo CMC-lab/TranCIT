@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "Dynamic Causal Strength (DCS): A Python package for transient neural causal inference"
+title: "TranCIT: Transient Causal Interaction - A Python package for transient neural causal inference"
 message: "If you use this software, please cite it as below."
 authors:
   - given-names: Salar
@@ -15,8 +15,8 @@ authors:
     family-names: Safavi
     orcid: "https://orcid.org/0000-0002-2868-530X"
     affiliation: "Computational Neuroscience, Department of Child and Adolescent Psychiatry, Faculty of Medicine, Technische Universität Dresden, Dresden 01307, Germany"
-repository-code: "https://github.com/CMC-lab/dcs"
-url: "https://dynamic-causal-strength.readthedocs.io"
+repository-code: "https://github.com/CMC-lab/TranCIT"
+url: "https://trancit.readthedocs.io"
 license: BSD-2-Clause
 version: 0.1.0
 date-released: 2025-08-17
@@ -26,7 +26,7 @@ keywords:
   - neuroscience
   - statistics
   - causal-inference
-  - dynamic-causal-strength
+  - trancit
   - transfer-entropy
   - granger-causality
   - transient-neural-events

@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-We provide security updates for the following versions of Dynamic Causal Strength (DCS):
+We provide security updates for the following versions of TranCIT:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -10,7 +10,7 @@ We provide security updates for the following versions of Dynamic Causal Strengt
 
 ## Reporting a Vulnerability
 
-The DCS team takes security vulnerabilities seriously. We appreciate your efforts to responsibly disclose your findings.
+The TranCIT team takes security vulnerabilities seriously. We appreciate your efforts to responsibly disclose your findings.
 
 ### How to Report
 
@@ -48,7 +48,7 @@ We practice responsible disclosure and ask that you:
 
 ## Security Best Practices
 
-When using DCS in your research or production environments:
+When using TranCIT in your research or production environments:
 
 ### Data Handling
 - **Sensitive Data**: Be cautious when analyzing sensitive time series data
@@ -57,7 +57,7 @@ When using DCS in your research or production environments:
 - **Memory Management**: Be aware of memory usage with large datasets
 
 ### Dependencies
-- **Keep Updated**: Regularly update DCS and its dependencies to the latest versions
+- **Keep Updated**: Regularly update TranCIT and its dependencies to the latest versions
 - **Verify Integrity**: Use package checksums when available
 - **Audit Dependencies**: Regularly audit your dependency tree for known vulnerabilities
 
@@ -69,7 +69,7 @@ When using DCS in your research or production environments:
 ## Known Security Considerations
 
 ### Data Privacy
-- DCS processes time series data, which may contain sensitive information
+- TranCIT processes time series data, which may contain sensitive information
 - Ensure appropriate data anonymization before analysis when required
 - Be aware of potential information leakage through statistical analysis results
 
@@ -95,15 +95,15 @@ Security updates will be:
 ## Contact Information
 
 - **Security Issues**: salr.nouri@gmail.com
-- **General Issues**: [GitHub Issues](https://github.com/CMC-lab/dcs/issues)
+- **General Issues**: [GitHub Issues](https://github.com/CMC-lab/TranCIT/issues)
 - **Maintainer**: Salar Nouri (salr.nouri@gmail.com)
 
 ## Acknowledgments
 
-We would like to thank the following researchers and security professionals who have helped improve the security of DCS:
+We would like to thank the following researchers and security professionals who have helped improve the security of TranCIT:
 
 - *None yet - be the first!*
 
 ---
 
-**Thank you for helping keep DCS and our community safe!**
+**Thank you for helping keep TranCIT and our community safe!**
