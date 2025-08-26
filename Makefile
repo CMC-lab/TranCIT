@@ -1,4 +1,4 @@
-# Makefile for dynamic-causal-strength
+# Makefile for TranCIT: Transient Causal Interaction
 
 PYTHON := python3
 
@@ -19,9 +19,9 @@ help:
 
 lint-check:
 	@echo "🔍 Checking code style..."
-	black --check --diff dcs/ tests/ examples/
-	isort --check-only --diff --skip dcs/_version.py dcs/ tests/ examples/
-	flake8 dcs/ tests/ examples/ --max-line-length=100 --extend-ignore=E203,W503,E712 --exclude=dcs/_version.py
+	black --check --diff trancit/ tests/ examples/
+	isort --check-only --diff --skip trancit/_version.py trancit/ tests/ examples/
+	flake8 trancit/ tests/ examples/ --max-line-length=100 --extend-ignore=E203,W503,E712 --exclude=trancit/_version.py
 	@echo "✅ Lint check complete!"
 
 type-check:
@@ -31,7 +31,7 @@ type-check:
 
 type-check-simple:
 	@echo "🔍 Running simple type check (research code friendly)..."
-	mypy dcs/ --config-file=mypy_simple.ini
+	mypy trancit/ --config-file=mypy_simple.ini
 	@echo "✅ Simple type check complete!"
 
 lint-fix:
@@ -43,9 +43,9 @@ lint: lint-check
 
 format:
 	@echo "🎨 Formatting code..."
-	autoflake --in-place --remove-unused-variables --remove-all-unused-imports -r dcs/ tests/ examples/
-	isort --skip dcs/_version.py dcs/ tests/ examples/
-	black dcs/ tests/ examples/
+	autoflake --in-place --remove-unused-variables --remove-all-unused-imports -r trancit/ tests/ examples/
+	isort --skip trancit/_version.py trancit/ tests/ examples/
+	black trancit/ tests/ examples/
 	@echo "✨ Formatting complete!"
 
 format-and-lint: format lint-check

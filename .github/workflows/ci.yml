@@ -32,17 +32,17 @@ jobs:
 
       - name: Run linting
         run: |
-          black --check --diff dcs/ tests/ examples/
-          isort --check-only --diff --skip dcs/_version.py dcs/ tests/ examples/
-          flake8 dcs/ tests/ examples/ --max-line-length=100 --extend-ignore=E203,W503,E712 --exclude=dcs/_version.py
+          black --check --diff trancit/ tests/ examples/
+          isort --check-only --diff --skip trancit/_version.py trancit/ tests/ examples/
+          flake8 trancit/ tests/ examples/ --max-line-length=100 --extend-ignore=E203,W503,E712 --exclude=trancit/_version.py
 
       - name: Run type checking
         run: |
-          mypy dcs/
+          mypy trancit/
 
       - name: Run tests with coverage
         run: |
-          pytest --cov=dcs --cov-report=xml --cov-report=term-missing
+          pytest --cov=trancit --cov-report=xml --cov-report=term-missing
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
