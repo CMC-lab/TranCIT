@@ -9,7 +9,7 @@ and RelativeDCSCalculator classes.
 import numpy as np
 import pytest
 
-from dcs.causality import (
+from trancit.causality import (
     DCSCalculator,
     DCSResult,
     GrangerCausalityCalculator,
@@ -20,7 +20,7 @@ from dcs.causality import (
     TransferEntropyResult,
     time_varying_causality,
 )
-from dcs.core.exceptions import ComputationError, ValidationError
+from trancit.core.exceptions import ComputationError, ValidationError
 
 
 @pytest.fixture

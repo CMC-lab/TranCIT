@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from dcs.utils.residuals import estimate_residuals, get_residuals
+from trancit.utils.residuals import estimate_residuals, get_residuals
 
 
 def test_estimate_residuals_shapes():

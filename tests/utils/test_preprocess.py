@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from dcs.core.exceptions import ValidationError
-from dcs.utils.preprocess import regularize_if_singular, remove_artifact_trials
+from trancit.core.exceptions import ValidationError
+from trancit.utils.preprocess import regularize_if_singular, remove_artifact_trials
 
 
 def test_regularize_if_singular_non_singular_matrix():

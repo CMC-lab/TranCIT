@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 
 # Import current implementation
-from dcs import (
+from trancit import (
     BicParams,
     CausalParams,
     DCSCalculator,
@@ -261,7 +261,7 @@ class TestIntegrationScenarios:
 
     def test_class_interface_consistency(self):
         """Test that all main classes follow consistent interface patterns."""
-        from dcs import (
+        from trancit import (
             DCSCalculator,
             GrangerCausalityCalculator,
             TransferEntropyCalculator,

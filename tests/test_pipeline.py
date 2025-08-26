@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from dcs.config import (
+from trancit.config import (
     BicParams,
     CausalParams,
     DetectionParams,
@@ -19,8 +19,8 @@ from dcs.config import (
     PipelineConfig,
     PipelineOptions,
 )
-from dcs.core.exceptions import ComputationError, ValidationError
-from dcs.pipeline import (
+from trancit.core.exceptions import ComputationError, ValidationError
+from trancit.pipeline import (
     BICSelectionStage,
     CausalityAnalysisStage,
     EventDetectionStage,
@@ -158,7 +158,7 @@ class TestPipelineOrchestrator:
         assert hasattr(result, "config")
         assert hasattr(result, "event_snapshots")
 
-    @patch("dcs.pipeline.stages.EventDetectionStage")
+    @patch("trancit.pipeline.stages.EventDetectionStage")
     def test_run_method_with_mocked_detection(
         self, mock_detection, sample_signals, minimal_config
     ):
@@ -220,7 +220,7 @@ class TestPipelineStages:
         stage = EventDetectionStage(minimal_config)
 
         # This might fail without proper signal characteristics, so we'll mock it
-        with patch("dcs.utils.signal.find_peak_locations") as mock_find_peaks:
+        with patch("trancit.utils.signal.find_peak_locations") as mock_find_peaks:
             mock_find_peaks.return_value = np.array([25, 75, 125])
 
             result = stage.execute(
@@ -236,7 +236,7 @@ class TestPipelineStages:
         stage = BICSelectionStage(full_config)
 
         # Mock the BIC computation since it requires proper data setup
-        with patch("dcs.models.bic_selection.BICSelector") as mock_selector:
+        with patch("trancit.models.bic_selection.BICSelector") as mock_selector:
             mock_bic = MagicMock()
             mock_bic._compute_multi_trial_bic.return_value = {
                 "BIC": np.array([10.0, 8.0, 12.0, 15.0]),
@@ -262,7 +262,7 @@ class TestPipelineStages:
             10, 50, 20
         )  # (n_vars*(morder+1), n_obs, n_trials)
 
-        with patch("dcs.utils.core.compute_event_statistics") as mock_stats:
+        with patch("trancit.utils.core.compute_event_statistics") as mock_stats:
             mock_stats.return_value = {
                 "OLS": {
                     "At": np.random.randn(50, 2, 5),
@@ -293,7 +293,7 @@ class TestPipelineStages:
             "mean": np.random.randn(6, 50),
         }
 
-        with patch("dcs.causality.rdcs.time_varying_causality") as mock_causality:
+        with patch("trancit.causality.rdcs.time_varying_causality") as mock_causality:
             mock_causality.return_value = {
                 "TE": np.random.randn(50, 2),
                 "DCS": np.random.randn(50, 2),

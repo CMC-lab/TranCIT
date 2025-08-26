@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_allclose
 
-from dcs.utils.core import (
+from trancit.utils.core import (
     compute_event_statistics,
     extract_event_snapshots,
     extract_event_windows,

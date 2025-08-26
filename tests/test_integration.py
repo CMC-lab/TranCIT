@@ -10,8 +10,8 @@ from typing import Tuple
 import numpy as np
 import pytest
 
-from dcs import DCSCalculator, PipelineOrchestrator, generate_signals
-from dcs.config import (
+from trancit import DCSCalculator, PipelineOrchestrator, generate_signals
+from trancit.config import (
     BicParams,
     CausalParams,
     DetectionParams,

@@ -1,6 +1,6 @@
 import numpy as np
 
-from dcs.simulation import (
+from trancit.simulation import (
     generate_ensemble_nonstat_innomean,
     generate_signals,
     simulate_ar_event,

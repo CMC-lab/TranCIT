@@ -1,6 +1,6 @@
 import numpy as np
 
-from dcs.utils.helpers import compute_covariances, estimate_coefficients
+from trancit.utils.helpers import compute_covariances, estimate_coefficients
 
 
 def test_compute_covariances_shapes():

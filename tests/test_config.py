@@ -1,6 +1,6 @@
 import pytest
 
-from dcs.config import (
+from trancit.config import (
     BicParams,
     CausalParams,
     DetectionParams,
