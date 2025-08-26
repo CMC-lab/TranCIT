@@ -1,14 +1,14 @@
 """
-Basic Usage Example for Dynamic Causal Strength (DCS)
+Basic Usage Example for TranCIT: Transient Causal Interaction
 
-This example demonstrates the basic usage of the DCS package for
+This example demonstrates the basic usage of the TranCIT package for
 causal inference in time series data.
 """
 
 import numpy as np
 
-from dcs import PipelineOrchestrator, generate_signals
-from dcs.config import (
+from trancit import PipelineOrchestrator, generate_signals
+from trancit.config import (
     BicParams,
     CausalParams,
     DetectionParams,
@@ -21,7 +21,7 @@ from dcs.config import (
 
 def main() -> None:
     """
-    Demonstrate basic usage of the DCS package.
+    Demonstrate basic usage of the TranCIT package.
 
     This function shows how to:
     1. Generate synthetic time series data
@@ -29,7 +29,7 @@ def main() -> None:
     3. Run the causal analysis
     4. Access and interpret results
     """
-    print("Dynamic Causal Strength (DCS) - Basic Usage Example")
+    print("TranCIT: Transient Causal Interaction - Basic Usage Example")
     print("=" * 60)
 
     # Step 1: Generate synthetic data

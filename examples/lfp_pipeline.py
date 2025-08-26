@@ -4,8 +4,8 @@ import numpy as np
 import scipy.io as sio
 from scipy.signal import firwin, lfilter
 
-from dcs import PipelineOrchestrator
-from dcs.config import (
+from trancit import PipelineOrchestrator
+from trancit.config import (
     BicParams,
     CausalParams,
     DeSnapParams,
