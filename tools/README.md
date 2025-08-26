@@ -1,6 +1,6 @@
 # Development Tools
 
-This directory contains temporary scripts and tools used during development and maintenance of the DCS package.
+This directory contains temporary scripts and tools used during development and maintenance of the TranCIT package.
 
 ## Scripts
 

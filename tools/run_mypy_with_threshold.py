@@ -13,7 +13,7 @@ def run_mypy_check():
     
     try:
         result = subprocess.run(
-            ["mypy", "dcs/"], 
+            ["mypy", "trancit/"], 
             capture_output=True, 
             text=True
         )

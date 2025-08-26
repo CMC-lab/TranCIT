@@ -47,7 +47,7 @@ def add_ignores_to_file(filepath: str, patterns: list) -> int:
 
 def main():
     """Add strategic type ignores to research code files."""
-    base_path = Path("dcs")
+    base_path = Path("trancit")
     
     # Focus on the most problematic files
     problematic_files = [
@@ -68,7 +68,7 @@ def main():
                 total_changes += changes
     
     print(f"\nTotal changes made: {total_changes}")
-    print("Run 'mypy dcs/' to see the reduced error count!")
+    print("Run 'mypy trancit/' to see the reduced error count!")
 
 if __name__ == "__main__":
     main()

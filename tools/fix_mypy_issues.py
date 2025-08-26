@@ -12,7 +12,7 @@ def add_type_ignores():
     
     # Define files and line patterns to fix
     fixes = {
-        "dcs/causality/rdcs.py": [
+        "trancit/causality/rdcs.py": [
             (401, r'(.+ = list\(.+\))', r'\1  # type: ignore[call-overload]'),
             (430, r'(.+ = list\(.+\))', r'\1  # type: ignore[call-overload]'), 
             (530, r'(.+_compute_transfer_entropy\(.+)', r'\1  # type: ignore[arg-type]'),
@@ -20,7 +20,7 @@ def add_type_ignores():
             (574, r'(.+_compute_causal_strength_measures\(.+)', r'\1  # type: ignore[arg-type]'),
             (575, r'(.+_compute_causal_strength_measures\(.+)', r'\1  # type: ignore[arg-type]'),
         ],
-        "dcs/utils/core.py": [
+        "trancit/utils/core.py": [
             (513, r'(.+\[.+\] = .+)', r'\1  # type: ignore[index]'),
             (585, r'(.+\[.+\] = .+)', r'\1  # type: ignore[index]'),
             (597, r'(.+\[.+\] = .+)', r'\1  # type: ignore[index]'),
@@ -36,13 +36,13 @@ def add_type_ignores():
             (661, r'(.+\[.+\])', r'\1  # type: ignore[index]'),
             (669, r'(return .+)', r'\1  # type: ignore[return-value]'),
         ],
-        "dcs/causality/granger.py": [
+        "trancit/causality/granger.py": [
             (122, r'(.+_compute_homogeneous_gc\(.+)', r'\1  # type: ignore[call-arg]'),
         ],
-        "dcs/utils/plotting.py": [
+        "trancit/utils/plotting.py": [
             (88, r'(return .+)', r'\1  # type: ignore[return-value]'),
         ],
-        "dcs/pipeline/stages.py": [
+        "trancit/pipeline/stages.py": [
             (181, r'(.+extract_event_snapshots\(.+)', r'\1  # type: ignore[arg-type]'),
             (182, r'(.+extract_event_snapshots\(.+)', r'\1  # type: ignore[arg-type]'), 
             (246, r'(.+extract_event_snapshots\(.+)', r'\1  # type: ignore[arg-type]'),
@@ -96,6 +96,6 @@ if __name__ == "__main__":
     
     if fixes_made > 0:
         print(f"✅ Successfully added {fixes_made} type ignores!")
-        print("Run 'mypy dcs/' to see the reduced error count.")
+        print("Run 'mypy trancit/' to see the reduced error count.")
     else:
         print("ℹ️  No changes needed - type ignores already present.")

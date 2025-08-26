@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Automated linting fix script for DCS repository.
+Automated linting fix script for TranCIT repository.
 This script applies multiple automated fixes to resolve linting issues.
 """
 
@@ -30,11 +30,11 @@ def run_command(command, description):
 
 def main():
     """Main linting fix process."""
-    print("🚀 Starting automated linting fixes for DCS repository")
+    print("🚀 Starting automated linting fixes for TranCIT repository")
     
     os.chdir(Path(__file__).parent)
     
-    targets = ["dcs/", "tests/", "examples/"]
+    targets = ["trancit/", "tests/", "examples/"]
     
     success_count = 0
     total_fixes = 0
@@ -104,7 +104,7 @@ def fix_comparison_issues():
     import re
     
     python_files = []
-    for target in ["dcs/", "tests/", "examples/"]:
+    for target in ["trancit/", "tests/", "examples/"]:
         for file_path in Path(target).rglob("*.py"):
             python_files.append(file_path)
     
