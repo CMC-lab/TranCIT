@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
-SPHINXPROJ    = DCS # Matches project name in conf.py if needed, often not used directly here
+SPHINXPROJ    = TranCIT # Matches project name in conf.py if needed, often not used directly here
 SOURCEDIR     = .
 BUILDDIR      = _build
 

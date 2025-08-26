@@ -5,7 +5,7 @@
 Contributing
 ############
 
-Thank you for your interest in contributing to **Dynamic Causal Strength (DCS)**!  
+Thank you for your interest in contributing to **TranCIT: Transient Causal Interaction**!  
 We welcome all forms of contributions — from fixing bugs and improving docs to proposing features or submitting new code.
 
 If you're not sure where to start, feel free to open an issue or ask a question. All contributions, big or small, are appreciated.
@@ -23,11 +23,11 @@ Reporting Issues
 
 Found a bug or have a suggestion? Great! Before opening a new issue, please:
 
-- Search existing issues on `GitHub <https://github.com/CMC-lab/dcs/issues>`_ to avoid duplicates.
+- Search existing issues on `GitHub <https://github.com/CMC-lab/TranCIT/issues>`_ to avoid duplicates.
 - If it's new, open an issue and include:
   - Expected vs. actual behavior
   - Steps to reproduce (code snippets welcome!)
-  - Environment details (OS, Python version, `dcs`, `numpy`, etc.)
+  - Environment details (OS, Python version, `trancit`, `numpy`, etc.)
 
 Feature Requests
 ================
@@ -75,6 +75,6 @@ More Guidelines
 ===============
 
 We follow best practices from the Python community. For a more detailed guide, please see the  
-`CONTRIBUTING.md <https://github.com/CMC-lab/dcs/main/CONTRIBUTING.md>`_.
+`CONTRIBUTING.md <https://github.com/CMC-lab/TranCIT/main/CONTRIBUTING.md>`_.
 
-Thank you again for helping improve the DCS package!
+Thank you again for helping improve the TranCIT package!

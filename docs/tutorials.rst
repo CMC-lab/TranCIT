@@ -4,7 +4,7 @@
 Tutorials
 #########
 
-This section provides comprehensive tutorials for using Dynamic Causal Strength (DCS) in different scenarios. Each tutorial builds on the previous ones and includes complete working examples.
+This section provides comprehensive tutorials for using TranCIT: Transient Causal Interaction in different scenarios. Each tutorial builds on the previous ones and includes complete working examples.
 
 .. contents:: Tutorial Contents
    :local:
@@ -24,7 +24,7 @@ DCS works with multivariate time series data in a specific format:
 .. code-block:: python
 
    import numpy as np
-   from dcs import generate_signals
+   from trancit import generate_signals
    
    # Generate sample data
    data, _, _ = generate_signals(
@@ -60,7 +60,7 @@ Step-by-Step DCS Analysis
 
 .. code-block:: python
 
-   from dcs import DCSCalculator
+   from trancit import DCSCalculator
    import matplotlib.pyplot as plt
    
    # Step 1: Create calculator with appropriate model order
@@ -172,8 +172,8 @@ Event-based analysis focuses on detecting specific time windows of interest and 
 .. code-block:: python
 
    import numpy as np
-   from dcs import generate_signals, PipelineOrchestrator
-   from dcs.config import (
+   from trancit import generate_signals, PipelineOrchestrator
+   from trancit.config import (
        PipelineConfig, PipelineOptions, DetectionParams, 
        CausalParams, BicParams, OutputParams
    )
@@ -393,8 +393,8 @@ Choosing the right model order is crucial for accurate causality analysis:
 
 .. code-block:: python
 
-   from dcs import DCSCalculator
-   from dcs.models import BICSelector
+   from trancit import DCSCalculator
+   from trancit.models import BICSelector
    import matplotlib.pyplot as plt
    
    # Generate test data
@@ -468,7 +468,7 @@ Handling Different Data Types
 
 .. code-block:: python
 
-   from dcs.utils.preprocess import normalize_data, check_data_quality
+   from trancit.utils.preprocess import normalize_data, check_data_quality
    
    # Simulate different types of real-world data issues
    np.random.seed(456)
@@ -539,8 +539,8 @@ Performance Optimization
 .. code-block:: python
 
    import time
-   from dcs import PipelineOrchestrator
-   from dcs.config import PipelineConfig, PipelineOptions, DetectionParams, CausalParams
+   from trancit import PipelineOrchestrator
+   from trancit.config import PipelineConfig, PipelineOptions, DetectionParams, CausalParams
    
    # Generate larger dataset for performance testing
    large_data, _, _ = generate_signals(T=2000, Ntrial=30, h=0.1,
@@ -742,7 +742,7 @@ Neural Data Analysis
    print(f"Sampling rate: 500 Hz, Duration: 20s, Channels: 2, Trials: 25")
    
    # Preprocess neural data
-   from dcs.utils.preprocess import normalize_data
+   from trancit.utils.preprocess import normalize_data
    neural_data_norm = normalize_data(neural_data, method="zscore", axis=1)
    
    # DCS analysis with parameters suitable for neural data
@@ -972,7 +972,7 @@ Data Quality Assessment
 
 .. code-block:: python
 
-   from dcs.utils.preprocess import check_data_quality, normalize_data
+   from trancit.utils.preprocess import check_data_quality, normalize_data
    import warnings
    
    def comprehensive_data_check(data, description=""):
@@ -1264,7 +1264,7 @@ Common Issues and Solutions
    smooth_signal = np.mean(smooth_data, axis=2)
    
    # Try with high threshold (likely to fail)
-   from dcs.config import PipelineConfig, PipelineOptions, DetectionParams, CausalParams, BicParams, OutputParams
+   from trancit.config import PipelineConfig, PipelineOptions, DetectionParams, CausalParams, BicParams, OutputParams
    
    high_threshold_config = PipelineConfig(
        options=PipelineOptions(detection=True, causal_analysis=True),

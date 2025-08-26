@@ -10,16 +10,16 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
-project = "Dynamic Causal Strength"
+project = "TranCIT: Transient Causal Interaction"
 author = "Salar Nouri"
 copyright = "2025, Salar Nouri / CMC-Lab"
 
 # Try dynamic versioning
 try:
-    from dcs import __version__ as version_str
+    from trancit import __version__ as version_str
 except ImportError:
     warnings.warn(
-        "Could not import version from dcs.__init__.py. Falling back to '0.1.0'."
+        "Could not import version from trancit.__init__.py. Falling back to '0.1.0'."
     )
     version_str = "0.1.0"
 
@@ -74,7 +74,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 pygments_style = "sphinx"
 
 # -- Options for HTML output -------------------------------------------------
-html_baseurl = "https://dynamic-causal-strength.readthedocs.io"
+html_baseurl = "https://trancit.readthedocs.io"
 
 html_theme = "sphinx_rtd_theme"
 html_theme_options = {
@@ -86,7 +86,7 @@ html_static_path = ["_static"]
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
-htmlhelp_basename = "DCSdoc"
+htmlhelp_basename = "TranCITdoc"
 
 # -- Options for LaTeX output ------------------------------------------------
 
@@ -94,8 +94,8 @@ latex_elements = {}
 latex_documents = [
     (
         master_doc,
-        "DCS.tex",
-        "Dynamic Causal Strength Documentation",
+        "TranCIT.tex",
+        "TranCIT: Transient Causal Interaction Documentation",
         "Salar Nouri",
         "manual",
     ),
@@ -103,17 +103,17 @@ latex_documents = [
 
 # -- Options for manual page output ------------------------------------------
 
-man_pages = [(master_doc, "dcs", "Dynamic Causal Strength Documentation", [author], 1)]
+man_pages = [(master_doc, "trancit", "TranCIT: Transient Causal Interaction Documentation", [author], 1)]
 
 # -- Options for Texinfo output ----------------------------------------------
 
 texinfo_documents = [
     (
         master_doc,
-        "DCS",
-        "Dynamic Causal Strength Documentation",
+        "TranCIT",
+        "TranCIT: Transient Causal Interaction Documentation",
         author,
-        "DCS",
+        "TranCIT",
         "Causal inference in time series.",
         "Miscellaneous",
     ),

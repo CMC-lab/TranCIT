@@ -4,9 +4,9 @@
 API Reference
 ############
 
-Welcome to the comprehensive API reference for **Dynamic Causal Strength (DCS)**. This section provides detailed documentation for all classes, functions, and modules in the package.
+Welcome to the comprehensive API reference for **TranCIT: Transient Causal Interaction**. This section provides detailed documentation for all classes, functions, and modules in the package.
 
-The DCS package is organized into several core components:
+The TranCIT package is organized into several core components:
 
 - **Core Classes**: Base analyzers, results, and configuration objects
 - **Causality Analysis**: DCS, Transfer Entropy, Granger Causality calculators
@@ -20,15 +20,15 @@ The DCS package is organized into several core components:
    :depth: 3
 
 ****************************
-Core Module (`dcs.core`)
+Core Module (`trancit.core`)
 ****************************
 
-The core module provides the foundational classes and interfaces used throughout the DCS package.
+The core module provides the foundational classes and interfaces used throughout the TranCIT package.
 
 Base Classes
 ============
 
-.. currentmodule:: dcs.core.base
+.. currentmodule:: trancit.core.base
 
 .. autoclass:: BaseAnalyzer
    :members:
@@ -46,7 +46,7 @@ Base Classes
    
    .. code-block:: python
    
-      from dcs.core.base import BaseAnalyzer
+      from trancit.core.base import BaseAnalyzer
       import numpy as np
       
       class MyAnalyzer(BaseAnalyzer):
@@ -69,7 +69,7 @@ Base Classes
    
    .. code-block:: python
    
-      from dcs.core.base import BaseResult
+      from trancit.core.base import BaseResult
       
       result = MyResult(causal_strength=cs_array, transfer_entropy=te_array)
       print(result.causal_strength.shape)
@@ -84,7 +84,7 @@ Base Classes
 Exception Classes
 =================
 
-.. currentmodule:: dcs.core.exceptions
+.. currentmodule:: trancit.core.exceptions
 
 .. autoclass:: DCSError
    :show-inheritance:
@@ -120,7 +120,7 @@ Exception Classes
    Raised when configuration parameters are invalid or inconsistent.
 
 **********************************************
-Causality Analysis (`dcs.causality`)
+Causality Analysis (`trancit.causality`)
 **********************************************
 
 The causality module provides implementations of various causality measures.
@@ -128,7 +128,7 @@ The causality module provides implementations of various causality measures.
 Dynamic Causal Strength (DCS)
 ==============================
 
-.. currentmodule:: dcs.causality.dcs
+.. currentmodule:: trancit.causality.dcs
 
 .. autoclass:: DCSCalculator
    :members:
@@ -152,7 +152,7 @@ Dynamic Causal Strength (DCS)
    
    .. code-block:: python
    
-      from dcs import DCSCalculator
+      from trancit import DCSCalculator
       import numpy as np
       
       # Generate sample data
@@ -189,7 +189,7 @@ Dynamic Causal Strength (DCS)
 Transfer Entropy
 ================
 
-.. currentmodule:: dcs.causality.transfer_entropy
+.. currentmodule:: trancit.causality.transfer_entropy
 
 .. autoclass:: TransferEntropyCalculator
    :members:
@@ -205,7 +205,7 @@ Transfer Entropy
    
    .. code-block:: python
    
-      from dcs.causality import TransferEntropyCalculator
+      from trancit.causality import TransferEntropyCalculator
       
       calculator = TransferEntropyCalculator(model_order=3)
       result = calculator.analyze(data)
@@ -220,7 +220,7 @@ Transfer Entropy
 Granger Causality
 =================
 
-.. currentmodule:: dcs.causality.granger
+.. currentmodule:: trancit.causality.granger
 
 .. autoclass:: GrangerCausalityCalculator
    :members:
@@ -236,7 +236,7 @@ Granger Causality
    
    .. code-block:: python
    
-      from dcs.causality import GrangerCausalityCalculator
+      from trancit.causality import GrangerCausalityCalculator
       
       calculator = GrangerCausalityCalculator(model_order=4)
       result = calculator.analyze(data)
@@ -257,7 +257,7 @@ Granger Causality
 Relative Dynamic Causal Strength (rDCS)
 ========================================
 
-.. currentmodule:: dcs.causality.rdcs
+.. currentmodule:: trancit.causality.rdcs
 
 .. autoclass:: RelativeDCSCalculator
    :members:
@@ -273,7 +273,7 @@ Relative Dynamic Causal Strength (rDCS)
    
    .. code-block:: python
    
-      from dcs.causality import RelativeDCSCalculator
+      from trancit.causality import RelativeDCSCalculator
       
       calculator = RelativeDCSCalculator(
           model_order=3,
@@ -291,7 +291,7 @@ Relative Dynamic Causal Strength (rDCS)
 Utility Functions
 =================
 
-.. currentmodule:: dcs.causality.rdcs
+.. currentmodule:: trancit.causality.rdcs
 
 .. autofunction:: time_varying_causality
 
@@ -311,7 +311,7 @@ Utility Functions
    
    .. code-block:: python
    
-      from dcs.causality import time_varying_causality
+      from trancit.causality import time_varying_causality
       
       causal_params = {
           'ref_time': 25,
@@ -328,7 +328,7 @@ Utility Functions
       rdcs_values = causality_results['rDCS']
 
 ************************************
-Pipeline System (`dcs.pipeline`)
+Pipeline System (`trancit.pipeline`)
 ************************************
 
 The pipeline module provides orchestrated analysis workflows for event-based DCS analysis.
@@ -336,7 +336,7 @@ The pipeline module provides orchestrated analysis workflows for event-based DCS
 Pipeline Orchestration
 =======================
 
-.. currentmodule:: dcs.pipeline.orchestrator
+.. currentmodule:: trancit.pipeline.orchestrator
 
 .. autoclass:: PipelineOrchestrator
    :members:
@@ -366,8 +366,8 @@ Pipeline Orchestration
    
    .. code-block:: python
    
-      from dcs import PipelineOrchestrator
-      from dcs.config import PipelineConfig, PipelineOptions, DetectionParams, CausalParams
+      from trancit import PipelineOrchestrator
+      from trancit.config import PipelineConfig, PipelineOptions, DetectionParams, CausalParams
       
       # Configure pipeline
       config = PipelineConfig(
@@ -411,7 +411,7 @@ Pipeline Orchestration
 Pipeline Stages
 ===============
 
-.. currentmodule:: dcs.pipeline.stages
+.. currentmodule:: trancit.pipeline.stages
 
 Individual pipeline stages can be used independently for custom workflows.
 
@@ -449,7 +449,7 @@ Individual pipeline stages can be used independently for custom workflows.
 
 .. code-block:: python
 
-   from dcs.pipeline.stages import InputValidationStage, EventDetectionStage, CausalityAnalysisStage
+   from trancit.pipeline.stages import InputValidationStage, EventDetectionStage, CausalityAnalysisStage
    
    # Create individual stages
    validation_stage = InputValidationStage(config)
@@ -464,12 +464,12 @@ Individual pipeline stages can be used independently for custom workflows.
    # ... continue with other stages
 
 *************************************
-Configuration (`dcs.config`)
+Configuration (`trancit.config`)
 *************************************
 
 The configuration module defines all parameter classes used throughout DCS.
 
-.. currentmodule:: dcs.config
+.. currentmodule:: trancit.config
 
 Main Configuration
 ==================
@@ -493,7 +493,7 @@ Main Configuration
    
    .. code-block:: python
    
-      from dcs.config import *
+      from trancit.config import *
       
       config = PipelineConfig(
           options=PipelineOptions(
@@ -584,7 +584,7 @@ Parameter Classes
    Parameters for output formatting.
 
 ***********************************
-Model Estimation (`dcs.models`)
+Model Estimation (`trancit.models`)
 ***********************************
 
 The models module provides VAR model estimation and selection tools.
@@ -592,7 +592,7 @@ The models module provides VAR model estimation and selection tools.
 VAR Model Estimation
 ====================
 
-.. currentmodule:: dcs.models.var_estimation
+.. currentmodule:: trancit.models.var_estimation
 
 .. autoclass:: VAREstimator
    :members:
@@ -604,7 +604,7 @@ VAR Model Estimation
    
    .. code-block:: python
    
-      from dcs.models import VAREstimator
+      from trancit.models import VAREstimator
       
       estimator = VAREstimator(model_order=4, method="OLS")
       coefficients, residuals = estimator.fit(data)
@@ -612,7 +612,7 @@ VAR Model Estimation
 BIC Model Selection
 ===================
 
-.. currentmodule:: dcs.models.bic_selection
+.. currentmodule:: trancit.models.bic_selection
 
 .. autoclass:: BICSelector
    :members:
@@ -624,7 +624,7 @@ BIC Model Selection
    
    .. code-block:: python
    
-      from dcs.models import BICSelector
+      from trancit.models import BICSelector
       
       selector = BICSelector(max_order=10, mode="OLS")
       bic_results = selector.compute_multi_trial_BIC(data, params)
@@ -633,7 +633,7 @@ BIC Model Selection
 Model Validation
 ================
 
-.. currentmodule:: dcs.models.model_validation
+.. currentmodule:: trancit.models.model_validation
 
 .. autoclass:: ModelValidator
    :members:
@@ -642,7 +642,7 @@ Model Validation
    Tools for validating fitted VAR models.
 
 ******************************
-Simulation (`dcs.simulation`)
+Simulation (`trancit.simulation`)
 ******************************
 
 The simulation module provides tools for generating synthetic time series data for testing and validation.
@@ -650,7 +650,7 @@ The simulation module provides tools for generating synthetic time series data f
 Signal Generation
 =================
 
-.. currentmodule:: dcs.simulation
+.. currentmodule:: trancit.simulation
 
 .. autofunction:: generate_signals
 
@@ -672,7 +672,7 @@ Signal Generation
    
    .. code-block:: python
    
-      from dcs import generate_signals
+      from trancit import generate_signals
       
       data, time_axis, params = generate_signals(
           T=1000, Ntrial=20, h=0.1,
@@ -701,7 +701,7 @@ VAR Simulation
    Generate non-stationary VAR processes.
 
 **************************
-Utilities (`dcs.utils`)
+Utilities (`trancit.utils`)
 **************************
 
 The utilities module provides helper functions for data processing, analysis, and visualization.
@@ -709,7 +709,7 @@ The utilities module provides helper functions for data processing, analysis, an
 Data Processing
 ===============
 
-.. currentmodule:: dcs.utils.preprocess
+.. currentmodule:: trancit.utils.preprocess
 
 .. autofunction:: normalize_data
 
@@ -725,7 +725,7 @@ Data Processing
    
    .. code-block:: python
    
-      from dcs.utils.preprocess import normalize_data
+      from trancit.utils.preprocess import normalize_data
       
       normalized_data = normalize_data(data, method="zscore", axis=1)
 
@@ -736,7 +736,7 @@ Data Processing
 Core Analysis Functions
 =======================
 
-.. currentmodule:: dcs.utils.core
+.. currentmodule:: trancit.utils.core
 
 .. autofunction:: compute_event_statistics
 
@@ -749,7 +749,7 @@ Core Analysis Functions
 Signal Processing
 =================
 
-.. currentmodule:: dcs.utils.signal
+.. currentmodule:: trancit.utils.signal
 
 .. autofunction:: find_peak_locations
 
@@ -762,7 +762,7 @@ Signal Processing
 Residual Analysis
 =================
 
-.. currentmodule:: dcs.utils.residuals
+.. currentmodule:: trancit.utils.residuals
 
 .. autofunction:: estimate_residuals
 
@@ -775,7 +775,7 @@ Residual Analysis
 Visualization
 =============
 
-.. currentmodule:: dcs.utils.plotting
+.. currentmodule:: trancit.utils.plotting
 
 .. autofunction:: plot_causality_results
 
@@ -785,7 +785,7 @@ Visualization
    
    .. code-block:: python
    
-      from dcs.utils.plotting import plot_causality_results
+      from trancit.utils.plotting import plot_causality_results
       
       # Assuming 'result' is a DCSResult object
       plot_causality_results(
@@ -798,7 +798,7 @@ Visualization
 Helper Functions
 ================
 
-.. currentmodule:: dcs.utils.helpers
+.. currentmodule:: trancit.utils.helpers
 
 .. autofunction:: remove_artifact_trials
 
@@ -823,8 +823,8 @@ Basic Analysis Workflow
 
    # Complete workflow example
    import numpy as np
-   from dcs import DCSCalculator, generate_signals
-   from dcs.utils.preprocess import normalize_data
+   from trancit import DCSCalculator, generate_signals
+   from trancit.utils.preprocess import normalize_data
    import matplotlib.pyplot as plt
    
    # 1. Generate or load data
@@ -870,8 +870,8 @@ Event-Based Analysis Workflow
 .. code-block:: python
 
    # Complete event-based analysis
-   from dcs import PipelineOrchestrator, generate_signals
-   from dcs.config import *
+   from trancit import PipelineOrchestrator, generate_signals
+   from trancit.config import *
    
    # Generate data
    data, _, _ = generate_signals(T=800, Ntrial=15, h=0.1,
@@ -938,8 +938,8 @@ Old Function-Based API
 .. code-block:: python
 
    # OLD: Function-based approach
-   from dcs.causality import compute_causal_strength_nonzero_mean
-   from dcs.pipeline import snapshot_detect_analysis_pipeline
+   from trancit.causality import compute_causal_strength_nonzero_mean
+   from trancit.pipeline import snapshot_detect_analysis_pipeline
    
    # Causality analysis
    cs, te, gc, coeffs, te_cov = compute_causal_strength_nonzero_mean(
@@ -957,7 +957,7 @@ New Class-Based API
 .. code-block:: python
 
    # NEW: Class-based approach
-   from dcs import DCSCalculator, PipelineOrchestrator
+   from trancit import DCSCalculator, PipelineOrchestrator
    
    # Causality analysis
    calculator = DCSCalculator(model_order=4, time_mode="inhomo")
@@ -1036,5 +1036,5 @@ Troubleshooting
 
 - Check the tutorials in :doc:`tutorials`
 - Review examples in the ``examples/`` directory
-- Open an issue on `GitHub <https://github.com/CMC-lab/dcs/issues>`_
+- Open an issue on `GitHub <https://github.com/CMC-lab/TranCIT/issues>`_
 - Read the scientific paper for theoretical background

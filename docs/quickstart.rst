@@ -4,7 +4,7 @@
 Quickstart
 ##########
 
-This quickstart guide will get you up and running with **Dynamic Causal Strength (DCS)** analysis in just a few minutes. 
+This quickstart guide will get you up and running with **TranCIT: Transient Causal Interaction** analysis in just a few minutes. 
 
 We'll cover the most common use cases with the new class-based API, which provides cleaner interfaces and better error handling than the previous function-based approach.
 
@@ -16,8 +16,8 @@ First, verify your installation:
 
 .. code-block:: python
 
-   import dcs
-   print(f"DCS version: {dcs.__version__}")
+   import trancit
+   print(f"TranCIT version: {trancit.__version__}")
 
 If this works, you're ready to go! If not, see the :doc:`installation` guide.
 
@@ -31,7 +31,7 @@ The simplest way to analyze causal relationships is using the ``DCSCalculator`` 
    :linenos:
 
    import numpy as np
-   from dcs import DCSCalculator, generate_signals
+   from trancit import DCSCalculator, generate_signals
 
    # Generate synthetic bivariate time series data
    data, _, _ = generate_signals(
@@ -73,8 +73,8 @@ For event-based analysis (detecting and analyzing specific time windows), use th
    :linenos:
 
    import numpy as np
-   from dcs import generate_signals, PipelineOrchestrator
-   from dcs.config import (
+   from trancit import generate_signals, PipelineOrchestrator
+   from trancit.config import (
        PipelineConfig, PipelineOptions, DetectionParams, 
        CausalParams, BicParams, OutputParams
    )
@@ -164,7 +164,7 @@ DCS provides several specialized calculators for different causality measures:
 .. code-block:: python
    :linenos:
 
-   from dcs import (
+   from trancit import (
        DCSCalculator,              # Dynamic Causal Strength
        TransferEntropyCalculator,  # Information-theoretic measure
        GrangerCausalityCalculator, # Linear causality detection
@@ -204,8 +204,8 @@ Here's how to apply DCS to your own time series data:
    :linenos:
 
    import numpy as np
-   from dcs import DCSCalculator
-   from dcs.utils.preprocess import normalize_data
+   from trancit import DCSCalculator
+   from trancit.utils.preprocess import normalize_data
    
    # Load your data (example with NumPy)
    # Your data should have shape (n_variables, n_timepoints, n_trials)
@@ -326,4 +326,4 @@ Now that you understand the basics:
 - Enable ``bootstrap=True`` in pipeline for statistical significance testing
 - Use ``BIC`` model selection for automatic model order selection
 
-Need help? Check our :doc:`../TROUBLESHOOTING` guide or open an issue on `GitHub <https://github.com/CMC-lab/dcs/issues>`_.
+Need help? Check our :doc:`../TROUBLESHOOTING` guide or open an issue on `GitHub <https://github.com/CMC-lab/TranCIT/issues>`_.

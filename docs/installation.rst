@@ -8,7 +8,7 @@ Installation
 Prerequisites
 =============
 
-Before installing **Dynamic Causal Strength (DCS)**, ensure your environment includes:
+Before installing **TranCIT: Transient Causal Interaction**, ensure your environment includes:
 
 * Python 3.9 or higher
 * NumPy 1.26 or higher
@@ -24,10 +24,10 @@ To install the latest stable release from PyPI:
 
 .. code-block:: bash
 
-   pip install dynamic-causal-strength
+   pip install trancit
 
 .. tip::
-   Replace `'dynamic-causal-strength'` with the actual PyPI package name if different.
+   Replace `'trancit'` with the actual PyPI package name if different.
 
 Install from Source
 ===================
@@ -38,8 +38,8 @@ To install the latest development version from the source code:
 
    .. code-block:: bash
 
-      git clone https://github.com/CMC-lab/dcs.git
-      cd dcs
+      git clone https://github.com/CMC-lab/TranCIT.git
+      cd TranCIT
 
 2. Install the package:
 
@@ -52,11 +52,11 @@ To install the latest development version from the source code:
 Verify Installation
 ===================
 
-To check if DCS was installed correctly:
+To check if TranCIT was installed correctly:
 
 .. code-block:: bash
 
-   python -c "import dcs; print(dcs.__version__)"
+   python -c "import trancit; print(trancit.__version__)"
 
 Optional Dependencies
 =====================
@@ -66,8 +66,8 @@ Some features may require additional packages:
 * `matplotlib` for plotting
 * `jupyter` for running notebooks in the examples directory
 
-To install these along with DCS:
+To install these along with TranCIT:
 
 .. code-block:: bash
 
-   pip install dynamic-causal-strength[dev]
+   pip install trancit[dev]

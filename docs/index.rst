@@ -1,13 +1,13 @@
-.. Dynamic Causal Strength documentation master file.
+.. TranCIT: Transient Causal Interaction documentation master file.
 
-===========================
-Dynamic Causal Strength (DCS)
-===========================
+==========================================
+TranCIT: Transient Causal Interaction
+==========================================
 
-**Dynamic Causal Strength (DCS)** is a comprehensive Python package for analyzing causal relationships in multivariate time series data. It provides robust, scientifically-validated methods for detecting and quantifying directional influences between signals, with applications in neuroscience, economics, finance, and other domains involving complex time-dependent systems.
+**TranCIT (Transient Causal Interaction)** is a comprehensive Python package for analyzing causal relationships in multivariate time series data. It provides robust, scientifically-validated methods for detecting and quantifying directional influences between signals, with applications in neuroscience, economics, finance, and other domains involving complex time-dependent systems.
 
-.. image:: https://img.shields.io/pypi/v/dynamic-causal-strength
-   :target: https://pypi.org/project/dynamic-causal-strength/
+.. image:: https://img.shields.io/pypi/v/trancit
+   :target: https://pypi.org/project/trancit/
    :alt: PyPI Version
 
 .. image:: https://img.shields.io/badge/python-3.9+-blue.svg
@@ -15,14 +15,14 @@ Dynamic Causal Strength (DCS)
    :alt: Python Version
 
 .. image:: https://img.shields.io/badge/license-BSD--2--Clause-green.svg
-   :target: https://github.com/CMC-lab/dcs/blob/main/LICENSE
+   :target: https://github.com/CMC-lab/TranCIT/blob/main/LICENSE
    :alt: License
 
-.. image:: https://img.shields.io/github/stars/CMC-lab/dcs.svg
-   :target: https://github.com/CMC-lab/dcs
+.. image:: https://img.shields.io/github/stars/CMC-lab/TranCIT.svg
+   :target: https://github.com/CMC-lab/TranCIT
    :alt: GitHub Stars
 
-Source code is available on `GitHub <https://github.com/CMC-lab/dcs>`_.
+Source code is available on `GitHub <https://github.com/CMC-lab/TranCIT>`_.
 You can find comprehensive examples in the `examples/` folder of the repository to help you get started quickly.
 
 ****************
@@ -63,7 +63,7 @@ Get started with DCS in just a few lines of code:
 .. code-block:: python
 
    import numpy as np
-   from dcs import DCSCalculator, generate_signals
+   from trancit import DCSCalculator, generate_signals
    
    # Generate synthetic coupled oscillators
    data, _, _ = generate_signals(T=1000, Ntrial=20, h=0.1, 
@@ -159,22 +159,22 @@ Installation
 
 .. code-block:: bash
 
-   pip install dynamic-causal-strength
+   pip install trancit
 
 **Install from source:**
 
 .. code-block:: bash
 
-   git clone https://github.com/CMC-lab/dcs.git
-   cd dcs
+   git clone https://github.com/CMC-lab/TranCIT.git
+   cd TranCIT
    pip install -e .
 
 **Verify installation:**
 
 .. code-block:: python
 
-   import dcs
-   print(f"DCS version: {dcs.__version__}")
+   import trancit
+   print(f"TranCIT version: {trancit.__version__}")
 
 For detailed installation instructions, including troubleshooting and development setup, see :doc:`installation`.
 
@@ -223,7 +223,7 @@ Quick Navigation
 
 **Developers**: See :doc:`contributing` for development guidelines and :doc:`RELEASE` for release procedures.
 
-**Support**: Check :doc:`TROUBLESHOOTING` for common issues, or open an issue on `GitHub <https://github.com/CMC-lab/dcs/issues>`_.
+**Support**: Check :doc:`TROUBLESHOOTING` for common issues, or open an issue on `GitHub <https://github.com/CMC-lab/TranCIT/issues>`_.
 
 ****************
 Scientific Background
@@ -260,8 +260,8 @@ Community & Support
 **Getting Help**
 
 - 📖 **Documentation**: Comprehensive guides and tutorials available here
-- 💬 **Discussions**: Join our `GitHub Discussions <https://github.com/CMC-lab/dcs/discussions>`_ 
-- 🐛 **Bug Reports**: Submit issues on `GitHub Issues <https://github.com/CMC-lab/dcs/issues>`_
+- 💬 **Discussions**: Join our `GitHub Discussions <https://github.com/CMC-lab/TranCIT/discussions>`_ 
+- 🐛 **Bug Reports**: Submit issues on `GitHub Issues <https://github.com/CMC-lab/TranCIT/issues>`_
 - 📧 **Direct Contact**: Email the maintainers at salr.nouri@gmail.com
 
 **Contributing**
@@ -312,7 +312,7 @@ Special thanks to the scientific computing and neuroscience communities for feed
 
 - **Lead Developer**: Salar Nouri (University of California, Riverside)
 - **Scientific Advisor**: Prof. Maxim Bazhenov (University of California, San Diego)  
-- **Contributors**: See `GitHub contributors <https://github.com/CMC-lab/dcs/contributors>`_
+- **Contributors**: See `GitHub contributors <https://github.com/CMC-lab/TranCIT/contributors>`_
 
 ****************
 Indices and Tables
