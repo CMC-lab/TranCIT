@@ -1,7 +1,7 @@
 """
-Transfer Entropy (TE) implementation.
+Granger Causality (GC) implementation.
 
-This module provides the implementation of Transfer Entropy
+This module provides the implementation of Granger Causality
 calculation using the new modular architecture.
 """
 
@@ -10,48 +10,47 @@ from typing import Dict, Tuple
 
 import numpy as np
 
-from dcs.core.base import BaseAnalyzer, BaseResult
-from dcs.core.exceptions import ComputationError, ValidationError
-from dcs.utils.helpers import compute_covariances, estimate_coefficients
-from dcs.utils.preprocess import regularize_if_singular
+from trancit.core.base import BaseAnalyzer, BaseResult
+from trancit.core.exceptions import ComputationError, ValidationError
+from trancit.utils.helpers import estimate_coefficients
 
 logger = logging.getLogger(__name__)
 
 
-class TransferEntropyResult(BaseResult):
-    """Result container for Transfer Entropy analysis."""
+class GrangerCausalityResult(BaseResult):
+    """Result container for Granger Causality analysis."""
 
     def __init__(
         self,
-        transfer_entropy: np.ndarray,
-        te_residual_cov: np.ndarray,
+        granger_causality: np.ndarray,
         coefficients: np.ndarray,
+        residual_variances: np.ndarray,
     ):
         """
-        Initialize Transfer Entropy result.
+        Initialize Granger Causality result.
 
         Parameters
         ----------
-        transfer_entropy : np.ndarray
-            Transfer Entropy values
-        te_residual_cov : np.ndarray
-            Transfer entropy residual covariance
+        granger_causality : np.ndarray
+            Granger Causality values
         coefficients : np.ndarray
             VAR coefficients
+        residual_variances : np.ndarray
+            Residual variances for each variable
         """
         super().__init__(
-            transfer_entropy=transfer_entropy,
-            te_residual_cov=te_residual_cov,
+            granger_causality=granger_causality,
             coefficients=coefficients,
+            residual_variances=residual_variances,
         )
 
 
-class TransferEntropyCalculator(BaseAnalyzer):
+class GrangerCausalityCalculator(BaseAnalyzer):
     """
-    Transfer Entropy (TE) calculator.
+    Granger Causality (GC) calculator.
 
-    This class implements the Transfer Entropy algorithm for quantifying
-    information flow between time series variables.
+    This class implements the Granger Causality algorithm for detecting
+    linear causal relationships in time series data.
     """
 
     def __init__(
@@ -62,7 +61,7 @@ class TransferEntropyCalculator(BaseAnalyzer):
         **kwargs,
     ):
         """
-        Initialize Transfer Entropy calculator.
+        Initialize Granger Causality calculator.
 
         Parameters
         ----------
@@ -81,11 +80,10 @@ class TransferEntropyCalculator(BaseAnalyzer):
             use_diagonal_covariance=use_diagonal_covariance,
             **kwargs,
         )
-        # VAREstimator is not used in this implementation - using direct computation
 
-    def analyze(self, data: np.ndarray, **kwargs) -> TransferEntropyResult:
+    def analyze(self, data: np.ndarray, **kwargs) -> GrangerCausalityResult:
         """
-        Perform Transfer Entropy analysis on the given data.
+        Perform Granger Causality analysis on the given data.
 
         Parameters
         ----------
@@ -96,8 +94,8 @@ class TransferEntropyCalculator(BaseAnalyzer):
 
         Returns
         -------
-        TransferEntropyResult
-            Transfer Entropy analysis results
+        GrangerCausalityResult
+            Granger Causality analysis results
         """
         self._validate_input_data(data)
         self._log_analysis_start(data.shape)
@@ -107,35 +105,23 @@ class TransferEntropyCalculator(BaseAnalyzer):
                 data
             )
 
-            cov_xp, cov_yp, c_xyp, c_yxp = compute_covariances(
-                lagged_data, n_time_steps, self.config["model_order"]
-            )
-
             result_arrays = self._initialize_result_arrays(
                 n_time_steps, data.shape[1], data.shape[0]
             )
 
             if self.config["time_mode"] == "inhomo":
-                self._compute_inhomogeneous_te(
+                self._compute_inhomogeneous_gc(
                     current_data,
                     lagged_data,
-                    cov_xp,
-                    cov_yp,
-                    c_xyp,
-                    c_yxp,
                     result_arrays,
                     data.shape[2],
                     data.shape[0],
                 )
                 self._adjust_outputs_for_inhomo(result_arrays)
             else:
-                self._compute_homogeneous_te(
+                self._compute_homogeneous_gc(
                     current_data,
                     lagged_data,
-                    cov_xp,
-                    cov_yp,
-                    c_xyp,
-                    c_yxp,
                     result_arrays,
                     data.shape[2],
                     data.shape[0],
@@ -143,16 +129,16 @@ class TransferEntropyCalculator(BaseAnalyzer):
 
             self._log_analysis_complete()
 
-            return TransferEntropyResult(
-                transfer_entropy=result_arrays["transfer_entropy"],
-                te_residual_cov=result_arrays["te_residual_cov"],
+            return GrangerCausalityResult(
+                granger_causality=result_arrays["granger_causality"],
                 coefficients=result_arrays["coefficients"],
+                residual_variances=result_arrays["residual_variances"],
             )
 
         except Exception as e:
-            logger.error(f"Transfer Entropy analysis failed: {e}")
+            logger.error(f"Granger Causality analysis failed: {e}")
             raise ComputationError(
-                f"Transfer Entropy analysis failed: {e}", "te_computation", data.shape
+                f"Granger Causality analysis failed: {e}", "gc_computation", data.shape
             )
 
     def _validate_config(self) -> None:
@@ -239,26 +225,22 @@ class TransferEntropyCalculator(BaseAnalyzer):
             Dictionary of initialized arrays
         """
         return {
-            "te_residual_cov": np.zeros((n_time_steps, 2)),
-            "transfer_entropy": np.zeros((n_time_steps, 2)),
+            "granger_causality": np.zeros((n_time_steps, 2)),
             "coefficients": np.full(
                 (nobs, nvar, nvar * self.config["model_order"] + 1), np.nan
             ),
+            "residual_variances": np.zeros((n_time_steps, 2)),
         }
 
-    def _compute_inhomogeneous_te(
+    def _compute_inhomogeneous_gc(
         self,
         current_data: np.ndarray,
         lagged_data: np.ndarray,
-        cov_xp: np.ndarray,
-        cov_yp: np.ndarray,
-        c_xyp: np.ndarray,
-        c_yxp: np.ndarray,
         result_arrays: Dict[str, np.ndarray],
         ntrials: int,
         nvar: int,
     ) -> None:
-        """Compute inhomogeneous Transfer Entropy."""
+        """Compute inhomogeneous Granger Causality."""
         n_time_steps = current_data.shape[1] - 1
 
         for t in range(n_time_steps):
@@ -273,93 +255,77 @@ class TransferEntropyCalculator(BaseAnalyzer):
 
                 result_arrays["coefficients"][t, :, :] = coeff
 
-                a_square = coeff[:, :-1].reshape(nvar, nvar, self.config["model_order"])
-                b = a_square[0, 1, :]  # X -> Y
-                c = a_square[1, 0, :]  # Y -> X
                 sigy = residual_cov[0, 0] + np.finfo(float).eps
                 sigx = residual_cov[1, 1] + np.finfo(float).eps
+                result_arrays["residual_variances"][t, 0] = sigx
+                result_arrays["residual_variances"][t, 1] = sigy
 
-                cov_yp_reg = regularize_if_singular(cov_yp[t])
-                cov_xp_reg = regularize_if_singular(cov_xp[t])
-
-                result_arrays["te_residual_cov"][t, 1] = (
-                    sigy
-                    + b.T @ cov_xp_reg @ b
-                    - b.T @ c_xyp[t] @ np.linalg.inv(cov_yp_reg) @ c_xyp[t].T @ b
-                )
-                result_arrays["te_residual_cov"][t, 0] = (
-                    sigx
-                    + c.T @ cov_yp_reg @ c
-                    - c.T @ c_yxp[t] @ np.linalg.inv(cov_xp_reg) @ c_yxp[t].T @ c
+                lagged_x_only = lagged_data[1, :, t, :].T
+                current_x = current_data[1, t, :]
+                _, sigx_reduced = estimate_coefficients(
+                    current_x, lagged_x_only, ntrials
                 )
 
-                result_arrays["transfer_entropy"][t, 1] = 0.5 * np.log(
-                    result_arrays["te_residual_cov"][t, 1] / sigy
+                lagged_y_only = lagged_data[0, :, t, :].T
+                current_y = current_data[0, t, :]
+                _, sigy_reduced = estimate_coefficients(
+                    current_y, lagged_y_only, ntrials
                 )
-                result_arrays["transfer_entropy"][t, 0] = 0.5 * np.log(
-                    result_arrays["te_residual_cov"][t, 0] / sigx
-                )
+
+                result_arrays["granger_causality"][t, 1] = np.log(
+                    sigy_reduced / sigy
+                )  # X -> Y
+                result_arrays["granger_causality"][t, 0] = np.log(
+                    sigx_reduced / sigx
+                )  # Y -> X
 
             except Exception as e:
                 logger.error(
-                    f"Transfer Entropy computation failed at time step {t}: {e}"
+                    f"Granger Causality computation failed at time step {t}: {e}"
                 )
-                result_arrays["transfer_entropy"][t] = np.zeros(2)
-                result_arrays["te_residual_cov"][t] = np.zeros(2)
+                result_arrays["granger_causality"][t] = np.zeros(2)
+                result_arrays["residual_variances"][t] = np.zeros(2)
 
-    def _compute_homogeneous_te(
+    def _compute_homogeneous_gc(
         self,
         current_data: np.ndarray,
         lagged_data: np.ndarray,
-        cov_xp: np.ndarray,
-        cov_yp: np.ndarray,
-        c_xyp: np.ndarray,
-        c_yxp: np.ndarray,
         result_arrays: Dict[str, np.ndarray],
         ntrials: int,
-        nvar: int,
     ) -> None:
-        """Compute homogeneous Transfer Entropy."""
+        """Compute homogeneous Granger Causality."""
         coeff, residual_cov = estimate_coefficients(current_data, lagged_data, ntrials)
 
         for t in range(result_arrays["coefficients"].shape[0]):
             result_arrays["coefficients"][t] = coeff.T
 
-        a_square = coeff[:, :-1].reshape(nvar, nvar, self.config["model_order"])
-        b = a_square[0, 1, :]  # X -> Y
-        c = a_square[1, 0, :]  # Y -> X
         sigy = residual_cov[0, 0] + np.finfo(float).eps
         sigx = residual_cov[1, 1] + np.finfo(float).eps
+        result_arrays["residual_variances"][0, 0] = sigx
+        result_arrays["residual_variances"][0, 1] = sigy
 
-        cov_xp_avg = np.mean(cov_xp, axis=0)
-        cov_yp_avg = np.mean(cov_yp, axis=0)
-        cov_xy_p_avg = np.mean(c_xyp, axis=0)
-        cov_yx_p_avg = np.mean(c_yxp, axis=0)
+        lagged_x_only = (
+            lagged_data[1, :, :, :].reshape(self.config["model_order"], -1).T
+        )
+        lagged_y_only = (
+            lagged_data[0, :, :, :].reshape(self.config["model_order"], -1).T
+        )
+        current_x = current_data[1, :, :].flatten()
+        current_y = current_data[0, :, :].flatten()
 
-        result_arrays["transfer_entropy"][0, 1] = 0.5 * np.log(
-            (
-                sigy
-                + b.T @ cov_xp_avg @ b
-                - b.T @ cov_xy_p_avg @ np.linalg.inv(cov_yp_avg) @ cov_xy_p_avg.T @ b
-            )
-            / sigy
-        )
-        result_arrays["transfer_entropy"][0, 0] = 0.5 * np.log(
-            (
-                sigx
-                + c.T @ cov_yp_avg @ c
-                - c.T @ cov_yx_p_avg @ np.linalg.inv(cov_xp_avg) @ cov_yx_p_avg.T @ c
-            )
-            / sigx
-        )
+        _, sigx_reduced = estimate_coefficients(current_x, lagged_x_only, ntrials)
+        _, sigy_reduced = estimate_coefficients(current_y, lagged_y_only, ntrials)
+
+        result_arrays["granger_causality"][0, 1] = np.log(sigy_reduced / sigy)  # X -> Y
+        result_arrays["granger_causality"][0, 0] = np.log(sigx_reduced / sigx)  # Y -> X
 
     def _adjust_outputs_for_inhomo(self, result_arrays: Dict[str, np.ndarray]) -> None:
         """Adjust outputs for inhomogeneous mode by adding NaN blocks."""
         if self.config["time_mode"] == "inhomo":
             nan_block = np.full((self.config["model_order"], 2), np.nan)
-            result_arrays["transfer_entropy"] = np.vstack(
-                [nan_block, result_arrays["transfer_entropy"]]
+            result_arrays["granger_causality"] = np.vstack(
+                [nan_block, result_arrays["granger_causality"]]
             )
-            result_arrays["te_residual_cov"] = np.vstack(
-                [nan_block, result_arrays["te_residual_cov"]]
+            result_arrays["residual_variances"] = np.vstack(
+                [nan_block, result_arrays["residual_variances"]]
             )

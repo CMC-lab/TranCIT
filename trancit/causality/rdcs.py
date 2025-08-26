@@ -11,9 +11,9 @@ from typing import Dict
 
 import numpy as np
 
-from dcs.core.base import BaseAnalyzer, BaseResult
-from dcs.core.exceptions import ComputationError, ValidationError
-from dcs.utils.preprocess import regularize_if_singular
+from trancit.core.base import BaseAnalyzer, BaseResult
+from trancit.core.exceptions import ComputationError, ValidationError
+from trancit.utils.preprocess import regularize_if_singular
 
 logger = logging.getLogger(__name__)
 

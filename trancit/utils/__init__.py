@@ -1,5 +1,5 @@
 """
-Utilities Sub-package for Dynamic Causal Strength (DCS).
+Utilities Sub-package for TranCIT: Transient Causal Interaction.
 
 This sub-package contains helper functions organized into logical modules:
 
@@ -33,13 +33,13 @@ Plotting (plotting.py):
     - Standard deviation plotting with shading
     - Matplotlib integration (optional)
 
-All functions are designed to work with the DCS pipeline and provide
+All functions are designed to work with the TranCIT pipeline and provide
 robust, well-documented utilities for neuroscience time series analysis.
 
 Example
 -------
 >>> import numpy as np
->>> from dcs.utils import extract_event_snapshots, compute_event_statistics
+>>> from trancit.utils import extract_event_snapshots, compute_event_statistics
 >>>
 >>> # Generate sample data
 >>> signal = np.random.randn(2, 1000)  # (n_vars, time)

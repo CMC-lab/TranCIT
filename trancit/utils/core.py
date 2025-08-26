@@ -421,7 +421,7 @@ def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray,
 
     Examples
     --------
-    >>> from dcs.config import DeSnapParams
+    >>> from trancit.config import DeSnapParams
     >>> params = DeSnapParams(...)  # Configure parameters
     >>> results = perform_desnap_analysis(params)
     >>> print(f"Results keys: {list(results.keys())}")

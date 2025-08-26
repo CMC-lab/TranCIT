@@ -57,7 +57,7 @@ class BaseAnalyzer(ABC):
     Abstract base class for all analyzers.
 
     This class defines the common interface and functionality
-    for all analysis components in the DCS package.
+    for all analysis components in the TranCIT package.
     """
 
     def __init__(self, **kwargs):

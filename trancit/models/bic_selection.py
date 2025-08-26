@@ -9,8 +9,8 @@ from typing import Dict, Tuple
 
 import numpy as np
 
-from dcs import PipelineConfig
-from dcs.utils import compute_event_statistics
+from trancit import PipelineConfig
+from trancit.utils import compute_event_statistics
 
 from ..core.exceptions import ValidationError
 

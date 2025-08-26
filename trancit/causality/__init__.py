@@ -1,5 +1,5 @@
 """
-Causality analysis module for Dynamic Causal Strength (DCS).
+Causality analysis module for TranCIT: Transient Causal Interaction.
 
 This module provides implementations of various causality measures:
 - Dynamic Causal Strength (DCS): Time-varying causal relationships
@@ -13,7 +13,7 @@ a consistent interface for analyzing causal relationships in time series data.
 Example
 -------
 >>> import numpy as np
->>> from dcs.causality import DCSCalculator
+>>> from trancit.causality import DCSCalculator
 >>>
 >>> # Create DCS calculator
 >>> calculator = DCSCalculator(model_order=4, time_mode="inhomo")

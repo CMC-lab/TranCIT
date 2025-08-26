@@ -11,13 +11,13 @@ from typing import Any, Dict
 
 import numpy as np
 
-from dcs.config import PipelineConfig
-from dcs.utils import (
+from trancit.config import PipelineConfig
+from trancit.utils import (
     compute_event_statistics,
     extract_event_snapshots,
     remove_artifact_trials,
 )
-from dcs.utils.signal import (
+from trancit.utils.signal import (
     find_best_shrinked_locations,
     find_peak_locations,
     shrink_locations_resample_uniform,
@@ -172,7 +172,7 @@ class BICSelectionStage(PipelineStage):
         if self.config.options.bic:
             logger.info("Performing BIC model selection.")
 
-            from dcs.models.bic_selection import BICSelector
+            from trancit.models.bic_selection import BICSelector
 
             try:
                 event_snapshots_momax = extract_event_snapshots(
@@ -344,7 +344,7 @@ class CausalityAnalysisStage(PipelineStage):
 
         logger.info("Performing causality analysis.")
 
-        from dcs.causality.rdcs import time_varying_causality
+        from trancit.causality.rdcs import time_varying_causality
 
         causal_params = {
             "ref_time": self.config.causal.ref_time,
@@ -382,9 +382,9 @@ class BootstrapAnalysisStage(PipelineStage):
 
         logger.info("Performing bootstrap analysis.")
 
-        from dcs.causality.rdcs import time_varying_causality
-        from dcs.simulation import simulate_ar_event_bootstrap
-        from dcs.utils.residuals import get_residuals
+        from trancit.causality.rdcs import time_varying_causality
+        from trancit.simulation import simulate_ar_event_bootstrap
+        from trancit.utils.residuals import get_residuals
 
         bootstrap_causal_outputs_list = []
 
@@ -454,8 +454,8 @@ class DeSnapAnalysisStage(PipelineStage):
 
         logger.info("Performing DeSnap analysis.")
 
-        from dcs.utils.core import perform_desnap_analysis
-        from dcs.utils.residuals import estimate_residuals
+        from trancit.utils.core import perform_desnap_analysis
+        from trancit.utils.residuals import estimate_residuals
 
         try:
             desnap_params_instance = self.config.desnap

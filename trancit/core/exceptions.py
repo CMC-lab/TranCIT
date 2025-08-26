@@ -2,7 +2,7 @@
 Custom exceptions for Dynamic Causal Strength (DCS).
 
 This module defines the exception hierarchy used throughout
-the DCS package for consistent error handling.
+the TranCIT package for consistent error handling.
 """
 
 from typing import Any, Optional, Tuple

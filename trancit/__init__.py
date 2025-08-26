@@ -1,5 +1,5 @@
 """
-Dynamic Causal Strength (DCS) Package
+TranCIT: Transient Causal Interaction Package
 
 A Python package for quantifying causal relationships in multivariate time series data
 using dynamic causal strength (DCS) methods.
@@ -16,7 +16,7 @@ The package implements several causality measures:
 Example
 -------
 >>> import numpy as np
->>> from dcs import DCSCalculator
+>>> from trancit import DCSCalculator
 >>>
 >>> # Create calculator
 >>> calculator = DCSCalculator(model_order=4, time_mode="inhomo")
@@ -40,20 +40,20 @@ __email__ = "salr.nouri@gmail.com"
 __license__ = "BSD-2-Clause"
 
 # Causality analysis imports
-from dcs.causality.dcs import DCSCalculator, DCSResult
-from dcs.causality.granger import GrangerCausalityCalculator, GrangerCausalityResult
-from dcs.causality.rdcs import (
+from trancit.causality.dcs import DCSCalculator, DCSResult
+from trancit.causality.granger import GrangerCausalityCalculator, GrangerCausalityResult
+from trancit.causality.rdcs import (
     RelativeDCSCalculator,
     RelativeDCSResult,
     time_varying_causality,
 )
-from dcs.causality.transfer_entropy import (
+from trancit.causality.transfer_entropy import (
     TransferEntropyCalculator,
     TransferEntropyResult,
 )
 
 # Configuration imports
-from dcs.config import (
+from trancit.config import (
     BicParams,
     CausalParams,
     DeSnapParams,
@@ -65,8 +65,8 @@ from dcs.config import (
 )
 
 # Core functionality imports
-from dcs.core.base import BaseAnalyzer, BaseConfig, BaseResult
-from dcs.core.exceptions import (
+from trancit.core.base import BaseAnalyzer, BaseConfig, BaseResult
+from trancit.core.exceptions import (
     ComputationError,
     ConfigurationError,
     ConvergenceError,
@@ -77,16 +77,16 @@ from dcs.core.exceptions import (
 )
 
 # Setup logging
-from dcs.logger_config import setup_logging
-from dcs.models.bic_selection import BICSelector
-from dcs.models.model_validation import ModelValidator
+from trancit.logger_config import setup_logging
+from trancit.models.bic_selection import BICSelector
+from trancit.models.model_validation import ModelValidator
 
 # Model estimation imports
-from dcs.models.var_estimation import VAREstimator
+from trancit.models.var_estimation import VAREstimator
 
 # Pipeline imports
-from dcs.pipeline.orchestrator import PipelineOrchestrator, PipelineResult
-from dcs.pipeline.stages import (
+from trancit.pipeline.orchestrator import PipelineOrchestrator, PipelineResult
+from trancit.pipeline.stages import (
     ArtifactRemovalStage,
     BICSelectionStage,
     BootstrapAnalysisStage,
@@ -101,7 +101,7 @@ from dcs.pipeline.stages import (
 )
 
 # Simulation imports
-from dcs.simulation import (
+from trancit.simulation import (
     generate_ensemble_nonstat_innomean,
     generate_signals,
     generate_var_nonstat,
@@ -112,7 +112,7 @@ from dcs.simulation import (
 )
 
 # Utility imports
-from dcs.utils import (
+from trancit.utils import (
     compute_event_statistics,
     estimate_residuals,
     extract_event_snapshots,
@@ -124,7 +124,7 @@ from dcs.utils import (
     shrink_locations_resample_uniform,
 )
 
-setup_logging(log_file="dcs_log.txt")
+setup_logging(log_file="trancit_log.txt")
 
 # Public API definition
 __all__ = [

@@ -5,7 +5,7 @@ from typing import Optional
 LOG_LEVEL_DEFAULT = logging.INFO
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
-LOGGER_NAME = "dcs"
+LOGGER_NAME = "trancit"
 
 
 def setup_logging(
@@ -16,7 +16,7 @@ def setup_logging(
     log_file: Optional[str] = None,
 ) -> logging.Logger:
     """
-    Configures logging for the 'dcs' package.
+    Configures logging for the 'trancit' package.
 
     This should be called once at application start or from __init__.py.
 

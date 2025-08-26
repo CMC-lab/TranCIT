@@ -10,10 +10,10 @@ from typing import Any, Dict
 
 import numpy as np
 
-from dcs.config import PipelineConfig
-from dcs.core.base import BaseAnalyzer, BaseResult
-from dcs.core.exceptions import ComputationError, ValidationError
-from dcs.pipeline.stages import (
+from trancit.config import PipelineConfig
+from trancit.core.base import BaseAnalyzer, BaseResult
+from trancit.core.exceptions import ComputationError, ValidationError
+from trancit.pipeline.stages import (
     ArtifactRemovalStage,
     BICSelectionStage,
     BootstrapAnalysisStage,

@@ -11,8 +11,8 @@ from typing import Dict
 import numpy as np
 from scipy import stats
 
-from dcs.core.base import BaseAnalyzer, BaseResult
-from dcs.core.exceptions import ComputationError, ValidationError
+from trancit.core.base import BaseAnalyzer, BaseResult
+from trancit.core.exceptions import ComputationError, ValidationError
 
 logger = logging.getLogger(__name__)
 

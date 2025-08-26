@@ -1,7 +1,7 @@
 """
-Dynamic Causal Strength (DCS) implementation.
+Transfer Entropy (TE) implementation.
 
-This module provides the implementation of Dynamic Causal Strength
+This module provides the implementation of Transfer Entropy
 calculation using the new modular architecture.
 """
 
@@ -10,56 +10,48 @@ from typing import Dict, Tuple
 
 import numpy as np
 
-from dcs.core.base import BaseAnalyzer, BaseResult
-from dcs.core.exceptions import ComputationError, ValidationError
-from dcs.utils.helpers import compute_covariances, estimate_coefficients
-from dcs.utils.preprocess import regularize_if_singular
+from trancit.core.base import BaseAnalyzer, BaseResult
+from trancit.core.exceptions import ComputationError, ValidationError
+from trancit.utils.helpers import compute_covariances, estimate_coefficients
+from trancit.utils.preprocess import regularize_if_singular
 
 logger = logging.getLogger(__name__)
 
 
-class DCSResult(BaseResult):
-    """Result container for DCS analysis."""
+class TransferEntropyResult(BaseResult):
+    """Result container for Transfer Entropy analysis."""
 
     def __init__(
         self,
-        causal_strength: np.ndarray,
         transfer_entropy: np.ndarray,
-        granger_causality: np.ndarray,
-        coefficients: np.ndarray,
         te_residual_cov: np.ndarray,
+        coefficients: np.ndarray,
     ):
         """
-        Initialize DCS result.
+        Initialize Transfer Entropy result.
 
         Parameters
         ----------
-        causal_strength : np.ndarray
-            Dynamic Causal Strength values
         transfer_entropy : np.ndarray
             Transfer Entropy values
-        granger_causality : np.ndarray
-            Granger Causality values
-        coefficients : np.ndarray
-            VAR coefficients
         te_residual_cov : np.ndarray
             Transfer entropy residual covariance
+        coefficients : np.ndarray
+            VAR coefficients
         """
         super().__init__(
-            causal_strength=causal_strength,
             transfer_entropy=transfer_entropy,
-            granger_causality=granger_causality,
-            coefficients=coefficients,
             te_residual_cov=te_residual_cov,
+            coefficients=coefficients,
         )
 
 
-class DCSCalculator(BaseAnalyzer):
+class TransferEntropyCalculator(BaseAnalyzer):
     """
-    Dynamic Causal Strength (DCS) calculator.
+    Transfer Entropy (TE) calculator.
 
-    This class implements the DCS algorithm for quantifying
-    causal relationships in time series data.
+    This class implements the Transfer Entropy algorithm for quantifying
+    information flow between time series variables.
     """
 
     def __init__(
@@ -70,7 +62,7 @@ class DCSCalculator(BaseAnalyzer):
         **kwargs,
     ):
         """
-        Initialize DCS calculator.
+        Initialize Transfer Entropy calculator.
 
         Parameters
         ----------
@@ -89,10 +81,11 @@ class DCSCalculator(BaseAnalyzer):
             use_diagonal_covariance=use_diagonal_covariance,
             **kwargs,
         )
+        # VAREstimator is not used in this implementation - using direct computation
 
-    def analyze(self, data: np.ndarray, **kwargs) -> DCSResult:
+    def analyze(self, data: np.ndarray, **kwargs) -> TransferEntropyResult:
         """
-        Perform DCS analysis on the given data.
+        Perform Transfer Entropy analysis on the given data.
 
         Parameters
         ----------
@@ -103,8 +96,8 @@ class DCSCalculator(BaseAnalyzer):
 
         Returns
         -------
-        DCSResult
-            DCS analysis results
+        TransferEntropyResult
+            Transfer Entropy analysis results
         """
         self._validate_input_data(data)
         self._log_analysis_start(data.shape)
@@ -117,11 +110,13 @@ class DCSCalculator(BaseAnalyzer):
             cov_xp, cov_yp, c_xyp, c_yxp = compute_covariances(
                 lagged_data, n_time_steps, self.config["model_order"]
             )
+
             result_arrays = self._initialize_result_arrays(
                 n_time_steps, data.shape[1], data.shape[0]
             )
+
             if self.config["time_mode"] == "inhomo":
-                self._compute_inhomogeneous_causality(
+                self._compute_inhomogeneous_te(
                     current_data,
                     lagged_data,
                     cov_xp,
@@ -134,7 +129,7 @@ class DCSCalculator(BaseAnalyzer):
                 )
                 self._adjust_outputs_for_inhomo(result_arrays)
             else:
-                self._compute_homogeneous_causality(
+                self._compute_homogeneous_te(
                     current_data,
                     lagged_data,
                     cov_xp,
@@ -148,18 +143,16 @@ class DCSCalculator(BaseAnalyzer):
 
             self._log_analysis_complete()
 
-            return DCSResult(
-                causal_strength=result_arrays["causal_strength"],
+            return TransferEntropyResult(
                 transfer_entropy=result_arrays["transfer_entropy"],
-                granger_causality=result_arrays["granger_causality"],
-                coefficients=result_arrays["coefficients"],
                 te_residual_cov=result_arrays["te_residual_cov"],
+                coefficients=result_arrays["coefficients"],
             )
 
         except Exception as e:
-            logger.error(f"DCS analysis failed: {e}")
+            logger.error(f"Transfer Entropy analysis failed: {e}")
             raise ComputationError(
-                f"DCS analysis failed: {e}", "dcs_computation", data.shape
+                f"Transfer Entropy analysis failed: {e}", "te_computation", data.shape
             )
 
     def _validate_config(self) -> None:
@@ -198,7 +191,7 @@ class DCSCalculator(BaseAnalyzer):
         self, time_series_data: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray, int]:
         """
-        Prepare data structures for analysis exactly like the previous implementation.
+        Prepare data structures for analysis.
 
         Parameters
         ----------
@@ -229,7 +222,7 @@ class DCSCalculator(BaseAnalyzer):
         self, n_time_steps: int, nobs: int, nvar: int
     ) -> Dict[str, np.ndarray]:
         """
-        Initialize arrays for storing results exactly like the previous implementation.
+        Initialize arrays for storing results.
 
         Parameters
         ----------
@@ -248,14 +241,12 @@ class DCSCalculator(BaseAnalyzer):
         return {
             "te_residual_cov": np.zeros((n_time_steps, 2)),
             "transfer_entropy": np.zeros((n_time_steps, 2)),
-            "causal_strength": np.zeros((n_time_steps, 2)),
-            "granger_causality": np.zeros((n_time_steps, 2)),
             "coefficients": np.full(
                 (nobs, nvar, nvar * self.config["model_order"] + 1), np.nan
             ),
         }
 
-    def _compute_inhomogeneous_causality(
+    def _compute_inhomogeneous_te(
         self,
         current_data: np.ndarray,
         lagged_data: np.ndarray,
@@ -267,12 +258,11 @@ class DCSCalculator(BaseAnalyzer):
         ntrials: int,
         nvar: int,
     ) -> None:
-        """Compute inhomogeneous causality exactly like the previous implementation."""
+        """Compute inhomogeneous Transfer Entropy."""
         n_time_steps = current_data.shape[1] - 1
 
         for t in range(n_time_steps):
             try:
-                logging.debug(f"Processing time step {t}/{n_time_steps - 1}")
                 coeff, residual_cov = estimate_coefficients(
                     current_data[:, t, :].T,
                     lagged_data[:, : self.config["model_order"], t, :]
@@ -280,13 +270,14 @@ class DCSCalculator(BaseAnalyzer):
                     .T,
                     ntrials,
                 )
+
                 result_arrays["coefficients"][t, :, :] = coeff
 
                 a_square = coeff[:, :-1].reshape(nvar, nvar, self.config["model_order"])
                 b = a_square[0, 1, :]  # X -> Y
                 c = a_square[1, 0, :]  # Y -> X
-                sigy = residual_cov[0, 0] or np.finfo(float).eps
-                sigx = residual_cov[1, 1] or np.finfo(float).eps
+                sigy = residual_cov[0, 0] + np.finfo(float).eps
+                sigx = residual_cov[1, 1] + np.finfo(float).eps
 
                 cov_yp_reg = regularize_if_singular(cov_yp[t])
                 cov_xp_reg = regularize_if_singular(cov_xp[t])
@@ -309,36 +300,14 @@ class DCSCalculator(BaseAnalyzer):
                     result_arrays["te_residual_cov"][t, 0] / sigx
                 )
 
-                if not self.config["use_diagonal_covariance"]:
-                    result_arrays["causal_strength"][t, 1] = 0.5 * np.log(
-                        (sigy + b.T @ cov_xp_reg @ b) / sigy
-                    )
-                    result_arrays["causal_strength"][t, 0] = 0.5 * np.log(
-                        (sigx + c.T @ cov_yp_reg @ c) / sigx
-                    )
-                else:
-                    result_arrays["causal_strength"][t, 1] = 0.5 * np.log(
-                        (sigy + b.T @ np.diag(np.diag(cov_xp_reg)) @ b) / sigy
-                    )
-                    result_arrays["causal_strength"][t, 0] = 0.5 * np.log(
-                        (sigx + c.T @ np.diag(np.diag(cov_yp_reg)) @ c) / sigx
-                    )
-
-                lagged_x_p = lagged_data[1, :, t, :].T
-                lagged_y_p = lagged_data[0, :, t, :].T
-                current_x_t = current_data[1, t, :]
-                current_y_t = current_data[0, t, :]
-                _, sigx_r = estimate_coefficients(current_x_t, lagged_x_p, ntrials)
-                _, sigy_r = estimate_coefficients(current_y_t, lagged_y_p, ntrials)
-                result_arrays["granger_causality"][t, 1] = np.log(sigy_r / sigy)
-                result_arrays["granger_causality"][t, 0] = np.log(sigx_r / sigx)
             except Exception as e:
-                logger.error(f"Computation failed at time step {t}: {e}")
-                result_arrays["causal_strength"][t] = np.zeros(2)
+                logger.error(
+                    f"Transfer Entropy computation failed at time step {t}: {e}"
+                )
                 result_arrays["transfer_entropy"][t] = np.zeros(2)
-                result_arrays["granger_causality"][t] = np.zeros(2)
+                result_arrays["te_residual_cov"][t] = np.zeros(2)
 
-    def _compute_homogeneous_causality(
+    def _compute_homogeneous_te(
         self,
         current_data: np.ndarray,
         lagged_data: np.ndarray,
@@ -350,9 +319,7 @@ class DCSCalculator(BaseAnalyzer):
         ntrials: int,
         nvar: int,
     ) -> None:
-        """Compute homogeneous causality exactly like the previous implementation."""
-        current_data.shape[1] - 1
-
+        """Compute homogeneous Transfer Entropy."""
         coeff, residual_cov = estimate_coefficients(current_data, lagged_data, ntrials)
 
         for t in range(result_arrays["coefficients"].shape[0]):
@@ -361,16 +328,13 @@ class DCSCalculator(BaseAnalyzer):
         a_square = coeff[:, :-1].reshape(nvar, nvar, self.config["model_order"])
         b = a_square[0, 1, :]  # X -> Y
         c = a_square[1, 0, :]  # Y -> X
-        sigy = residual_cov[0, 0] or np.finfo(float).eps
-        sigx = residual_cov[1, 1] or np.finfo(float).eps
+        sigy = residual_cov[0, 0] + np.finfo(float).eps
+        sigx = residual_cov[1, 1] + np.finfo(float).eps
 
         cov_xp_avg = np.mean(cov_xp, axis=0)
         cov_yp_avg = np.mean(cov_yp, axis=0)
         cov_xy_p_avg = np.mean(c_xyp, axis=0)
         cov_yx_p_avg = np.mean(c_yxp, axis=0)
-
-        cov_yp_reg = regularize_if_singular(cov_yp_avg)
-        cov_xp_reg = regularize_if_singular(cov_xp_avg)
 
         result_arrays["transfer_entropy"][0, 1] = 0.5 * np.log(
             (
@@ -389,41 +353,13 @@ class DCSCalculator(BaseAnalyzer):
             / sigx
         )
 
-        if not self.config["use_diagonal_covariance"]:
-            result_arrays["causal_strength"][0, 1] = 0.5 * np.log(
-                (sigy + b.T @ cov_xp_reg @ b) / sigy
-            )
-            result_arrays["causal_strength"][0, 0] = 0.5 * np.log(
-                (sigx + c.T @ cov_yp_reg @ c) / sigx
-            )
-        else:
-            result_arrays["causal_strength"][0, 1] = 0.5 * np.log(
-                (sigy + b.T @ np.diag(np.diag(cov_xp_reg)) @ b) / sigy
-            )
-            result_arrays["causal_strength"][0, 0] = 0.5 * np.log(
-                (sigx + c.T @ np.diag(np.diag(cov_yp_reg)) @ c) / sigx
-            )
-
-        lagged_x_p = lagged_data[1, :, :, :].reshape(self.config["model_order"], -1).T
-        lagged_y_p = lagged_data[0, :, :, :].reshape(self.config["model_order"], -1).T
-        current_x_t = current_data[1, :, :].flatten()
-        current_y_t = current_data[0, :, :].flatten()
-        _, sigx_r = estimate_coefficients(current_x_t, lagged_x_p, ntrials)
-        _, sigy_r = estimate_coefficients(current_y_t, lagged_y_p, ntrials)
-        result_arrays["granger_causality"][0, 1] = np.log(sigy_r / sigy)
-        result_arrays["granger_causality"][0, 0] = np.log(sigx_r / sigx)
-
     def _adjust_outputs_for_inhomo(self, result_arrays: Dict[str, np.ndarray]) -> None:
-        """Adjust outputs for inhomogeneous mode by adding NaN blocks exactly
-        like the previous implementation."""
+        """Adjust outputs for inhomogeneous mode by adding NaN blocks."""
         if self.config["time_mode"] == "inhomo":
             nan_block = np.full((self.config["model_order"], 2), np.nan)
-            result_arrays["granger_causality"] = np.vstack(
-                [nan_block, result_arrays["granger_causality"]]
-            )
             result_arrays["transfer_entropy"] = np.vstack(
                 [nan_block, result_arrays["transfer_entropy"]]
             )
-            result_arrays["causal_strength"] = np.vstack(
-                [nan_block, result_arrays["causal_strength"]]
+            result_arrays["te_residual_cov"] = np.vstack(
+                [nan_block, result_arrays["te_residual_cov"]]
             )

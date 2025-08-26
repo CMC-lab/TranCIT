@@ -1,5 +1,5 @@
 """
-Models module for Dynamic Causal Strength (DCS).
+Models module for TranCIT: Transient Causal Interaction.
 
 This module provides implementations for:
 - VAR model estimation: Vector Autoregressive model fitting
@@ -13,7 +13,7 @@ and support both homogeneous and inhomogeneous VAR models.
 Example
 -------
 >>> import numpy as np
->>> from dcs.models import VAREstimator, BICSelector, select_model_order
+>>> from trancit.models import VAREstimator, BICSelector, select_model_order
 >>>
 >>> # Create VAR estimator
 >>> estimator = VAREstimator(model_order=4, time_mode="inhomo")

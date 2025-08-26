@@ -1,5 +1,5 @@
 """
-Simulation module for the DCS package.
+Simulation module for the TranCIT package.
 
 This module provides various simulation functions for generating synthetic time series data
 for testing and demonstration purposes.

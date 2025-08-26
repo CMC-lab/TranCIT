@@ -1,8 +1,8 @@
 """
-Core module for Dynamic Causal Strength (DCS).
+Core module for TranCIT: Transient Causal Interaction.
 
 This module provides the foundation classes and interfaces
-that are used throughout the DCS package.
+that are used throughout the TranCIT package.
 
 The core module includes:
 - BaseAnalyzer: Abstract base class for all analyzers
@@ -12,7 +12,7 @@ The core module includes:
 
 Example
 -------
->>> from dcs.core import BaseAnalyzer, BaseResult
+>>> from trancit.core import BaseAnalyzer, BaseResult
 >>>
 >>> class MyAnalyzer(BaseAnalyzer):
 ...     def analyze(self, data):
