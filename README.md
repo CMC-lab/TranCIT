@@ -6,8 +6,7 @@
 [![CI](https://github.com/CMC-lab/TranCIT/actions/workflows/ci.yml/badge.svg)](https://github.com/CMC-lab/TranCIT/actions/workflows/ci.yml)
 [![Documentation](https://readthedocs.org/projects/trancit/badge/?version=latest)](https://trancit.readthedocs.io/en/latest/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-<!-- DOI Badge will be added after first Zenodo release -->
-<!-- [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXX) -->
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16998397.svg)](https://doi.org/10.5281/zenodo.16998397)
 
 TranCIT (Transient Causal Interaction) is a Python package for quantifying causal relationships in multivariate time series data. It provides methods for analyzing directional influences using model-based statistical tools, inspired by information-theoretic and autoregressive frameworks.
 
@@ -195,12 +194,19 @@ If you use **TranCIT** in your research, please cite:
 And cite this software package:
 
 ```bibtex
-@software{nouri2025dynamic,
-  title={TranCIT: Transient Causal Interaction Toolbox},
-  author={Nouri, Salar and Shao, Kaidi and Logothetis, Nikos K. and Besserve, Michel},
-  year={2025},
-  url={https://github.com/CMC-lab/TranCIT},
-  doi={10.5281/zenodo.XXXXXX}
+@software{nouri_2025_16998397,
+  author       = {Nouri, Salar and
+                  Shao, Kaidi and
+                  Safavi, Shervin},
+  title        = {TranCIT: Transient Causal Interaction - A Python
+                   package for transient neural causal inference
+                  },
+  month        = aug,
+  year         = 2025,
+  publisher    = {Zenodo},
+  version      = {v1.0.0},
+  doi          = {10.5281/zenodo.16998397},
+  url          = {https://doi.org/10.5281/zenodo.16998397}
 }
 ```
 
@@ -216,6 +222,6 @@ This project is licensed under the BSD 2-Clause License. See the [LICENSE](LICEN
 
 ## 📞 Contact
 
-- **Maintainer**: Salar Nouri (salr.nouri@gmail.com)
+- **Maintainer**: Salar Nouri (<salr.nouri@gmail.com>)
 - **Issues**: [GitHub Issues](https://github.com/CMC-lab/TranCIT/issues)
 - **Documentation**: [ReadTheDocs](https://trancit.readthedocs.io)
