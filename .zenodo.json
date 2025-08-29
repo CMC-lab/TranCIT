@@ -1,0 +1,80 @@
+{
+  "title": "TranCIT: Transient Causal Interaction - A Python package for transient neural causal inference",
+  "description": "A Python package for quantifying causal relationships in multivariate time series data, with a focus on transient neural events and neuroscience applications. TranCIT implements advanced causality measures including directed coherence spectroscopy (DCS), robust directed coherence spectroscopy (RDCS), Granger causality, and transfer entropy, specifically designed for analyzing transient neural interactions in electrophysiological data.",
+  "creators": [
+    {
+      "name": "Nouri, Salar",
+      "affiliation": "School of Electrical and Computer Engineering, College of Engineering, University of Tehran, Tehran, Iran",
+      "orcid": "0000-0002-8846-9318"
+    },
+    {
+      "name": "Shao, Kaidi", 
+      "affiliation": "International Center for Primate Brain Research (ICPBR), Center for Excellence in Brain Science and Intelligence Technology (CEBSIT), Chinese Academy of Sciences (CAS), Shanghai, China",
+      "orcid": "0000-0002-3027-0090"
+    },
+    {
+      "name": "Safavi, Shervin",
+      "affiliation": "Computational Neuroscience, Department of Child and Adolescent Psychiatry, Faculty of Medicine, Technische Universität Dresden, Dresden 01307, Germany", 
+      "orcid": "0000-0002-2868-530X"
+    }
+  ],
+  "license": "BSD-2-Clause",
+  "keywords": [
+    "causality",
+    "causal-inference",
+    "time-series", 
+    "neuroscience",
+    "statistics",
+    "machine learning",
+    "trancit",
+    "transfer-entropy",
+    "granger-causality",
+    "transient-neural-events",
+    "local-field-potential",
+    "electroencephalogram",
+    "magnetoencephalography",
+    "robust-directed-coherence-spectroscopy",
+    "multivariate-time-series",
+    "computational-neuroscience"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/CMC-lab/TranCIT",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://trancit.readthedocs.io",
+      "relation": "isDocumentedBy", 
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://pypi.org/project/trancit/",
+      "relation": "isIdenticalTo",
+      "scheme": "url"
+    }
+  ],
+  "communities": [
+    {
+      "identifier": "neuroscience"
+    },
+    {
+      "identifier": "software"
+    },
+    {
+      "identifier": "python"
+    }
+  ],
+  "grants": [
+    {
+        "title": "Shanghai Municipal Science and Technology Major Project",
+        "code": "2019SHZDZX02"
+    },
+    {
+        "title": "Max Planck Society (including the Max Planck Institute for Biological Cybernetics and the Graduate School of Neural and Behavioral Sciences)"
+    },
+    {
+        "title": "Joachim Herz Foundation"
+    }
+  ]
+}
