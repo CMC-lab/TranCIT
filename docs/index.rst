@@ -18,9 +18,13 @@ TranCIT: Transient Causal Interaction
    :target: https://github.com/CMC-lab/TranCIT/blob/main/LICENSE
    :alt: License
 
-.. image:: https://img.shields.io/github/stars/CMC-lab/TranCIT.svg
-   :target: https://github.com/CMC-lab/TranCIT
-   :alt: GitHub Stars
+.. image:: https://github.com/CMC-lab/TranCIT/actions/workflows/ci.yml/badge.svg
+   :target: https://github.com/CMC-lab/TranCIT/actions/workflows/ci.yml
+   :alt: CI Status
+
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.16998397.svg
+   :target: https://doi.org/10.5281/zenodo.16998397
+   :alt: DOI
 
 Source code is available on `GitHub <https://github.com/CMC-lab/TranCIT>`_.
 You can find comprehensive examples in the `examples/` folder of the repository to help you get started quickly.
@@ -280,16 +284,20 @@ If you use DCS in your research, please cite our paper:
 
 .. code-block:: bibtex
 
-   @article{nouri2023dynamic,
-     title={Dynamic causal strength: A novel method for effective connectivity in networks with non-stationary dynamics},
-     author={Nouri, Salar and Krishnan, Giri P and Bazhenov, Maxim},
-     journal={Frontiers in Network Physiology},
-     volume={3},
-     pages={1085347},
-     year={2023},
-     publisher={Frontiers},
-     doi={10.3389/fnetp.2023.1085347}
-   }
+   @software{nouri_2025_16998397,
+      author       = {Nouri, Salar and
+                        Shao, Kaidi and
+                        Safavi, Shervin},
+      title        = {TranCIT: Transient Causal Interaction - A Python
+                        package for transient neural causal inference
+                        },
+      month        = aug,
+      year         = 2025,
+      publisher    = {Zenodo},
+      version      = {v1.0.0},
+      doi          = {10.5281/zenodo.16998397},
+      url          = {https://doi.org/10.5281/zenodo.16998397}
+      }
 
 ****************
 License & Acknowledgments  
@@ -302,16 +310,16 @@ DCS is released under the BSD 2-Clause License, allowing both academic and comme
 **Acknowledgments**
 
 This work was supported by:
-- National Institutes of Health grants
-- National Science Foundation awards
-- University of California research funding
+- Shanghai Municipal Science and Technology Major Project (Grant No. 2019SHZDZX02)
+- Max Planck Society (including the Max Planck Institute for Biological Cybernetics and the Graduate School of Neural and Behavioral Sciences)
+- Joachim Herz Foundation
 
 Special thanks to the scientific computing and neuroscience communities for feedback and validation studies.
 
 **Development Team**
 
-- **Lead Developer**: Salar Nouri (University of California, Riverside)
-- **Scientific Advisor**: Prof. Maxim Bazhenov (University of California, San Diego)  
+- **Lead Developer**: Salar Nouri
+- **Scientific Advisor**: Shervin Safavi
 - **Contributors**: See `GitHub contributors <https://github.com/CMC-lab/TranCIT/contributors>`_
 
 ****************
