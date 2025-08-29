@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "TranCIT: Transient Causal Interaction - A Python package for transient neural causal inference"
+title: "TranCIT: Transient Causal Interaction Toolbox - A Python package for transient neural causal inference"
 message: "If you use this software, please cite it as below."
 authors:
   - given-names: Salar

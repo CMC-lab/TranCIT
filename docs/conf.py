@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
-project = "TranCIT: Transient Causal Interaction"
+project = "TranCIT: Transient Causal Interaction Toolbox"
 author = "Salar Nouri"
 copyright = "2025, Salar Nouri / CMC-Lab"
 
@@ -95,7 +95,7 @@ latex_documents = [
     (
         master_doc,
         "TranCIT.tex",
-        "TranCIT: Transient Causal Interaction Documentation",
+        "TranCIT: Transient Causal Interaction Toolbox Documentation",
         "Salar Nouri",
         "manual",
     ),
@@ -103,7 +103,7 @@ latex_documents = [
 
 # -- Options for manual page output ------------------------------------------
 
-man_pages = [(master_doc, "trancit", "TranCIT: Transient Causal Interaction Documentation", [author], 1)]
+man_pages = [(master_doc, "trancit", "TranCIT: Transient Causal Interaction Toolbox Documentation", [author], 1)]
 
 # -- Options for Texinfo output ----------------------------------------------
 
@@ -111,7 +111,7 @@ texinfo_documents = [
     (
         master_doc,
         "TranCIT",
-        "TranCIT: Transient Causal Interaction Documentation",
+        "TranCIT: Transient Causal Interaction Toolbox Documentation",
         author,
         "TranCIT",
         "Causal inference in time series.",

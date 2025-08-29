@@ -1,10 +1,10 @@
-.. TranCIT: Transient Causal Interaction documentation master file.
+.. TranCIT: Transient Causal Interaction Toolbox documentation master file.
 
-==========================================
-TranCIT: Transient Causal Interaction
-==========================================
+===================================================
+TranCIT: Transient Causal Interaction Toolbox
+===================================================
 
-**TranCIT (Transient Causal Interaction)** is a comprehensive Python package for analyzing causal relationships in multivariate time series data. It provides robust, scientifically-validated methods for detecting and quantifying directional influences between signals, with applications in neuroscience, economics, finance, and other domains involving complex time-dependent systems.
+**TranCIT (Transient Causal Interaction Toolbox)** is a comprehensive Python package for analyzing causal relationships in multivariate time series data. It provides robust, scientifically-validated methods for detecting and quantifying directional influences between signals, with applications in neuroscience, economics, finance, and other domains involving complex time-dependent systems.
 
 .. image:: https://img.shields.io/pypi/v/trancit
    :target: https://pypi.org/project/trancit/
@@ -288,9 +288,9 @@ If you use DCS in your research, please cite our paper:
       author       = {Nouri, Salar and
                         Shao, Kaidi and
                         Safavi, Shervin},
-      title        = {TranCIT: Transient Causal Interaction - A Python
-                        package for transient neural causal inference
-                        },
+            title        = {TranCIT: Transient Causal Interaction Toolbox - A Python
+                       package for transient neural causal inference
+                      },
       month        = aug,
       year         = 2025,
       publisher    = {Zenodo},

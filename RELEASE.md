@@ -1,4 +1,4 @@
-# Release Guide for TranCIT: Transient Causal Interaction
+# Release Guide for TranCIT: Transient Causal Interaction Toolbox
 
 This document provides instructions for releasing new versions of the TranCIT package.
 

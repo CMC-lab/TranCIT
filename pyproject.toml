@@ -1,7 +1,7 @@
 [project]
 name = "trancit"
 dynamic = ["version"]
-description = "TranCIT: Transient Causal Interaction - A Python package for quantifying causal relationships in multivariate time series data."
+description = "TranCIT: Transient Causal Interaction Toolbox - A Python package for quantifying causal relationships in multivariate time series data."
 authors = [{ name = "Salar Nouri", email = "salr.nouri@gmail.com" }]
 maintainers = [{ name = "Salar Nouri", email = "salr.nouri@gmail.com" }]
 license = "BSD-2-Clause"

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the TranCIT: Transient Causal Interaction project will be documented in this file.
+All notable changes to the TranCIT: Transient Causal Interaction Toolbox project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-01-18
 
 ### Added
-- **Initial Release** of TranCIT: Transient Causal Interaction package
+- **Initial Release** of TranCIT: Transient Causal Interaction Toolbox
 - **Core Functionality**:
   - Dynamic Causal Strength (DCS) analysis for time-varying causal relationships
   - Transfer Entropy (TE) computation for information-theoretic causality measures

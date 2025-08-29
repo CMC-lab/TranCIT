@@ -1,5 +1,5 @@
 """
-TranCIT: Transient Causal Interaction Package
+TranCIT: Transient Causal Interaction Toolbox
 
 A Python package for quantifying causal relationships in multivariate time series data
 using dynamic causal strength (DCS) methods.

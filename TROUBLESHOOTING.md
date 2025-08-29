@@ -1,6 +1,6 @@
 # Troubleshooting Guide
 
-This guide helps you resolve common issues when using the TranCIT: Transient Causal Interaction package.
+This guide helps you resolve common issues when using the TranCIT: Transient Causal Interaction Toolbox.
 
 ## Installation Issues
 
