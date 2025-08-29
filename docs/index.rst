@@ -46,13 +46,13 @@ Dynamic Causal Strength quantifies **time-varying causal relationships** between
 
 **Scientific Foundation:**
 
-DCS is based on the theoretical framework described in our peer-reviewed publication:
+DCS is based on the theoretical framework described in the following peer-reviewed publication:
 
-   *Nouri, S., Krishnan, G. P., & Bazhenov, M. (2023). Dynamic causal strength: A novel method for effective connectivity in networks with non-stationary dynamics. Frontiers in Network Physiology, 3, 1085347.*
+   *Shao, Kaidi, Nikos K. Logothetis, and Michel Besserve. "Information theoretic measures of causal influences during transient neural events." Frontiers in Network Physiology 3 (2023): 1085347.*
 
 **Applications:**
 
-- **Neuroscience**: Analyze effective connectivity in neural networks, EEG/MEG signals, LFP recordings
+- **Neuroscience**: Analyze connectivity in neural networks, EEG/MEG signals, LFP recordings
 - **Finance**: Detect lead-lag relationships in financial markets and economic indicators  
 - **Climate Science**: Study causality in climate time series and extreme events
 - **Engineering**: Analyze control systems and sensor networks
@@ -112,7 +112,7 @@ Analysis Methods
 **Granger Causality (GC)**
    Classical linear measure testing whether past values of one series help predict another series beyond its own past values.
 
-**Relative Dynamic Causal Strength (rDCS)**
+**relative Dynamic Causal Strength (rDCS)**
    Event-based measure comparing causal strength to a baseline reference, ideal for analyzing stimulus-evoked responses.
 
 Pipeline Capabilities
