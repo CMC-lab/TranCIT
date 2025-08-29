@@ -109,11 +109,8 @@ jobs:
             echo "First release of TranCIT package." >> changelog.md
           fi
           
-          {
-            echo "changelog<<EOF"
-            cat changelog.md
-            echo "EOF"
-          } >> $GITHUB_OUTPUT
+          # Just create the changelog file, we'll read it in the next step
+          echo "Changelog generated in changelog.md"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -122,7 +119,7 @@ jobs:
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
           name: "TranCIT ${{ steps.tag.outputs.tag }}"
-          body: ${{ steps.changelog.outputs.changelog }}
+          body_path: changelog.md
           draft: false
           prerelease: false
 
