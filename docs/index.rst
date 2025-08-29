@@ -288,9 +288,7 @@ If you use DCS in your research, please cite our paper:
       author       = {Nouri, Salar and
                         Shao, Kaidi and
                         Safavi, Shervin},
-            title        = {TranCIT: Transient Causal Interaction Toolbox - A Python
-                       package for transient neural causal inference
-                      },
+            title        = {TranCIT: Transient Causal Interaction Toolbox},
       month        = aug,
       year         = 2025,
       publisher    = {Zenodo},
