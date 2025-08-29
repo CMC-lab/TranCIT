@@ -4,10 +4,22 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.12"
-
-python:
-  install:
-    - requirements: requirements.txt
+  jobs:
+    post_create_environment:
+      - pip install --upgrade pip setuptools wheel
+    post_install:
+      - pip install .[docs]
 
 sphinx:
   configuration: docs/conf.py
+
+formats:
+  - pdf
+  - htmlzip
+
+python:
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
