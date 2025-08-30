@@ -53,28 +53,5 @@
       "relation": "isIdenticalTo",
       "scheme": "url"
     }
-  ],
-  "communities": [
-    {
-      "identifier": "neuroscience"
-    },
-    {
-      "identifier": "software"
-    },
-    {
-      "identifier": "python"
-    }
-  ],
-  "grants": [
-    {
-        "title": "Shanghai Municipal Science and Technology Major Project",
-        "code": "2019SHZDZX02"
-    },
-    {
-        "title": "Max Planck Society (including the Max Planck Institute for Biological Cybernetics and the Graduate School of Neural and Behavioral Sciences)"
-    },
-    {
-        "title": "Joachim Herz Foundation"
-    }
   ]
 }
