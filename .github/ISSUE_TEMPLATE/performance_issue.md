@@ -8,6 +8,7 @@ assignees: ''
 ---
 
 ## Performance Issue Type
+
 - [ ] Unexpectedly slow execution
 - [ ] Memory usage too high
 - [ ] Crashes with large datasets
@@ -16,6 +17,7 @@ assignees: ''
 - [ ] Other: ________________
 
 ## Dataset Characteristics
+
 **Data specifications:**
 - **Data shape**: [e.g., (64, 10000, 100) - channels × time_points × trials]
 - **Data size**: [e.g., ~500 MB, 2.3 GB]
@@ -24,6 +26,7 @@ assignees: ''
 - **Analysis duration**: [e.g., 30 seconds, 10 minutes of data]
 
 ## Analysis Configuration
+
 **Method and parameters:**
 ```python
 # Your analysis configuration
@@ -34,19 +37,23 @@ result = calculator.analyze(data)  # The slow operation
 ```
 
 **Parameters:**
+
 - **Method**: [DCS, Transfer Entropy, Granger Causality, etc.]
 - **Model order**: [e.g., 4, auto-selection]
 - **Time mode**: [e.g., inhomo, homo]
 - **Bootstrap samples**: [if applicable]
 
 ## Performance Measurements
+
 **Timing results:**
+
 - **Execution time**: [e.g., 45 minutes for 10-second analysis]
 - **Expected time**: [e.g., Should complete in ~5 minutes based on paper]
 - **Memory usage**: [e.g., 32 GB RAM, crashes system]
 - **CPU usage**: [e.g., Single core at 100%, multi-core at 25%]
 
 **Measurement method:**
+
 ```python
 import time
 start_time = time.time()
@@ -55,6 +62,7 @@ execution_time = time.time() - start_time
 ```
 
 ## Environment Information
+
 - **TranCIT version**: [e.g., 1.0.10]
 - **Python version**: [e.g., 3.11.5]
 - **Operating System**: [e.g., macOS 14.0, Ubuntu 22.04]
@@ -62,6 +70,7 @@ execution_time = time.time() - start_time
 - **NumPy/SciPy backend**: [e.g., OpenBLAS, Intel MKL]
 
 ## Comparison Benchmarks
+
 **Have you tried:**
 - [ ] Different parameter settings
 - [ ] Smaller subset of data
@@ -72,6 +81,7 @@ execution_time = time.time() - start_time
 **Results:** [Describe performance differences if any]
 
 ## Expected Performance
+
 **Based on:**
 - [ ] Literature benchmarks
 - [ ] Previous TranCIT versions
@@ -81,6 +91,7 @@ execution_time = time.time() - start_time
 **Expected behavior:** [e.g., "Should scale O(n²) with number of channels"]
 
 ## Reproducible Example
+
 **Minimal code to reproduce the performance issue:**
 ```python
 # Minimal example that demonstrates the slow performance
@@ -95,11 +106,13 @@ data = ...
 ```
 
 ## Additional Context
+
 - Is this a regression from previous versions?
 - Are there specific scientific requirements driving the performance need?
 - Would you be interested in profiling or benchmarking contributions?
 
 ## Potential Solutions Considered
+
 - [ ] Algorithm optimization
 - [ ] Parallel processing
 - [ ] Memory management improvements
