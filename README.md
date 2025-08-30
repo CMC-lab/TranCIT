@@ -6,7 +6,7 @@
 [![CI](https://github.com/CMC-lab/TranCIT/actions/workflows/ci.yml/badge.svg)](https://github.com/CMC-lab/TranCIT/actions/workflows/ci.yml)
 [![Documentation](https://readthedocs.org/projects/trancit/badge/?version=latest)](https://trancit.readthedocs.io/en/latest/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16998396.svg)](https://doi.org/10.5281/zenodo.16998396)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16998397.svg)](https://doi.org/10.5281/zenodo.16998397)
 
 TranCIT (Transient Causal Interaction Toolbox) is a Python package for quantifying causal relationships in multivariate time series data. It provides methods for analyzing directional influences using model-based statistical tools, inspired by information-theoretic and autoregressive frameworks.
 
@@ -134,9 +134,9 @@ For comprehensive documentation, tutorials, and API reference:
 
 ### Examples
 
-- **[Basic Usage](/examples/basic_usage.py)**: Simple causality analysis
-- **[LFP Pipeline](/examples/lfp_pipeline.py)**: Local field potential analysis
-- **[DCS Introduction](/examples/dcs_introduction.ipynb)**: Interactive tutorial
+- **[Basic Usage](https://github.com/CMC-lab/TranCIT/blob/main/examples/basic_usage.py)**: Simple causality analysis
+- **[LFP Pipeline](https://github.com/CMC-lab/TranCIT/blob/main/examples/lfp_pipeline.py)**: Local field potential analysis
+- **[DCS Introduction](https://github.com/CMC-lab/TranCIT/blob/main/examples/dcs_introduction.ipynb)**: Interactive tutorial
 
 ## 🔬 Scientific Background
 
@@ -153,18 +153,18 @@ This package implements methods from:
 pytest
 
 # Run with coverage
-pytest --cov=dcs --cov-report=html
+pytest --cov=trancit --cov-report=html
 
 # Run linting
-flake8 dcs/ tests/
+flake8 trancit/ tests/
 
 # Format code
-black dcs/ tests/
+black trancit/ tests/
 ```
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](/CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Contributing Guidelines](https://github.com/CMC-lab/TranCIT/blob/main/CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -202,14 +202,14 @@ And cite this software package:
   month        = aug,
   year         = 2025,
   publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.16998396},
-  url          = {https://doi.org/10.5281/zenodo.16998396},
+  doi          = {10.5281/zenodo.16998397},
+  url          = {https://doi.org/10.5281/zenodo.16998397},
 }
 ```
 
 ## 📄 License
 
-This project is licensed under the BSD 2-Clause License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the BSD 2-Clause License. See the [LICENSE](https://github.com/CMC-lab/TranCIT/blob/main/LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
