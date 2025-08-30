@@ -6,7 +6,7 @@
 [![CI](https://github.com/CMC-lab/TranCIT/actions/workflows/ci.yml/badge.svg)](https://github.com/CMC-lab/TranCIT/actions/workflows/ci.yml)
 [![Documentation](https://readthedocs.org/projects/trancit/badge/?version=latest)](https://trancit.readthedocs.io/en/latest/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16998397.svg)](https://doi.org/10.5281/zenodo.16998397)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16998396.svg)](https://doi.org/10.5281/zenodo.16998396)
 
 TranCIT (Transient Causal Interaction Toolbox) is a Python package for quantifying causal relationships in multivariate time series data. It provides methods for analyzing directional influences using model-based statistical tools, inspired by information-theoretic and autoregressive frameworks.
 

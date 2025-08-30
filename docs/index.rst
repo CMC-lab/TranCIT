@@ -22,8 +22,8 @@ TranCIT: Transient Causal Interaction Toolbox
    :target: https://github.com/CMC-lab/TranCIT/actions/workflows/ci.yml
    :alt: CI Status
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.16998397.svg
-   :target: https://doi.org/10.5281/zenodo.16998397
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.16998396.svg
+   :target: https://doi.org/10.5281/zenodo.16998396
    :alt: DOI
 
 Source code is available on `GitHub <https://github.com/CMC-lab/TranCIT>`_.
