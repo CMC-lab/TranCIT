@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Documentation
+    url: https://trancit.readthedocs.io
+    about: Check the documentation for usage guides and API reference
+  - name: 💬 Discussions
+    url: https://github.com/CMC-lab/TranCIT/discussions
+    about: Ask questions and discuss with the community
+  - name: 📄 Scientific Paper
+    url: https://www.frontiersin.org/articles/10.3389/fnetp.2023.1085347/full
+    about: Read the original research paper by Shao et al. (2023)
+  - name: 🏛️ CMC Lab
+    url: https://shervinsafavi.github.io/cmclab/
+    about: Visit the Computational and Mathematical Cognition Lab website
