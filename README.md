@@ -194,7 +194,7 @@ If you use **TranCIT** in your research, please cite:
 And cite this software package:
 
 ```bibtex
-@software{nouri_2025_16998397,
+@software{nouri_2025_all_versions,
   author       = {Nouri, Salar and
                   Shao, Kaidi and
                   Safavi, Shervin},
@@ -202,9 +202,8 @@ And cite this software package:
   month        = aug,
   year         = 2025,
   publisher    = {Zenodo},
-  version      = {v1.0.0},
-  doi          = {10.5281/zenodo.16998397},
-  url          = {https://doi.org/10.5281/zenodo.16998397}
+  doi          = {10.5281/zenodo.16998396},
+  url          = {https://doi.org/10.5281/zenodo.16998396},
 }
 ```
 
