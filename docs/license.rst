@@ -5,7 +5,7 @@
 License
 #######
 
-The **TranCIT: Transient Causal Interaction** package is open-source and distributed under the **BSD 2-Clause License** (also known as the "Simplified BSD License").
+The **TranCIT: Transient Causal Interaction Toolbox** package is open-source and distributed under the **BSD 2-Clause License** (also known as the "Simplified BSD License").
 
 This permissive license allows you to freely use, modify, and redistribute the code — including for commercial purposes — as long as the following conditions are met:
 

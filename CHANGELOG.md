@@ -5,9 +5,10 @@ All notable changes to the TranCIT: Transient Causal Interaction Toolbox project
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2025-01-18
+## [0.1.0] - 2025-08-29
 
 ### Added
+
 - **Initial Release** of TranCIT: Transient Causal Interaction Toolbox
 - **Core Functionality**:
   - Dynamic Causal Strength (DCS) analysis for time-varying causal relationships
@@ -59,17 +60,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - BSD-2-Clause license
 
 ### Technical Specifications
+
 - **Python Compatibility**: 3.9, 3.10, 3.11, 3.12, 3.13
 - **Core Dependencies**: NumPy (≥1.19.5), SciPy (≥1.7.0), Matplotlib (≥3.5.0), Scikit-learn (≥1.0.0)
 - **Optional Dependencies**: Sphinx, pytest, black, flake8, mypy
 - **License**: BSD-2-Clause
-- **Documentation**: Available at https://trancit.readthedocs.io
+- **Documentation**: Available at `https://trancit.readthedocs.io`
 
 ### Scientific Background
+
 This implementation is based on research from:
+
 - Shao, K., Logothetis, N. K., & Besserve, M. (2023). Information theoretic measures of causal influences during transient neural events. *Frontiers in Network Physiology*, 3, 1085347.
 
 ### Examples Included
+
 - Basic TranCIT analysis workflow
 - LFP (Local Field Potential) analysis pipeline
 - Interactive Jupyter notebook demonstrations
@@ -78,6 +83,7 @@ This implementation is based on research from:
 ## [Unreleased]
 
 ### Planned Features
+
 - Additional causality measures
 - Performance optimizations
 - Extended documentation
@@ -88,10 +94,10 @@ This implementation is based on research from:
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Contributing Guide](/CONTRIBUTING.md) for details.
 
 ## Support
 
-- **Documentation**: https://trancit.readthedocs.io
-- **Issues**: https://github.com/CMC-lab/TranCIT/issues
-- **Discussions**: https://github.com/CMC-lab/TranCIT/discussions
+- **Documentation**: `https://trancit.readthedocs.io`
+- **Issues**: `https://github.com/CMC-lab/TranCIT/issues`
+- **Discussions**: `https://github.com/CMC-lab/TranCIT/discussions`

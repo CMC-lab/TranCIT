@@ -19,8 +19,8 @@ repository-code: "https://github.com/CMC-lab/TranCIT"
 url: "https://trancit.readthedocs.io"
 license: BSD-2-Clause
 version: 1.0.0
-date-released: 2025-08-29
-doi: "10.5281/zenodo.16998397"
+date-released: 2025-08-30
+doi: "10.5281/zenodo.16998396"
 keywords:
   - causality
   - time-series

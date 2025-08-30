@@ -284,7 +284,7 @@ If you use DCS in your research, please cite our paper:
 
 .. code-block:: bibtex
 
-   @software{nouri_2025_all_versions,
+   @software{nouri_2025_trancit,
       author       = {Nouri, Salar and
                         Shao, Kaidi and
                         Safavi, Shervin},
@@ -316,7 +316,7 @@ Special thanks to the scientific computing and neuroscience communities for feed
 **Development Team**
 
 - **Lead Developer**: Salar Nouri
-- **Scientific Advisor**: Shervin Safavi
+- **Scientific Advisor**: Kaidi Shao, Shervin Safavi
 - **Contributors**: See `GitHub contributors <https://github.com/CMC-lab/TranCIT/contributors>`_
 
 ****************
@@ -329,6 +329,6 @@ Indices and Tables
 
 .. note::
    
-   **Version Information**: This documentation covers DCS v0.1.0 and later. For information about upgrading from older versions, see our :doc:`api` migration guide.
+   **Version Information**: This documentation covers `trancit` v0.1.0 and later. For information about upgrading from older versions, see our :doc:`api` migration guide.
    
-   **Performance Note**: DCS is optimized for datasets with hundreds to thousands of time points and dozens of trials. For very large datasets (>100K time points), consider using the provided chunking utilities or contact us for optimization advice.
+   **Performance Note**: `trancit` is optimized for datasets with hundreds to thousands of time points and dozens of trials. For very large datasets (>100K time points), consider using the provided chunking utilities or contact us for optimization advice.

@@ -87,16 +87,16 @@ When using TranCIT in your research or production environments:
 
 Security updates will be:
 
-1. **Announced** in the [CHANGELOG.md](CHANGELOG.md)
+1. **Announced** in the [CHANGELOG.md](/CHANGELOG.md)
 2. **Tagged** with version numbers following semantic versioning
 3. **Published** to PyPI as soon as possible
 4. **Documented** with migration guidance when necessary
 
 ## Contact Information
 
-- **Security Issues**: salr.nouri@gmail.com
+- **Security Issues**: `salr.nouri@gmail.com`
 - **General Issues**: [GitHub Issues](https://github.com/CMC-lab/TranCIT/issues)
-- **Maintainer**: Salar Nouri (salr.nouri@gmail.com)
+- **Maintainer**: Salar Nouri (`salr.nouri@gmail.com`)
 
 ## Acknowledgments
 

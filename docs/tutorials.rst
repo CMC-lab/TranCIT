@@ -4,7 +4,7 @@
 Tutorials
 #########
 
-This section provides comprehensive tutorials for using TranCIT: Transient Causal Interaction in different scenarios. Each tutorial builds on the previous ones and includes complete working examples.
+This section provides comprehensive tutorials for using **TranCIT: Transient Causal Interaction Toolbox** in different scenarios. Each tutorial builds on the previous ones and includes complete working examples.
 
 .. contents:: Tutorial Contents
    :local:
@@ -14,7 +14,7 @@ This section provides comprehensive tutorials for using TranCIT: Transient Causa
 Tutorial 1: Basic DCS Analysis
 ****************************
 
-Learn the fundamentals of causality analysis with DCS.
+Learn the fundamentals of causality analysis with Dynamic Causal Strength (DCS).
 
 Understanding the Data Format
 =============================
@@ -51,7 +51,7 @@ DCS works with multivariate time series data in a specific format:
 **Key Points:**
 
 - **Shape**: ``(n_variables, n_timepoints, n_trials)``
-- **Variables**: DCS analyzes bivariate relationships (n_variables = 2)
+- **Variables**: Dynamic Causal Strength (DCS) analyzes bivariate relationships (n_variables = 2)
 - **Trials**: Multiple realizations improve statistical robustness
 - **Time**: Each time point represents one measurement
 

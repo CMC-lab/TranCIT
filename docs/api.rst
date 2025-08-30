@@ -9,7 +9,7 @@ Welcome to the comprehensive API reference for **TranCIT: Transient Causal Inter
 The TranCIT package is organized into several core components:
 
 - **Core Classes**: Base analyzers, results, and configuration objects
-- **Causality Analysis**: DCS, Transfer Entropy, Granger Causality calculators
+- **Causality Analysis**: Dynamic Causal Strength (DCS), relative Dynamic Causal Strength (rDCS), Transfer Entropy (TE), Granger Causality (GC) calculators
 - **Pipeline System**: Event-based analysis orchestration and stages
 - **Model Estimation**: VAR models, BIC selection, and validation
 - **Simulation**: Synthetic data generation for testing and validation
@@ -51,7 +51,7 @@ Base Classes
       
       class MyAnalyzer(BaseAnalyzer):
           def analyze(self, data):
-              # Your analysis implementation
+              # Your analysis implementation here
               return MyResult(result=data.sum())
 
 .. autoclass:: BaseResult

@@ -209,14 +209,14 @@ matplotlib.use('Agg')  # Use non-interactive backend
 
 If you encounter issues not covered here:
 
-1. **Check GitHub Issues**: https://github.com/CMC-lab/TranCIT/issues
+1. **Check GitHub Issues**: `https://github.com/CMC-lab/TranCIT/issues`
 2. **Create a New Issue**: Include:
    - Your operating system and Python version
    - TranCIT version (`import trancit; print(trancit.__version__)`)
    - Complete error message and traceback
    - Minimal code example that reproduces the issue
-3. **Check Documentation**: https://trancit.readthedocs.io
-4. **Contact**: salr.nouri@gmail.com for urgent issues
+3. **Check Documentation**: `https://trancit.readthedocs.io`
+4. **Contact**: `salr.nouri@gmail.com` for urgent issues
 
 ## Quick Debugging Checklist
 

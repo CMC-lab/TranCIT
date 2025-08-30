@@ -4,7 +4,7 @@
 Quickstart
 ##########
 
-This quickstart guide will get you up and running with **TranCIT: Transient Causal Interaction** analysis in just a few minutes. 
+This quickstart guide will get you up and running with **TranCIT: Transient Causal Interaction Toolbox** analysis in just a few minutes. 
 
 We'll cover the most common use cases with the new class-based API, which provides cleaner interfaces and better error handling than the previous function-based approach.
 
