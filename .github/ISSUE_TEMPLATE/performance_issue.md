@@ -19,6 +19,7 @@ assignees: ''
 ## Dataset Characteristics
 
 **Data specifications:**
+
 - **Data shape**: [e.g., (64, 10000, 100) - channels × time_points × trials]
 - **Data size**: [e.g., ~500 MB, 2.3 GB]
 - **Data type**: [e.g., np.float64, np.float32]
@@ -28,6 +29,7 @@ assignees: ''
 ## Analysis Configuration
 
 **Method and parameters:**
+
 ```python
 # Your analysis configuration
 from trancit import ...
@@ -72,6 +74,7 @@ execution_time = time.time() - start_time
 ## Comparison Benchmarks
 
 **Have you tried:**
+
 - [ ] Different parameter settings
 - [ ] Smaller subset of data
 - [ ] Different time modes
@@ -83,6 +86,7 @@ execution_time = time.time() - start_time
 ## Expected Performance
 
 **Based on:**
+
 - [ ] Literature benchmarks
 - [ ] Previous TranCIT versions
 - [ ] Other software packages
@@ -93,6 +97,7 @@ execution_time = time.time() - start_time
 ## Reproducible Example
 
 **Minimal code to reproduce the performance issue:**
+
 ```python
 # Minimal example that demonstrates the slow performance
 import numpy as np

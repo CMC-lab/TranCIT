@@ -45,6 +45,7 @@ result = NewFeature(parameters).analyze(data)
 ## Alternatives Considered
 
 **Describe alternatives you've considered:**
+
 - [ ] Using existing TranCIT methods differently
 - [ ] External tools or packages
 - [ ] Custom implementation
@@ -53,6 +54,7 @@ result = NewFeature(parameters).analyze(data)
 ## Scientific References
 
 **Relevant papers or methods:**
+
 - Reference 1: [Author et al. (Year). Title. Journal.]
 - Reference 2: [Author et al. (Year). Title. Journal.]
 
