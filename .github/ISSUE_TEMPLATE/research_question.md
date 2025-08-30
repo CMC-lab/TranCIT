@@ -8,6 +8,7 @@ assignees: ''
 ---
 
 ## Question Category
+
 - [ ] Methodology and theoretical background
 - [ ] Results interpretation
 - [ ] Method selection guidance
@@ -18,7 +19,9 @@ assignees: ''
 - [ ] Literature and references
 
 ## Research Context
+
 **Your research domain:**
+
 - [ ] Computational neuroscience
 - [ ] Electrophysiology (EEG/MEG/LFP)
 - [ ] Financial time series
@@ -28,17 +31,21 @@ assignees: ''
 - [ ] Other: ________________
 
 **Data characteristics:**
+
 - **Type**: [e.g., neural recordings, financial data, climate measurements]
 - **Properties**: [e.g., non-stationary, high-frequency, multivariate]
 - **Research question**: [Brief description of your scientific question]
 
 ## Specific Question
+
 **What would you like to know?**
 
 [Describe your specific question about TranCIT methods, interpretation, or application]
 
 ## Current Understanding
+
 **What do you already know?**
+
 - [ ] New to causality analysis
 - [ ] Familiar with Granger causality
 - [ ] Experience with information theory methods
@@ -48,7 +55,9 @@ assignees: ''
 **Relevant background:** [Describe your current knowledge level]
 
 ## Methods of Interest
+
 **Which TranCIT methods are relevant to your question?**
+
 - [ ] Dynamic Causal Strength (DCS)
 - [ ] Transfer Entropy (TE)  
 - [ ] Granger Causality (GC)
@@ -58,7 +67,9 @@ assignees: ''
 - [ ] Pipeline orchestration
 
 ## Specific Concerns
+
 **What aspects are you unsure about?**
+
 - [ ] Method selection for my data type
 - [ ] Parameter interpretation
 - [ ] Statistical significance testing  
@@ -69,12 +80,16 @@ assignees: ''
 - [ ] Integration with other analysis tools
 
 ## Literature Context
+
 **Relevant papers or methods you're referencing:**
+
 - Reference 1: [Author et al. (Year). Title. Journal.]
 - Reference 2: [Specific method or result you're trying to replicate]
 
 ## Expected Outcome
+
 **What kind of answer would be most helpful?**
+
 - [ ] Methodological explanation
 - [ ] Code example
 - [ ] Literature recommendations
@@ -84,7 +99,9 @@ assignees: ''
 - [ ] Validation approaches
 
 ## Current Analysis Setup
+
 **If applicable, share your current approach:**
+
 ```python
 # Your current analysis setup (optional)
 from trancit import ...
@@ -94,12 +111,14 @@ from trancit import ...
 ```
 
 ## Additional Context
+
 - Is this for a specific publication or project?
 - Are you comparing with results from other software?
 - Do you have specific accuracy or validation requirements?
 - Are there computational constraints to consider?
 
 ## Community Benefit
+
 - [ ] This question might help other researchers
 - [ ] Could lead to documentation improvements  
 - [ ] Might inspire new features or examples
