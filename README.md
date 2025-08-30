@@ -202,8 +202,8 @@ And cite this software package:
   month        = aug,
   year         = 2025,
   publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.16998397},
-  url          = {https://doi.org/10.5281/zenodo.16998397},
+  doi          = {10.5281/zenodo.16998396},
+  url          = {https://doi.org/10.5281/zenodo.16998396},
 }
 ```
 
