@@ -21,13 +21,15 @@ authors:
   - name: Kaidi Shao
     affiliation: "2"
     orcid: 0000-0002-3027-0090
+    corresponding: true
   - name: Shervin Safavi
     affiliation: "3, 4"
     orcid: 0000-0002-2868-530X
+    corresponding: true
 affiliations:
   - name: School of Electrical and Computer Engineering, College of Engineering, University of Tehran, Tehran, Iran
     index: 1
-    ror: "00hx57361"
+    ror: "05vf56z40"
   - name: International Center for Primate Brain Research (ICPBR), Center for Excellence in Brain Science and Intelligence Technology (CEBSIT), Chinese Academy of Sciences (CAS), Shanghai, China
     index: 2
   - name: Computational Neuroscience, Department of Child and Adolescent Psychiatry, Faculty of Medicine, Technische Universität Dresden, Dresden 01307, Germany
