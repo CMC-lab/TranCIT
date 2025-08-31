@@ -1,4 +1,3 @@
-
 ---
 # JOSS Paper Draft - Revised Version
 # the final release version/date, and DOI placeholders are filled in.
