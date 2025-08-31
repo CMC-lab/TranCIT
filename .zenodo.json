@@ -1,6 +1,6 @@
 {
   "title": "TranCIT: Transient Causal Interaction Toolbox",
-  "description": "A Python package for quantifying causal relationships in multivariate time series data, with a focus on transient neural events and neuroscience applications. TranCIT implements advanced causality measures including directed coherence spectroscopy (DCS), robust directed coherence spectroscopy (RDCS), Granger causality, and transfer entropy, specifically designed for analyzing transient neural interactions in electrophysiological data.",
+  "description": "A Python package for quantifying causal relationships in multivariate time series data, with a focus on transient neural events and neuroscience applications. TranCIT implements advanced causality measures including Dynamic Causal Strength (DCS), relative Dynamic Causal Strength (rDCS), Granger causality, and transfer entropy, specifically designed for analyzing transient neural interactions.",
   "creators": [
     {
       "name": "Nouri, Salar",
