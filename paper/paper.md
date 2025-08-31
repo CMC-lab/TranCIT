@@ -36,21 +36,21 @@ affiliations:
   - name: Department of Computational Neuroscience, Max Planck Institute for Biological Cybernetics, Tübingen 72076, Germany
     index: 4
 
-date: "2025-08-30"
+date: "2024-12-30"
 bibliography: paper.bib
 csl: ieee.csl
-repository: "https://github.com/cmc-lab/trancit"
+repository: "https://github.com/CMC-lab/TranCIT"
 crossref: true
-doi: "10.5281/zenodo.16998396" # Zenodo DOI for the archived version
+doi: "10.5281/zenodo.16998396"
 url: "https://trancit.readthedocs.io/en/latest/" 
 
 ---
 
 ## Summary
 
-The study of complex systems, e.g., neural circuits and cognitive functions, often requires understanding causal interactions that occur during brief, transient events [@logothetisHippocampalCorticalInteraction2012; @womelsdorfBurstFiringSynchronizes2014; @nitzanBrainwideInteractionsHippocampal2022; @safaviUncoveringOrganizationNeural2023; @lundqvistBetaBurstsCognition2024]. Traditional methods for estimating causality, such as Granger causality [@granger1969investigating] and Transfer Entropy (TE) [@Schreiber2000], are frequently challenged by the short-duration, non-stationary nature of these phenomena [@mitra2007observed]. Such methods typically assume stationarity and require long data segments, making them suboptimal for event-driven analysis.
+The study of complex systems, such as neural circuits and cognitive functions, often requires understanding the causal interactions that occur during brief, transient events [@logothetisHippocampalCorticalInteraction2012; @womelsdorfBurstFiringSynchronizes2014; @nitzanBrainwideInteractionsHippocampal2022; @safaviUncoveringOrganizationNeural2023; @lundqvistBetaBurstsCognition2024]. Traditional methods for estimating causality, such as Granger causality [@granger1969investigating] and Transfer Entropy (TE) [@Schreiber2000], are frequently challenged by the short-duration, non-stationary nature of these phenomena [@mitra2007observed]. Such methods typically assume stationarity and require long data segments, making them suboptimal for event-driven analysis.
 
-We present `trancit` (Transient Causal Interaction Toolbox), a robust, open-source Python package implementing advanced causal inference methods specifically designed to address this challenge [@nouri_2025_trancit]. `trancit` provides a comprehensive pipeline for dynamic causal inference on multivariate time-series data. It is a Python-native implementation and extension of a powerful causal learning algorithm originally introduced in MATLAB [@shao2023transient]. By leveraging foundational Python libraries like NumPy [@harris2020array] and SciPy [@virtanen2020fundamental], `trancit` integrates seamlessly into modern data science and research workflows, making these advanced techniques accessible to a broader scientific community.
+We present `trancit` (Transient Causal Interaction Toolbox), a robust, open-source Python package implementing advanced causal inference methods specifically designed to address this challenge [@nouri_2025_trancit]. `trancit` provides a comprehensive pipeline for dynamic causal inference on multivariate time-series data. It is a Python-native implementation and extension of a robust causal learning algorithm originally introduced in MATLAB [@shao2023transient]. By leveraging foundational Python libraries like NumPy [@harris2020array] and SciPy [@virtanen2020fundamental], `trancit` integrates seamlessly into modern data science and research workflows, making these advanced techniques accessible to a broader scientific community.
 
 The package offers an integrated solution for end-to-end causal analysis, including:
 
@@ -62,7 +62,7 @@ The package offers an integrated solution for end-to-end causal analysis, includ
 
 ## Statement of need
 
-While many statistical methods focus on correlation, the ability to infer directed causal relationships offers deeper, more mechanistic insights into how complex systems function [@Seth2015]. A critical frontier in this field is the analysis of transient dynamics, where interactions can rapidly change or occur in brief, intense bursts. While powerful methods to analyze these dynamics have been developed, their implementation in proprietary software like MATLAB [@shao2023transient] has limited their accessibility and adoption within the broader open-source scientific ecosystem.
+While many statistical methods focus on correlation, the ability to infer directed causal relationships offers deeper, more mechanistic insights into how complex systems function [@Seth2015]. A critical frontier in this field is the analysis of transient dynamics, where interactions can rapidly change or occur in brief, intense bursts. While powerful methods to analyze these dynamics have been developed, their implementation in proprietary software, such as MATLAB [@shao2023transient], has limited their accessibility and adoption within the broader open-source scientific ecosystem.
 
 `trancit` bridges this critical gap by providing a fully open-source, Python-based implementation. While general-purpose Python causality libraries such as `causal-learn` [@zheng2024causal] and `tigramite` [@runge2022jakobrunge] are invaluable, they often lack the specialized features required for robust analysis of transient, event-related data. For example, they may not offer integrated workflows for event detection and alignment, which are crucial for this type of analysis.
 
@@ -72,7 +72,7 @@ While many statistical methods focus on correlation, the ability to infer direct
 
 ### Causal inference methods
 
-`trancit` implements four primary methods for detecting and quantifying causal relationships. A brief overview is provided here; for full mathematical derivations and theoretical background, please refer to our main methodology paper [@shao2023transient; @nouri_2025_trancit].
+`trancit` implements four primary methods for detecting and quantifying causal relationships. A brief overview is provided here; for complete mathematical derivations and theoretical background, please refer to our main methodology paper [@shao2023transient; @nouri_2025_trancit].
 
 - **Granger Causality (GC):** A classic and widely used method based on vector autoregressive models that assesses whether the history of one time series improves the prediction of another.
 
@@ -88,7 +88,7 @@ A key feature of `trancit` is its integrated workflow for preparing time-series 
 
 ## Example
 
-To demonstrate `trancit`'s core functionality and validate its implementation, we replicated key results from Shao et al. ([Figure 4](https://www.frontiersin.org/files/Articles/1085347/fnetp-03-1085347-HTML-r1/image_m/fnetp-03-1085347-g004.jpg) [@shao2023transient]. As shown in \autoref{fig:causality}, our simulation example highlights the "synchrony pitfall" of Transfer Entropy. DCS correctly identifies a continuous underlying causal link in a system with a transient period of high synchrony, a scenario where TE incorrectly suggests that the causal link has weakened or vanished.
+To demonstrate `trancit`'s core functionality and validate its implementation, we replicated key results from Shao et al. ([Figure 4](https://www.frontiersin.org/files/Articles/1085347/fnetp-03-1085347-HTML-r1/image_m/fnetp-03-1085347-g004.jpg) [@shao2023transient]. As shown in \autoref{fig:causality}, our simulation example highlights the "synchrony pitfall" of Transfer Entropy. DCS correctly identifies a continuous underlying causal link in a system with a transient period of high synchrony. In this scenario, TE incorrectly suggests that the causal link has weakened or vanished.
 
 ![Replication of [@shao2023transient] Figure 4 using `trancit` package. Shows successful detection of directed influence from X to Y using simulated data and causality measures (e.g., TE, DCS) implemented in the package. \label{fig:causality}](figures/3_dcs_example.pdf "Figure 1: Causality detection on simulated data")
 
