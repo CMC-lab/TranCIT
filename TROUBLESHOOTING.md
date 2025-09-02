@@ -9,6 +9,7 @@ This guide helps you resolve common issues when using the TranCIT: Transient Cau
 **Problem**: Package not installed or not in Python path.
 
 **Solution**:
+
 ```bash
 # Install from PyPI
 pip install trancit
@@ -24,6 +25,7 @@ pip install -e .
 **Problem**: Incompatible versions of NumPy, SciPy, or other dependencies.
 
 **Solution**:
+
 ```bash
 # Update dependencies
 pip install --upgrade numpy scipy matplotlib scikit-learn
@@ -41,6 +43,7 @@ pip install trancit
 **Problem**: Time series too short for the configured parameters.
 
 **Solution**:
+
 - Increase `T` (total time points) to at least 500
 - Reduce burn-in period in `generate_signals()`
 - Check your data dimensions match expected format
@@ -50,6 +53,7 @@ pip install trancit
 **Problem**: Insufficient data or highly correlated variables.
 
 **Solution**:
+
 - Increase number of trials (`Ntrial`)
 - Reduce model order in BIC selection
 - Check for constant or highly correlated time series
@@ -60,6 +64,7 @@ pip install trancit
 **Problem**: Insufficient memory for large time series analysis.
 
 **Solution**:
+
 - Process data in smaller chunks
 - Reduce number of trials processed simultaneously
 - Use `gc.collect()` between analyses
@@ -72,6 +77,7 @@ pip install trancit
 **Problem**: No events detected with current threshold settings.
 
 **Solution**:
+
 ```python
 # Lower the detection threshold
 config.detection.thres_ratio = 2.0  # instead of 5.0
@@ -86,6 +92,7 @@ config.options.detection = False  # disable automatic detection
 **Problem**: BIC selects very high or very low model orders.
 
 **Solution**:
+
 ```python
 # Adjust BIC parameters
 config.bic.momax = 8  # reduce maximum model order
@@ -100,6 +107,7 @@ config.bic.mode = 'unbiased'  # try different BIC mode
 **Problem**: Data not in expected format (n_vars, n_obs, n_trials).
 
 **Solution**:
+
 ```python
 # Reshape your data
 if data.ndim == 2:  # (n_obs, n_vars) -> (n_vars, n_obs, 1)
@@ -115,6 +123,7 @@ print(f"Data shape: {data.shape}")  # Should be (n_vars, n_obs, n_trials)
 **Problem**: Data contains NaN or infinite values.
 
 **Solution**:
+
 ```python
 # Clean your data
 data = np.nan_to_num(data, nan=0.0, posinf=1e10, neginf=-1e10)
@@ -131,6 +140,7 @@ data = data[:, :, valid_trials]
 **Problem**: Long computation times for large datasets.
 
 **Solutions**:
+
 - Disable bootstrap analysis if not needed: `config.options.bootstrap = False`
 - Use OLS instead of ML estimation: `config.causal.estim_mode = 'OLS'`
 - Reduce model order: `config.bic.momax = 5`
@@ -141,6 +151,7 @@ data = data[:, :, valid_trials]
 **Problem**: Memory not being released between analyses.
 
 **Solution**:
+
 ```python
 import gc
 
@@ -152,19 +163,15 @@ for i in range(n_analyses):
     gc.collect()
 ```
 
-## API Transition Issues
+## API Issues
 
-### ImportError: cannot import name 'snapshot_detect_analysis_pipeline'
+### ImportError: cannot import name from trancit
 
-**Problem**: Using old function-based API that has been removed.
+**Problem**: This function has been removed from the package.
 
-**Solution**: Update to new class-based API:
+**Solution**: Use the modern PipelineOrchestrator class:
+
 ```python
-# Old way (deprecated)
-# from trancit import snapshot_detect_analysis_pipeline
-# results, config, snapshots = snapshot_detect_analysis_pipeline(...)
-
-# New way
 from trancit import PipelineOrchestrator
 orchestrator = PipelineOrchestrator(config)
 result = orchestrator.run(original_signal, detection_signal)
@@ -172,9 +179,9 @@ result = orchestrator.run(original_signal, detection_signal)
 
 ### Function signatures have changed
 
-**Problem**: Old function calls with different parameters.
+**Problem**: Function calls with different parameters than expected.
 
-**Solution**: Check the API documentation and examples for updated signatures.
+**Solution**: Check the API documentation and examples for current signatures.
 
 ## Plotting and Visualization Issues
 
@@ -183,6 +190,7 @@ result = orchestrator.run(original_signal, detection_signal)
 **Problem**: Plots not showing in Jupyter notebooks or scripts.
 
 **Solution**:
+
 ```python
 import matplotlib.pyplot as plt
 plt.ion()  # Turn on interactive mode
@@ -199,6 +207,7 @@ plt.show()
 **Problem**: Plots have rendering problems or missing fonts.
 
 **Solution**:
+
 ```python
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend
@@ -233,5 +242,5 @@ When you encounter an error:
 
 ---
 
-**Last Updated**: Version 0.1.0
+**Last Updated**: Version 1.0.10
 **For More Help**: See our [documentation](https://trancit.readthedocs.io) or [GitHub issues](https://github.com/CMC-lab/TranCIT/issues).
