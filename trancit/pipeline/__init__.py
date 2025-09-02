@@ -2,7 +2,7 @@
 Pipeline module for Dynamic Causal Strength (DCS) analysis.
 
 This module provides the pipeline orchestration functionality for DCS analysis,
-including stage-based processing and the legacy snapshot_detect_analysis_pipeline function.
+including stage-based processing and orchestration.
 """
 
 from .orchestrator import PipelineOrchestrator, PipelineResult
