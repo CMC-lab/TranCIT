@@ -4,7 +4,7 @@
 API Reference
 ############
 
-Welcome to the comprehensive API reference for **TranCIT: Transient Causal Interaction**. This section provides detailed documentation for all classes, functions, and modules in the package.
+Welcome to the comprehensive API reference for **TranCIT: Transient Causal Interaction Toolbox**. This section provides detailed documentation for all classes, functions, and modules in the package.
 
 The TranCIT package is organized into several core components:
 
@@ -349,12 +349,12 @@ Pipeline Orchestration
    1. Input validation
    2. Event detection
    3. Border removal
-   4. BIC model selection (optional)
+   4. BIC model selection
    5. Snapshot extraction
    6. Artifact removal
    7. Statistics computation
    8. Causality analysis
-   9. Bootstrap analysis (optional)
+   9. Bootstrap analysis
    10. Output preparation
    
    **Key Methods:**
@@ -927,36 +927,17 @@ Event-Based Analysis Workflow
            plt.show()
 
 *******************
-Migration Guide
+API Reference
 *******************
 
-If you're upgrading from the function-based API to the new class-based API, here's how to migrate your code:
+The TranCIT package provides a modern class-based API for causality analysis:
 
-Old Function-Based API
-=======================
-
-.. code-block:: python
-
-   # OLD: Function-based approach
-   from trancit.causality import compute_causal_strength_nonzero_mean
-   from trancit.pipeline import snapshot_detect_analysis_pipeline
-   
-   # Causality analysis
-   cs, te, gc, coeffs, te_cov = compute_causal_strength_nonzero_mean(
-       data, model_order=4, time_mode="inhomo"
-   )
-   
-   # Pipeline analysis
-   results, final_config, snapshots = snapshot_detect_analysis_pipeline(
-       original_signal, detection_signal, config
-   )
-
-New Class-Based API
-===================
+Class-Based API
+===============
 
 .. code-block:: python
 
-   # NEW: Class-based approach
+   # Class-based approach
    from trancit import DCSCalculator, PipelineOrchestrator
    
    # Causality analysis
