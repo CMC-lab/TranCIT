@@ -51,7 +51,7 @@ DCS works with multivariate time series data in a specific format:
 **Key Points:**
 
 - **Shape**: ``(n_variables, n_timepoints, n_trials)``
-- **Variables**: Dynamic Causal Strength (DCS) analyzes bivariate relationships (n_variables = 2)
+- **Variables**: DCS analyzes bivariate relationships (n_variables = 2)
 - **Trials**: Multiple realizations improve statistical robustness
 - **Time**: Each time point represents one measurement
 
