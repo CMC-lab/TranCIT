@@ -6,7 +6,7 @@ Quickstart
 
 This quickstart guide will get you up and running with **TranCIT: Transient Causal Interaction Toolbox** analysis in just a few minutes. 
 
-We'll cover the most common use cases with the new class-based API, which provides cleaner interfaces and better error handling than the previous function-based approach.
+We'll cover the most common use cases with the class-based API, which provides clean interfaces and robust error handling.
 
 ******************
 Installation Check
@@ -152,7 +152,7 @@ For event-based analysis (detecting and analyzing specific time windows), use th
 
 - **Event Detection**: Finds time windows of interest based on signal characteristics
 - **Snapshot Extraction**: Extracts fixed-length windows around detected events
-- **Causality Analysis**: Computes DCS, TE, and rDCS for each event window
+- **Causality Analysis**: Computes GC, TE, DCS, and rDCS for each event window
 - **Bootstrap Analysis**: Optional statistical significance testing
 
 *********************************
