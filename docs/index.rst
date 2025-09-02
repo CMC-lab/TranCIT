@@ -33,11 +33,11 @@ You can find comprehensive examples in the `examples/` folder of the repository 
 What is DCS?
 ****************
 
-Dynamic Causal Strength quantifies **time-varying causal relationships** between signals using advanced statistical methods. Unlike traditional correlation analysis, DCS determines the **direction** and **strength** of causal influences, making it invaluable for understanding complex dynamical systems.
+Dynamic Causal Strength (DCS)quantifies **time-varying causal relationships** between signals using advanced statistical methods. Unlike traditional correlation analysis, DCS determines the **direction** and **strength** of causal influences, making it invaluable for understanding complex dynamical systems.
 
 **Key Features:**
 
-🧠 **Multiple Causality Measures**: DCS, Transfer Entropy, Granger Causality, and relative DCS  
+🧠 **Multiple Causality Measures**: Transfer Entropy, Granger Causality, DCS, and relative DCS  
 ⚡ **High Performance**: Optimized algorithms for large-scale time series analysis  
 🔧 **Flexible Pipeline**: Event-based analysis with customizable detection and processing stages  
 📊 **Rich Visualization**: Built-in plotting functions for comprehensive result interpretation  
@@ -103,14 +103,14 @@ Key Capabilities
 Analysis Methods
 ================
 
-**Dynamic Causal Strength (DCS)**
-   Time-varying measure of direct causal influence based on structural causal models. Provides high temporal resolution and robust performance with non-stationary data.
-
 **Transfer Entropy (TE)**  
    Information-theoretic measure quantifying directed information flow between time series. Captures both linear and nonlinear dependencies.
 
 **Granger Causality (GC)**
    Classical linear measure testing whether past values of one series help predict another series beyond its own past values.
+
+**Dynamic Causal Strength (DCS)**
+   Time-varying measure of direct causal influence based on structural causal models. Provides high temporal resolution and robust performance with non-stationary data.
 
 **relative Dynamic Causal Strength (rDCS)**
    Event-based measure comparing causal strength to a baseline reference, ideal for analyzing stimulus-evoked responses.
@@ -266,7 +266,7 @@ Community & Support
 - 📖 **Documentation**: Comprehensive guides and tutorials available here
 - 💬 **Discussions**: Join our `GitHub Discussions <https://github.com/CMC-lab/TranCIT/discussions>`_ 
 - 🐛 **Bug Reports**: Submit issues on `GitHub Issues <https://github.com/CMC-lab/TranCIT/issues>`_
-- 📧 **Direct Contact**: Email the maintainers at salr.nouri@gmail.com
+- 📧 **Direct Contact**: Email the maintainers at `salr.nouri@gmail.com`
 
 **Contributing**
 
@@ -316,7 +316,7 @@ Special thanks to the scientific computing and neuroscience communities for feed
 **Development Team**
 
 - **Lead Developer**: Salar Nouri
-- **Scientific Advisor**: Kaidi Shao, Shervin Safavi
+- **Scientific Advisors**: Kaidi Shao, Shervin Safavi
 - **Contributors**: See `GitHub contributors <https://github.com/CMC-lab/TranCIT/contributors>`_
 
 ****************
@@ -329,6 +329,6 @@ Indices and Tables
 
 .. note::
    
-   **Version Information**: This documentation covers `trancit` v0.1.0 and later. For information about upgrading from older versions, see our :doc:`api` migration guide.
+   **Version Information**: This documentation covers `trancit` v1.0.0 and later.
    
    **Performance Note**: `trancit` is optimized for datasets with hundreds to thousands of time points and dozens of trials. For very large datasets (>100K time points), consider using the provided chunking utilities or contact us for optimization advice.
