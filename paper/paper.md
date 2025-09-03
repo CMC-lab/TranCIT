@@ -32,10 +32,13 @@ affiliations:
     ror: "05vf56z40"
   - name: International Center for Primate Brain Research (ICPBR), Center for Excellence in Brain Science and Intelligence Technology (CEBSIT), Chinese Academy of Sciences (CAS), Shanghai, China
     index: 2
+    ror: "00vpwhm04"
   - name: Computational Neuroscience, Department of Child and Adolescent Psychiatry, Faculty of Medicine, Technische Universität Dresden, Dresden 01307, Germany
     index: 3
+    ror: "042aqky30"
   - name: Department of Computational Neuroscience, Max Planck Institute for Biological Cybernetics, Tübingen 72076, Germany
     index: 4
+    ror: "026nmvv73"
 
 date: "2025-08-30"
 bibliography: paper.bib
