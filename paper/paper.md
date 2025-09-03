@@ -54,7 +54,7 @@ url: "https://trancit.readthedocs.io/en/latest/"
 
 The study of complex systems, e.g., neural circuits and cognitive functions, often requires understanding causal interactions that occur during brief, transient events [@logothetisHippocampalCorticalInteraction2012; @womelsdorfBurstFiringSynchronizes2014; @nitzanBrainwideInteractionsHippocampal2022; @safaviBrainComplexSystem2022; @safaviUncoveringOrganizationNeural2023; @lundqvistBetaBurstsCognition2024]. Traditional methods for estimating causality, such as Granger causality [@granger1969investigating] and Transfer Entropy (TE) [@Schreiber2000], are frequently challenged by the short-duration, non-stationary nature of these phenomena [@mitra2007observed]. Such methods typically assume stationarity and require long data segments, making them suboptimal for event-driven analysis.
 
-We present `trancit` (Transient Causal Interaction Toolbox), a robust, open-source Python package implementing advanced causal inference methods specifically designed to address this challenge [@nouri_2025_trancit]. `trancit` provides a comprehensive pipeline for dynamic causal inference on multivariate time-series data. It is a Python-native implementation and extension of a powerful causal learning algorithm originally introduced in MATLAB [@shao2023transient]. By leveraging foundational Python libraries like NumPy [@harris2020array] and SciPy [@virtanen2020fundamental], `trancit` integrates seamlessly into modern data science and research workflows, making these advanced techniques accessible to a broader scientific community.
+We present `trancit` (Transient Causal Interaction Toolbox), a robust, open-source Python package implementing advanced causal inference methods specifically designed to address this challenge [@nouri_2025_trancit_package; @nouri2025trancit]. `trancit` provides a comprehensive pipeline for dynamic causal inference on multivariate time-series data. It is a Python-native implementation and extension of a powerful causal learning algorithm originally introduced in MATLAB [@shao2023transient]. By leveraging foundational Python libraries like NumPy [@harris2020array] and SciPy [@virtanen2020fundamental], `trancit` integrates seamlessly into modern data science and research workflows, making these advanced techniques accessible to a broader scientific community.
 
 The package offers an integrated solution for end-to-end causal analysis, including:
 
@@ -76,7 +76,7 @@ While many statistical methods focus on correlation, the ability to infer direct
 
 ### Causal inference methods
 
-`trancit` implements four primary methods for detecting and quantifying causal relationships. A brief overview is provided here; for full mathematical derivations and theoretical background, please refer to our main methodology paper [@shao2023transient; @nouri_2025_trancit].
+`trancit` implements four primary methods for detecting and quantifying causal relationships. A brief overview is provided here; for full mathematical derivations and theoretical background, please refer to our main methodology paper [@shao2023transient; @nouri2025trancit].
 
 - **Granger Causality (GC):** A classic and widely used method based on vector autoregressive models that assesses whether the history of one time series improves the prediction of another.
 
@@ -102,7 +102,7 @@ To demonstrate its utility on real-world scientific data, we used `trancit` to a
 
 ## Implementation details
 
-The `trancit` package is open-source and distributed under the permissive **BSD-2 license**, ensuring it can be freely used, modified, and incorporated into diverse academic and commercial projects [@nouri_2025_trancit]. The package is designed with usability and extensibility in mind, featuring a highly modular architecture that separates concerns for causality, modeling, simulation, and utilities. It includes robust error handling for invalid configurations and relies on a comprehensive test suite implemented with the `pytest` framework to ensure algorithmic reliability. Continuous integration is managed via GitHub Actions. The project welcomes community involvement, and detailed guidelines for contributing code or reporting issues are provided in the software repository.
+The `trancit` package is open-source and distributed under the permissive **BSD-2 license**, ensuring it can be freely used, modified, and incorporated into diverse academic and commercial projects [@nouri_2025_trancit_package; @nouri2025trancit]. The package is designed with usability and extensibility in mind, featuring a highly modular architecture that separates concerns for causality, modeling, simulation, and utilities. It includes robust error handling for invalid configurations and relies on a comprehensive test suite implemented with the `pytest` framework to ensure algorithmic reliability. Continuous integration is managed via GitHub Actions. The project welcomes community involvement, and detailed guidelines for contributing code or reporting issues are provided in the software repository.
 
 ## Acknowledgments
 
