@@ -33,16 +33,16 @@ You can find comprehensive examples in the `examples/` folder of the repository 
 What is DCS?
 ****************
 
-Dynamic Causal Strength (DCS)quantifies **time-varying causal relationships** between signals using advanced statistical methods. Unlike traditional correlation analysis, DCS determines the **direction** and **strength** of causal influences, making it invaluable for understanding complex dynamical systems.
+Dynamic Causal Strength (DCS) quantifies **time-varying causal relationships** between signals using advanced statistical methods. Unlike traditional correlation analysis, DCS determines the **direction** and **strength** of causal influences, making it invaluable for understanding complex dynamical systems.
 
 **Key Features:**
 
-🧠 **Multiple Causality Measures**: Transfer Entropy, Granger Causality, DCS, and relative DCS  
-⚡ **High Performance**: Optimized algorithms for large-scale time series analysis  
-🔧 **Flexible Pipeline**: Event-based analysis with customizable detection and processing stages  
-📊 **Rich Visualization**: Built-in plotting functions for comprehensive result interpretation  
-🧪 **Robust Validation**: Extensive testing with synthetic and real-world datasets  
-📚 **Comprehensive Documentation**: Detailed tutorials, examples, and API reference  
+- 🧠 **Multiple Causality Measures**: Transfer Entropy, Granger Causality, DCS, and relative DCS
+- ⚡ **High Performance**: Optimized algorithms for large-scale time series analysis
+- 🔧 **Flexible Pipeline**: Event-based analysis with customizable detection and processing stages
+- 📊 **Rich Visualization**: Built-in plotting functions for comprehensive result interpretation
+- 🧪 **Robust Validation**: Extensive testing with synthetic and real-world datasets
+- 📚 **Comprehensive Documentation**: Detailed tutorials, examples, and API reference  
 
 **Scientific Foundation:**
 
@@ -284,7 +284,17 @@ If you use DCS in your research, please cite our paper:
 
 .. code-block:: bibtex
 
-   @software{nouri_2025_trancit,
+   @article{shao2023transient,
+            title={Information theoretic measures of causal influences during transient neural events},
+            author={Shao, Kaidi and Logothetis, Nikos K and Besserve, Michel},
+            journal={Frontiers in Network Physiology},
+            volume={3},
+            pages={1085347},
+            year={2023},
+            publisher={Frontiers Media SA}
+   }
+
+   @software{nouri_2025_trancit_package,
       author       = {Nouri, Salar and
                         Shao, Kaidi and
                         Safavi, Shervin},
@@ -295,6 +305,14 @@ If you use DCS in your research, please cite our paper:
       doi          = {10.5281/zenodo.16998396},
       url          = {https://doi.org/10.5281/zenodo.16998396},
       }
+   
+   @article{nouri2025trancit, 
+      title={TranCIT: Transient Causal Interaction Toolbox},  
+      author={Nouri, Salar and Shao, Kaidi and Safavi, Shervin}, 
+      year={2025}, 
+      journal={arXiv preprint arXiv:2509.00602},
+      url={https://doi.org/10.48550/arXiv.2509.00602}
+   }
 
 ****************
 License & Acknowledgments  

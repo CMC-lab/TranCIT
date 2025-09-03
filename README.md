@@ -189,6 +189,14 @@ If you use **TranCIT** in your research, please cite:
   year={2023},
   publisher={Frontiers Media SA}
 }
+
+@article{nouri2025trancit, 
+      title={TranCIT: Transient Causal Interaction Toolbox},  
+      author={Nouri, Salar and Shao, Kaidi and Safavi, Shervin}, 
+      year={2025}, 
+      journal={arXiv preprint arXiv:2509.00602},
+      url={https://doi.org/10.48550/arXiv.2509.00602}
+   }
 ```
 
 And cite this software package:
