@@ -1,15 +1,10 @@
 ---
-# JOSS Paper Draft - Revised Version
-# the final release version/date, and DOI placeholders are filled in.
-
 title: "TranCIT: Transient Causal Interaction Toolbox"
 tags:
   - Python
   - neuroscience
   - causal inference
   - time series analysis
-  - Granger causality
-  - transfer entropy
   - Local field potential (LFP)
   - Electroencephalogram (EEG)
   - Magnetoencephalography (MEG)
@@ -19,7 +14,7 @@ authors:
     orcid: 0000-0002-8846-9318
     corresponding: true
   - name: Kaidi Shao
-    affiliation: "2"
+    affiliation: 2
     orcid: 0000-0002-3027-0090
     corresponding: true
   - name: Shervin Safavi
@@ -42,71 +37,63 @@ affiliations:
 
 date: "2025-08-30"
 bibliography: paper.bib
-csl: ieee.csl
 repository: "https://github.com/cmc-lab/trancit"
 crossref: true
-doi: "10.5281/zenodo.16998396" # Zenodo DOI for the archived version
+doi: "10.5281/zenodo.16998396"
 url: "https://trancit.readthedocs.io/en/latest/" 
 
 ---
 
 ## Summary
 
-The study of complex systems, e.g., neural circuits and cognitive functions, often requires understanding causal interactions that occur during brief, transient events [@logothetisHippocampalCorticalInteraction2012; @womelsdorfBurstFiringSynchronizes2014; @nitzanBrainwideInteractionsHippocampal2022; @safaviBrainComplexSystem2022; @safaviUncoveringOrganizationNeural2023; @lundqvistBetaBurstsCognition2024]. Traditional methods for estimating causality, such as Granger causality [@granger1969investigating] and Transfer Entropy (TE) [@Schreiber2000], are frequently challenged by the short-duration, non-stationary nature of these phenomena [@mitra2007observed]. Such methods typically assume stationarity and require long data segments, making them suboptimal for event-driven analysis.
+The study of complex systems, particularly neural circuits and cognitive functions, requires understanding causal interactions during brief, transient events [@logothetisHippocampalCorticalInteraction2012; @womelsdorfBurstFiringSynchronizes2014; @nitzanBrainwideInteractionsHippocampal2022; @safaviBrainComplexSystem2022; @safaviUncoveringOrganizationNeural2023; @lundqvistBetaBurstsCognition2024]. Traditional causality methods, such as Granger causality (GC) [@granger1969investigating] and Transfer Entropy (TE) [@Schreiber2000], assume stationarity and require long data segments, making them suboptimal for event-driven analysis [@mitra2007observed].
 
-We present `trancit` (Transient Causal Interaction Toolbox), a robust, open-source Python package implementing advanced causal inference methods specifically designed to address this challenge [@nouri_2025_trancit_package; @nouri2025trancit]. `trancit` provides a comprehensive pipeline for dynamic causal inference on multivariate time-series data. It is a Python-native implementation and extension of a powerful causal learning algorithm originally introduced in MATLAB [@shao2023transient]. By leveraging foundational Python libraries like NumPy [@harris2020array] and SciPy [@virtanen2020fundamental], `trancit` integrates seamlessly into modern data science and research workflows, making these advanced techniques accessible to a broader scientific community.
+We present `trancit` (Transient Causal Interaction Toolbox), an open-source Python package implementing advanced causal inference methods for transient dynamics [@nouri_2025_trancit_package; @nouri2025trancit]. `trancit` provides a comprehensive pipeline for dynamic causal inference on multivariate time-series data, extending a robust causal learning algorithm originally introduced in MATLAB [@shao2023transient]. Built on NumPy [@harris2020array] and SciPy [@virtanen2020fundamental], it integrates seamlessly into modern data science workflows.
 
 The package offers an integrated solution for end-to-end causal analysis, including:
 
-- **Advanced causal inference methods:** A suite of algorithms to detect and quantify causal relationships, including classic methods like Granger Causality (GC) and Transfer Entropy (TE), alongside the more robust, Structural Causal Model (SCM) based Dynamic Causal Strength (DCS) and relative Dynamic Causal Strength (rDCS).
-
-- **Event-based preprocessing:** An automated pipeline to identify transient event timings from signals, align data epochs relative to these events, and reject trials contaminated by artifacts.
-
-- **Simulation and validation tools:** Utilities to generate synthetic autoregressive (AR) time-series data with known ground-truth causal structures, enabling users to validate methods, test hypotheses, and explore theoretical scenarios in a controlled environment.
+- **Advanced causal inference methods:** GC, TE, and robust Structural Causal Model(SCM)-based Dynamic Causal Strength (DCS) and relative Dynamic Causal Strength (rDCS)
+- **Event-based preprocessing:** Automated event detection, data alignment, and artifact rejection pipeline
+- **Simulation tools:** Synthetic autoregressive (AR) time-series data generation with known causal structures for validation and exploring scenarios.
 
 ## Statement of need
 
-While many statistical methods focus on correlation, the ability to infer directed causal relationships offers deeper, more mechanistic insights into how complex systems function [@Seth2015]. A critical frontier in this field is the analysis of transient dynamics, where interactions can rapidly change or occur in brief, intense bursts. While powerful methods to analyze these dynamics have been developed, their implementation in proprietary software like MATLAB [@shao2023transient] has limited their accessibility and adoption within the broader open-source scientific ecosystem.
+While many statistical methods focus on correlation, the ability to infer directed causal relationships offers deeper, more mechanistic insights into how complex systems function [@Seth2015]. A critical challenge is analyzing transient dynamics where interactions occur in brief, intense bursts. Existing methods are primarily implemented in proprietary software, such as MATLAB [@shao2023transient], which limits accessibility.
 
-`trancit` bridges this critical gap by providing a fully open-source, Python-based implementation. While general-purpose Python causality libraries such as `causal-learn` [@zheng2024causal] and `tigramite` [@runge2022jakobrunge] are invaluable, they often lack the specialized features required for robust analysis of transient, event-related data. For example, they may not offer integrated workflows for event detection and alignment, which are crucial for this type of analysis.
+`trancit` bridges this gap with a fully open-source Python implementation. While general-purpose causality libraries, such as `causal-learn` [@zheng2024causal] and `tigramite` [@runge2022jakobrunge], exist, they lack specialized features for analyzing transient, event-related data, including integrated event detection and alignment workflows.
 
-`trancit` offers a tailored solution that implements GC, TE, DCS, and rDCS with configurations specifically suited for potentially non-stationary signals. By providing these tools in an accessible Python package, `trancit` promotes reproducible research, lowers the barrier to entry for advanced causal inference, and supports a wide range of applications in fields such as neuroscience, climatology, and economics.
+`trancit` provides a tailored solution that implements GC, TE, DCS, and rDCS, with configurations for non-stationary signals. This promotes reproducible research, lowers barriers to advanced causal inference, and supports applications in neuroscience, climatology, and economics.
 
 ## Functionality
 
 ### Causal inference methods
 
-`trancit` implements four primary methods for detecting and quantifying causal relationships. A brief overview is provided here; for full mathematical derivations and theoretical background, please refer to our main methodology paper [@shao2023transient; @nouri2025trancit].
+`trancit` implements four primary methods for detecting and quantifying causal relationships. A brief overview is provided here; for complete mathematical derivations and theoretical background, please refer to our main methodology papers [@shao2023transient; @nouri2025trancit].
 
-- **Granger Causality (GC):** A classic and widely used method based on vector autoregressive models that assesses whether the history of one time series improves the prediction of another.
+- **Granger Causality (GC):** Vector autoregressive model-based method assessing whether the history of one time series improves the prediction of another.
+- **Transfer Entropy (TE):** Non-parametric, information-theoretic measure quantifying directed information flow between signals, and reduction of uncertainty between two signals.
+- **Dynamic Causal Strength (DCS):** SCM-based method overcoming the "synchrony pitfall" where TE fails during high synchronization periods. Since it quantifies time-varying causal influence through a principled interventional approach.
+- **relative Dynamic Causal Strength (rDCS):** Event-based extension quantifying causal effects relative to baseline periods. It quantifies causal effects relative to a pre-defined baseline or reference period, making it exceptionally sensitive to the deterministic shifts in signal dynamics that often characterize event-related data.
 
-- **Transfer Entropy (TE):** A non-parametric, information-theoretic measure that quantifies the directed flow of information and reduction of uncertainty between two signals.
-
-- **Dynamic Causal Strength (DCS):** A robust method grounded in the framework of SCMs. DCS quantifies time-varying causal influence through a principled interventional approach. This allows DCS to overcome common failure modes of other methods, such as the "synchrony pitfall," where measures like TE can be misleading during periods of high signal synchronization.
-
-- **relative Dynamic Causal Strength (rDCS):** An extension of DCS specifically tailored for event-based analysis. It quantifies causal effects relative to a pre-defined baseline or reference period, making it exceptionally sensitive to the deterministic shifts in signal dynamics that often characterize event-related data.
-
-#### Preprocessing and simulation
-
-A key feature of `trancit` is its integrated workflow for preparing time-series data for causal analysis. The preprocessing module includes functions for detecting event timings based on signal thresholds, aligning data epochs to these events (e.g., to a local signal peak), and automatically extracting data segments or "snapshots" for analysis. The package also includes a simulation module to generate synthetic AR data with user-defined causal structures. This feature is invaluable for validating the methods, for educational purposes, and for exploring the sensitivity of the causal measures under different conditions (e.g., varying noise levels or data lengths).
+`trancit` provides integrated preprocessing for event detection, data alignment, and artifact rejection, as well as simulation tools for generating synthetic AR data with known causal structures for validation and education.
 
 ## Example
 
-To demonstrate `trancit`'s core functionality and validate its implementation, we replicated key results from @shao2023transient ([Figure 4](https://www.frontiersin.org/files/Articles/1085347/fnetp-03-1085347-HTML-r1/image_m/fnetp-03-1085347-g004.jpg)). As shown in \autoref{fig:causality}, our simulation example highlights the "synchrony pitfall" of Transfer Entropy. DCS correctly identifies a continuous underlying causal link in a system with a transient period of high synchrony, a scenario where TE incorrectly suggests that the causal link has weakened or vanished.
+We validated `trancit` by replicating key results from @shao2023transient. As shown in \autoref{fig:causality}, our simulation illustrates the "synchrony pitfall," where TE fails during high-synchronization periods, while DCS correctly identifies the underlying causal link.
 
 ![Replication of @shao2023transient Figure 4 using `trancit` package. Shows successful detection of directed influence from X to Y using simulated data and causality measures (e.g., TE, DCS) implemented in the package. \label{fig:causality}](figures/3_dcs_example.pdf "Figure 1: Causality detection on simulated data")
 
-To demonstrate its utility on real-world scientific data, we used `trancit` to analyze publicly available Local Field Potential (LFP) recordings from the rodent hippocampus during sharp wave-ripple events. As shown in **\autoref{fig:ca1_ca3_analysis}**, the rDCS method correctly identifies the well-established transient information flow from hippocampal area CA3 to CA1. Critically, this result underscores the importance of proper experimental design, as the causal link is only apparent when the analysis is correctly aligned on the putative cause (CA3), a key feature facilitated by our package.
+To demonstrate its utility on real-world scientific data, `trancit` is used to analyze hippocampal LFP recordings during sharp wave-ripple events. As shown in **\autoref{fig:ca1_ca3_analysis}**, rDCS correctly identifies transient information flow from CA3 to CA1, demonstrating the importance of proper event alignment facilitated by our package.
 
 ![Demonstration of `trancit` on real-world LFP data showing directed causality from hippocampal area CA3 to CA1. The analysis successfully identifies transient information flow during sharp-wave ripple events using the package's built-in rDCS method. \label{fig:ca1_ca3_analysis}](figures/4_ca3_ca1_analysis.pdf "Figure 2: Event-based causal analysis of hippocampal LFP data. The plot shows a transient increase in directed influence from CA3 to CA1, computed using rDCS.")
 
 ## Implementation details
 
-The `trancit` package is open-source and distributed under the permissive **BSD-2 license**, ensuring it can be freely used, modified, and incorporated into diverse academic and commercial projects [@nouri_2025_trancit_package; @nouri2025trancit]. The package is designed with usability and extensibility in mind, featuring a highly modular architecture that separates concerns for causality, modeling, simulation, and utilities. It includes robust error handling for invalid configurations and relies on a comprehensive test suite implemented with the `pytest` framework to ensure algorithmic reliability. Continuous integration is managed via GitHub Actions. The project welcomes community involvement, and detailed guidelines for contributing code or reporting issues are provided in the software repository.
+`trancit` is distributed under the BSD-2 license. The package features a modular architecture separating causality, modeling, simulation, and utilities [@nouri_2025_trancit_package; @nouri2025trancit]. It includes robust error handling, a comprehensive `pytest` test suite, and GitHub Actions continuous integration. Community contributions are welcome with detailed guidelines in the repository.
 
 ## Acknowledgments
 
-We acknowledge the foundational work by Kaidi Shao, Nikos Logothetis, and Michel Besserve [@shao2023transient] on the dynamic causal strength methodology. We also thank the developers and communities behind the core Python scientific libraries utilized in `trancit`, including NumPy [@harris2020array], SciPy [@virtanen2020fundamental], and Matplotlib [@hunter2007matplotlib]. KS acknowledges the support from the Shanghai Municipal Science and Technology Major Project (Grant No. 2019SHZDZX02) and the Max Planck Society (including the Max Planck Institute for Biological Cybernetics and the Graduate School of Neural and Behavioral Sciences).
-SS acknowledges the support from Max Planck Society and add-on fellowship from the Joachim Herz Foundation.
+We acknowledge the foundational work by Kaidi Shao, Nikos Logothetis, and Michel Besserve [@shao2023transient] on the dynamic causal strength methodology. KS acknowledges the support from the Shanghai Municipal Science and Technology Major Project (Grant No. 2019SHZDZX02) and the Max Planck Society (including the Max Planck Institute for Biological Cybernetics and the Graduate School of Neural and Behavioral Sciences).
+SS acknowledges the support from the Max Planck Society and an add-on fellowship from the Joachim Herz Foundation.
 
 ## References
