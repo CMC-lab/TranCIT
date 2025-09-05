@@ -278,9 +278,9 @@ We welcome contributions from the community! Whether you're fixing bugs, adding 
 - **Documentation**: Help improve tutorials and examples
 - **Community Support**: Answer questions and help other users
 
-**Citing DCS**
+**Citing TranCIT**
 
-If you use DCS in your research, please cite our paper:
+If you use TranCIT in your research, please cite our paper:
 
 .. code-block:: bibtex
 
@@ -320,7 +320,7 @@ License & Acknowledgments
 
 **License**
 
-DCS is released under the BSD 2-Clause License, allowing both academic and commercial use. See :doc:`license` for full details.
+TranCIT is released under the BSD 2-Clause License, allowing both academic and commercial use. See :doc:`license` for full details.
 
 **Acknowledgments**
 
