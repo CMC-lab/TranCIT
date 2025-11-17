@@ -93,8 +93,7 @@ class BICSelector:
 
         if total_var_lag != n_vars * (max_order + 1):
             raise ValueError(
-                "Data shape does not match expected dimensions based on "
-                "max_order."
+                "Data shape does not match expected dimensions based on " "max_order."
             )
 
         bic_outputs = {
