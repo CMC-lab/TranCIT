@@ -21,7 +21,8 @@ def select_model_order(
     """
     Select the optimal VAR model order using Bayesian Information Criterion (BIC).
 
-    Evaluates BIC scores for model orders 1 to max_model_order under specified time mode.
+    Evaluates BIC scores for model orders 1 to max_model_order under specified
+    time mode.
 
     Parameters
     ----------

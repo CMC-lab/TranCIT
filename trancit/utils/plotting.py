@@ -26,8 +26,9 @@ def fill_std_known(
         1D array containing the standard deviation values corresponding to mean_temp.
         The shaded region will be mean_temp +/- std_temp.
     t : np.ndarray
-        1D array containing the time or x-axis values corresponding to mean_temp and std_temp.
-        Must have the same length as mean_temp and std_temp.
+        1D array containing the time or x-axis values corresponding to
+        mean_temp and std_temp. Must have the same length as mean_temp and
+        std_temp.
     ax : matplotlib.axes.Axes
         The Matplotlib Axes object onto which the plot should be drawn.
     color : str, optional
@@ -59,7 +60,9 @@ def fill_std_known(
     >>> mean_vals = np.sin(t)
     >>> std_vals = np.random.rand(100) * 0.2 + 0.1
     >>> fig, ax = plt.subplots()
-    >>> line, shade = fill_std_known(mean_vals, std_vals, t, ax, color='blue', label='Sine Wave')
+    >>> line, shade = fill_std_known(
+    ...     mean_vals, std_vals, t, ax, color='blue', label='Sine Wave'
+    ... )
     >>> ax.legend()
     >>> plt.show()
     """

@@ -50,7 +50,8 @@ class BICSelector:
 
     def _compute_multi_trial_bic(self, event_data_max_order: np.ndarray) -> Dict:
         """
-        Calculate Bayesian Information Criterion (BIC) for multiple model orders across trial data.
+        Calculate Bayesian Information Criterion (BIC) for multiple model orders
+        across trial data.
 
         This function computes BIC values for Vector Autoregression (VAR) models
         of orders 1 to momax,
@@ -63,17 +64,22 @@ class BICSelector:
             shape (n_vars * (max_order + 1), n_observations, n_trials).
         bic_params : dict
             Parameters for BIC calculation, containing:
-                - "Params": Sub-dict with "BIC": {"momax": int}, the maximum model order.
+                - "Params": Sub-dict with "BIC": {"momax": int}, the maximum
+                  model order.
 
         Returns
         -------
         dict
             Dictionary containing:
-                - 'bic': BIC values for each model order and variant, shape (max_order, 4).
+                - 'bic': BIC values for each model order and variant, shape
+                  (max_order, 4).
                 - 'penalty_terms': Penalty terms for BIC, shape (max_order, 4).
-                - 'log_likelihood': Log-likelihood for each model order, shape (max_order,).
-                - 'sum_log_det_hessian': Sum of log determinant of Hessian, shape (max_order,).
-                - 'optimal_orders': Optimal model orders for each BIC variant, shape (4,).
+                - 'log_likelihood': Log-likelihood for each model order, shape
+                  (max_order,).
+                - 'sum_log_det_hessian': Sum of log determinant of Hessian,
+                  shape (max_order,).
+                - 'optimal_orders': Optimal model orders for each BIC variant,
+                  shape (4,).
 
         Raises
         ------
@@ -87,7 +93,8 @@ class BICSelector:
 
         if total_var_lag != n_vars * (max_order + 1):
             raise ValueError(
-                "Data shape does not match expected dimensions based on max_order."
+                "Data shape does not match expected dimensions based on "
+                "max_order."
             )
 
         bic_outputs = {
@@ -140,9 +147,11 @@ class BICSelector:
         self, event_data: np.ndarray, model_order: int, config: PipelineConfig
     ) -> Tuple[float, float]:
         """
-        Compute log-likelihood and sum of log determinant of Hessian for a specific model order.
+        Compute log-likelihood and sum of log determinant of Hessian for a
+        specific model order.
 
-        Supports 'biased' mode currently; 'debiased' mode is planned for future implementation.
+        Supports 'biased' mode currently; 'debiased' mode is planned for
+        future implementation.
 
         Parameters
         ----------
