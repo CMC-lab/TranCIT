@@ -26,14 +26,18 @@ import numpy as np
 
 def fill_std_known(mean_temp, std_temp, t, color):
     """Fill between mean ± std and plot mean line."""
-    plt.fill_between(t, mean_temp - std_temp, mean_temp + std_temp, color=color, alpha=0.2)
+    plt.fill_between(
+        t, mean_temp - std_temp, mean_temp + std_temp, color=color, alpha=0.2
+    )
     plt.plot(t, mean_temp, color=color)
 
 
-def load_causality_data(data_dir, sess_name, n_chpair, align_mode, causal_methods, num_bootstraps=5):
+def load_causality_data(
+    data_dir, sess_name, n_chpair, align_mode, causal_methods, num_bootstraps=5
+):
     """
     Load causality analysis results from saved .npz files.
-    
+
     Parameters
     ----------
     data_dir : str
@@ -48,7 +52,7 @@ def load_causality_data(data_dir, sess_name, n_chpair, align_mode, causal_method
         List of causal methods (e.g., ['TE', 'DCS', 'rDCS'])
     num_bootstraps : int
         Number of bootstrap samples
-        
+
     Returns
     -------
     CausalStructure : dict
@@ -59,82 +63,90 @@ def load_causality_data(data_dir, sess_name, n_chpair, align_mode, causal_method
         Dictionary containing signal statistics
     """
     # Initialize data structures
-    CausalStructure = {'OLS': {}}
-    CausalStructure_btsp = {'OLS': {}}
-    Yt_stats_all = {'mean': {}, 'Sigma': {}}
-    
+    CausalStructure = {"OLS": {}}
+    CausalStructure_btsp = {"OLS": {}}
+    Yt_stats_all = {"mean": {}, "Sigma": {}}
+
     for align in align_mode:
-        VarAlign = align.replace('-', '_')
-        CausalStructure['OLS'][VarAlign] = {}
-        CausalStructure_btsp['OLS'][VarAlign] = {}
-        
+        VarAlign = align.replace("-", "_")
+        CausalStructure["OLS"][VarAlign] = {}
+        CausalStructure_btsp["OLS"][VarAlign] = {}
+
         for causal_method in causal_methods:
-            VarCausalM = causal_method.replace('-', '_')
+            VarCausalM = causal_method.replace("-", "_")
             # Initialize with NaN - will be filled as data is loaded
-            CausalStructure['OLS'][VarAlign][VarCausalM] = np.full((n_chpair, 401, 2), np.nan)
-            CausalStructure_btsp['OLS'][VarAlign][VarCausalM] = np.full(
+            CausalStructure["OLS"][VarAlign][VarCausalM] = np.full(
+                (n_chpair, 401, 2), np.nan
+            )
+            CausalStructure_btsp["OLS"][VarAlign][VarCausalM] = np.full(
                 (n_chpair, 401, 2, num_bootstraps), np.nan
             )
-    
+
     # Load data for each channel pair
     for n_ch in range(1, n_chpair + 1):
         for align in align_mode:
             # Load main causality results
             filename = os.path.join(
-                data_dir, 
-                f'ca3_ca1_{sess_name}_chpair_{n_ch}_{align}_model_causality.npz'
+                data_dir,
+                f"ca3_ca1_{sess_name}_chpair_{n_ch}_{align}_model_causality.npz",
             )
-            
+
             if not os.path.exists(filename):
                 print(f"Warning: File not found: {filename}")
                 continue
-                
+
             data = np.load(filename, allow_pickle=True)
-            
+
             snap_analysis_output = data["SnapAnalyOutput"].item()
-            Yt_stats = snap_analysis_output['Yt_stats']
-            CausalOutput = snap_analysis_output['CausalOutput']
-            
-            VarAlign = align.replace('-', '_')
-            if VarAlign not in Yt_stats_all['mean']:
-                Yt_stats_all['mean'][VarAlign] = np.zeros((n_chpair, 2, Yt_stats['mean'].shape[1]))
-                Yt_stats_all['Sigma'][VarAlign] = np.zeros((n_chpair, Yt_stats['Sigma'].shape[0], 2))
-            
-            Yt_stats_all['mean'][VarAlign][n_ch - 1, :, :] = Yt_stats['mean'][:2, :]
-            Yt_stats_all['Sigma'][VarAlign][n_ch - 1, :, 0] = (
-                Yt_stats['Sigma'][:, 0, 0] / Yt_stats['n_trials']
+            Yt_stats = snap_analysis_output["Yt_stats"]
+            CausalOutput = snap_analysis_output["CausalOutput"]
+
+            VarAlign = align.replace("-", "_")
+            if VarAlign not in Yt_stats_all["mean"]:
+                Yt_stats_all["mean"][VarAlign] = np.zeros(
+                    (n_chpair, 2, Yt_stats["mean"].shape[1])
+                )
+                Yt_stats_all["Sigma"][VarAlign] = np.zeros(
+                    (n_chpair, Yt_stats["Sigma"].shape[0], 2)
+                )
+
+            Yt_stats_all["mean"][VarAlign][n_ch - 1, :, :] = Yt_stats["mean"][:2, :]
+            Yt_stats_all["Sigma"][VarAlign][n_ch - 1, :, 0] = (
+                Yt_stats["Sigma"][:, 0, 0] / Yt_stats["n_trials"]
             )
-            Yt_stats_all['Sigma'][VarAlign][n_ch - 1, :, 1] = (
-                Yt_stats['Sigma'][:, 1, 1] / Yt_stats['n_trials']
+            Yt_stats_all["Sigma"][VarAlign][n_ch - 1, :, 1] = (
+                Yt_stats["Sigma"][:, 1, 1] / Yt_stats["n_trials"]
             )
-            
+
             # Load causality results for each method
             for method in causal_methods:
-                VarCausalM = method.replace('-', '_')
-                CausalStructure['OLS'][VarAlign][VarCausalM][n_ch - 1, :, :] = (
-                    CausalOutput['OLS'][method]
+                VarCausalM = method.replace("-", "_")
+                CausalStructure["OLS"][VarAlign][VarCausalM][n_ch - 1, :, :] = (
+                    CausalOutput["OLS"][method]
                 )
-                
+
                 # Load bootstrap data if available
                 for n_btsp in range(1, num_bootstraps + 1):
                     btsp_filename = os.path.join(
                         data_dir,
-                        f'ca3_ca1_{sess_name}_chpair_{n_ch}_{align}_bootstrap_sample_{n_btsp}.npz'
+                        f"ca3_ca1_{sess_name}_chpair_{n_ch}_{align}_bootstrap_sample_{n_btsp}.npz",
                     )
                     if os.path.exists(btsp_filename):
                         btsp_data = np.load(btsp_filename, allow_pickle=True)
-                        CausalOutput_btsp = btsp_data['CausalOutput_bootstrap_sample'].item()
-                        CausalStructure_btsp['OLS'][VarAlign][VarCausalM][
+                        CausalOutput_btsp = btsp_data[
+                            "CausalOutput_bootstrap_sample"
+                        ].item()
+                        CausalStructure_btsp["OLS"][VarAlign][VarCausalM][
                             n_ch - 1, :, :, n_btsp - 1
-                        ] = CausalOutput_btsp['OLS'][method]
-    
+                        ] = CausalOutput_btsp["OLS"][method]
+
     return CausalStructure, CausalStructure_btsp, Yt_stats_all
 
 
 def plot_event_waveforms(Yt_stats_all, align_mode, output_dir):
     """
     Plot event waveforms for different alignment conditions.
-    
+
     Parameters
     ----------
     Yt_stats_all : dict
@@ -149,63 +161,71 @@ def plot_event_waveforms(Yt_stats_all, align_mode, output_dir):
     t_idx = np.arange(0, 201) + 100  # Python 0-based indexing
     Fs = 1252  # Sampling frequency in Hz
     t_ms = t / Fs * 1000  # Convert to milliseconds
-    
+
     # Compute mean and std across channel pairs
-    mean_var1_temp = np.nanmean(Yt_stats_all['mean'][align_mode[0]], axis=0)  # Shape: (201, 2)
-    std_var1_temp = np.sqrt(np.nanmean(Yt_stats_all['Sigma'][align_mode[0]], axis=0))  # Shape: (201, 2)
-    
-    mean_var2_temp = np.nanmean(Yt_stats_all['mean'][align_mode[1]], axis=0)  # Shape: (201, 2)
-    std_var2_temp = np.sqrt(np.nanmean(Yt_stats_all['Sigma'][align_mode[1]], axis=0))  # Shape: (201, 2)
-    
+    mean_var1_temp = np.nanmean(
+        Yt_stats_all["mean"][align_mode[0]], axis=0
+    )  # Shape: (201, 2)
+    std_var1_temp = np.sqrt(
+        np.nanmean(Yt_stats_all["Sigma"][align_mode[0]], axis=0)
+    )  # Shape: (201, 2)
+
+    mean_var2_temp = np.nanmean(
+        Yt_stats_all["mean"][align_mode[1]], axis=0
+    )  # Shape: (201, 2)
+    std_var2_temp = np.sqrt(
+        np.nanmean(Yt_stats_all["Sigma"][align_mode[1]], axis=0)
+    )  # Shape: (201, 2)
+
     plt.figure(figsize=(12, 9))
-    
+
     # Subplot 1: CA3 aligned, CA3 signal
     plt.subplot(2, 2, 1)
-    fill_std_known(mean_var1_temp[0, t_idx], std_var1_temp[t_idx, 0], t_ms, 'b')
-    
+    fill_std_known(mean_var1_temp[0, t_idx], std_var1_temp[t_idx, 0], t_ms, "b")
+
     # Subplot 2: CA3 aligned, CA1 signal
     plt.subplot(2, 2, 2)
-    fill_std_known(mean_var1_temp[1, t_idx], std_var1_temp[t_idx, 1], t_ms, 'r')
-    
+    fill_std_known(mean_var1_temp[1, t_idx], std_var1_temp[t_idx, 1], t_ms, "r")
+
     # Subplot 3: CA1 aligned, CA3 signal
     plt.subplot(2, 2, 3)
-    fill_std_known(mean_var2_temp[0, t_idx], std_var2_temp[t_idx, 0], t_ms, 'b')
-    
+    fill_std_known(mean_var2_temp[0, t_idx], std_var2_temp[t_idx, 0], t_ms, "b")
+
     # Subplot 4: CA1 aligned, CA1 signal
     plt.subplot(2, 2, 4)
-    fill_std_known(mean_var2_temp[1, t_idx], std_var2_temp[t_idx, 1], t_ms, 'r')
-    
+    fill_std_known(mean_var2_temp[1, t_idx], std_var2_temp[t_idx, 1], t_ms, "r")
+
     # Define event titles
-    event_titles = ['(sr|sr)', '(pl|sr)', '(sr|pl)', '(pl|pl)']
-    
+    event_titles = ["(sr|sr)", "(pl|sr)", "(sr|pl)", "(pl|pl)"]
+
     # Set common properties for all subplots
     for i in range(1, 5):
         plt.subplot(2, 2, i)
         ax = plt.gca()
         ax.tick_params(labelsize=15)
-        ax.axvline(0, color='k', linestyle='--', linewidth=2)
-        ax.set_title('Event waveforms ' + event_titles[i-1])
+        ax.axvline(0, color="k", linestyle="--", linewidth=2)
+        ax.set_title("Event waveforms " + event_titles[i - 1])
         if i > 2:
-            ax.set_xlabel('Peri-event time $t^{\\prime}$ (ms)')
-        ax.set_ylabel('LFP (mV)')
+            ax.set_xlabel("Peri-event time $t^{\\prime}$ (ms)")
+        ax.set_ylabel("LFP (mV)")
         ax.set_frame_on(False)
-    
+
     plt.tight_layout()
-    
+
     # Save figures
     os.makedirs(output_dir, exist_ok=True)
-    for ext in ['svg', 'pdf']:
-        output_path = os.path.join(output_dir, f'event_waveforms.{ext}')
-        plt.savefig(output_path, format=ext, bbox_inches='tight')
+    for ext in ["svg", "pdf"]:
+        output_path = os.path.join(output_dir, f"event_waveforms.{ext}")
+        plt.savefig(output_path, format=ext, bbox_inches="tight")
         print(f"Saved: {output_path}")
-    
+
     plt.close()
 
 
 def plot_causality_results(CausalStructure, align_mode, causal_methods, output_dir):
     """
     Plot causality analysis results for different methods and alignment conditions.
-    
+
     Parameters
     ----------
     CausalStructure : dict
@@ -221,130 +241,131 @@ def plot_causality_results(CausalStructure, align_mode, causal_methods, output_d
     t = np.arange(-100, 101)  # From -100 to 100, length 201
     t_idx = np.arange(100, 301)  # Time vector from -100 to 100 (indices 100-300)
     Fs = 1252  # Sampling frequency in Hz
-    
-    condition_label = ['Aligned by putative cause', 'Aligned by putative effect']
-    legend_Col = [['ca3→ca1|ca3', 'ca1→ca3|ca1'], ['ca3→ca1|ca1', 'ca1→ca3|ca3']]
-    
+
+    condition_label = ["Aligned by putative cause", "Aligned by putative effect"]
+    legend_Col = [["ca3→ca1|ca3", "ca1→ca3|ca1"], ["ca3→ca1|ca1", "ca1→ca3|ca3"]]
+
     # Create figure
     plt.figure(figsize=(12, 9))
-    
+
     # Loop over causal methods and conditions
     for k, method in enumerate(causal_methods):
         for i_Col in range(2):
             # Select subplot in a 3x2 grid
             plt.subplot(3, 2, k * 2 + i_Col + 1)
-            
+
             # Condition-specific data extraction and plotting
             if i_Col == 0:
                 # First condition: Aligned by putative cause (blue), effect (red)
                 mean_temp1 = np.nanmean(
-                    CausalStructure['OLS'][align_mode[0]][method][:100, t_idx, 0], axis=0
+                    CausalStructure["OLS"][align_mode[0]][method][:100, t_idx, 0],
+                    axis=0,
                 )
                 std_temp1 = np.nanstd(
-                    CausalStructure['OLS'][align_mode[0]][method][:10, t_idx, 0], axis=0
+                    CausalStructure["OLS"][align_mode[0]][method][:10, t_idx, 0], axis=0
                 )
-                fill_std_known(mean_temp1, std_temp1, t / Fs, 'b')
-                
+                fill_std_known(mean_temp1, std_temp1, t / Fs, "b")
+
                 mean_temp2 = np.nanmean(
-                    CausalStructure['OLS'][align_mode[1]][method][:100, t_idx, 1], axis=0
+                    CausalStructure["OLS"][align_mode[1]][method][:100, t_idx, 1],
+                    axis=0,
                 )
                 std_temp2 = np.nanstd(
-                    CausalStructure['OLS'][align_mode[1]][method][:10, t_idx, 1], axis=0
+                    CausalStructure["OLS"][align_mode[1]][method][:10, t_idx, 1], axis=0
                 )
-                fill_std_known(mean_temp2, std_temp2, t / Fs, 'r')
+                fill_std_known(mean_temp2, std_temp2, t / Fs, "r")
             else:
                 # Second condition: Aligned by putative effect (blue), cause (red)
                 mean_temp1 = np.nanmean(
-                    CausalStructure['OLS'][align_mode[1]][method][:100, t_idx, 0], axis=0
+                    CausalStructure["OLS"][align_mode[1]][method][:100, t_idx, 0],
+                    axis=0,
                 )
                 std_temp1 = np.nanstd(
-                    CausalStructure['OLS'][align_mode[1]][method][:10, t_idx, 0], axis=0
+                    CausalStructure["OLS"][align_mode[1]][method][:10, t_idx, 0], axis=0
                 )
-                fill_std_known(mean_temp1, std_temp1, t / Fs, 'b')
-                
+                fill_std_known(mean_temp1, std_temp1, t / Fs, "b")
+
                 mean_temp2 = np.nanmean(
-                    CausalStructure['OLS'][align_mode[0]][method][:100, t_idx, 1], axis=0
+                    CausalStructure["OLS"][align_mode[0]][method][:100, t_idx, 1],
+                    axis=0,
                 )
                 std_temp2 = np.nanstd(
-                    CausalStructure['OLS'][align_mode[0]][method][:10, t_idx, 1], axis=0
+                    CausalStructure["OLS"][align_mode[0]][method][:10, t_idx, 1], axis=0
                 )
-                fill_std_known(mean_temp2, std_temp2, t / Fs, 'r')
-            
+                fill_std_known(mean_temp2, std_temp2, t / Fs, "r")
+
             # Set plot labels
             plt.ylabel(method)
-            
+
             # Add title for the first row
             if k == 0:
                 plt.title(condition_label[i_Col])
-            
+
             # Add vertical dashed line at t=0
-            plt.axvline(0, color='k', linestyle='--', linewidth=2)
-            
+            plt.axvline(0, color="k", linestyle="--", linewidth=2)
+
             # Add legend for the first row
             if k == 0:
                 plt.legend(legend_Col[i_Col], frameon=False)
-                plt.xlabel('Time (ms)')
-            
+                plt.xlabel("Time (ms)")
+
             # Set font size and remove box
             ax = plt.gca()
             ax.tick_params(labelsize=15)
             ax.set_frame_on(False)
-            
+
             # Add x-label for the bottom row
             if k == 2:
-                plt.xlabel('Peri-event time $t^{\\prime}$ (ms)')
-    
+                plt.xlabel("Peri-event time $t^{\\prime}$ (ms)")
+
     plt.tight_layout()
-    
+
     # Save figures
     os.makedirs(output_dir, exist_ok=True)
-    for ext in ['svg', 'pdf']:
-        output_path = os.path.join(output_dir, f'causality_results.{ext}')
-        plt.savefig(output_path, format=ext, bbox_inches='tight')
+    for ext in ["svg", "pdf"]:
+        output_path = os.path.join(output_dir, f"causality_results.{ext}")
+        plt.savefig(output_path, format=ext, bbox_inches="tight")
         print(f"Saved: {output_path}")
-    
+
     plt.close()
 
 
 def main():
     """Main function to run the visualization script."""
     parser = argparse.ArgumentParser(
-        description='Plot CA3-CA1 DCS verification results',
+        description="Plot CA3-CA1 DCS verification results",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=__doc__
+        epilog=__doc__,
     )
     parser.add_argument(
-        '--data_dir',
+        "--data_dir",
         type=str,
-        default='.',
-        help='Directory containing saved .npz files (default: current directory)'
+        default=".",
+        help="Directory containing saved .npz files (default: current directory)",
     )
     parser.add_argument(
-        '--output_dir',
+        "--output_dir",
         type=str,
-        default='figures',
-        help='Directory to save output figures (default: figures/)'
+        default="figures",
+        help="Directory to save output figures (default: figures/)",
     )
     parser.add_argument(
-        '--sess_name',
+        "--sess_name",
         type=str,
-        default='vvp01_2006-4-9_18-43-47',
-        help='Session name used in file naming (default: vvp01_2006-4-9_18-43-47)'
+        default="vvp01_2006-4-9_18-43-47",
+        help="Session name used in file naming (default: vvp01_2006-4-9_18-43-47)",
     )
     parser.add_argument(
-        '--n_chpair',
-        type=int,
-        default=20,
-        help='Number of channel pairs (default: 20)'
+        "--n_chpair", type=int, default=20, help="Number of channel pairs (default: 20)"
     )
-    
+
     args = parser.parse_args()
-    
+
     # Configuration
-    align_mode = ['ca3_peak', 'ca1_peak']
-    causal_methods = ['TE', 'DCS', 'rDCS']
+    align_mode = ["ca3_peak", "ca1_peak"]
+    causal_methods = ["TE", "DCS", "rDCS"]
     num_bootstraps = 5
-    
+
     print("Loading causality data...")
     CausalStructure, CausalStructure_btsp, Yt_stats_all = load_causality_data(
         args.data_dir,
@@ -352,19 +373,17 @@ def main():
         args.n_chpair,
         align_mode,
         causal_methods,
-        num_bootstraps
+        num_bootstraps,
     )
-    
+
     print("Plotting event waveforms...")
     plot_event_waveforms(Yt_stats_all, align_mode, args.output_dir)
-    
+
     print("Plotting causality results...")
     plot_causality_results(CausalStructure, align_mode, causal_methods, args.output_dir)
-    
+
     print("\nAll figures saved successfully!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-
-
