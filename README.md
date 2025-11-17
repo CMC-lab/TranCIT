@@ -8,7 +8,10 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16998396.svg)](https://doi.org/10.5281/zenodo.16998396)
 
-TranCIT (Transient Causal Interaction Toolbox) is a Python package for quantifying causal relationships in multivariate time series data. It provides methods for analyzing directional influences using model-based statistical tools, inspired by information-theoretic and autoregressive frameworks.
+TranCIT (Transient Causal Interaction Toolbox) is a Python package for quantifying
+causal relationships in multivariate time series data. It provides methods for
+analyzing directional influences using model-based statistical tools, inspired by
+information-theoretic and autoregressive frameworks.
 
 ## 🚀 Features
 
@@ -73,57 +76,70 @@ print(f"Transfer Entropy shape: {result.transfer_entropy.shape}")
 ```python
 import numpy as np
 from trancit import PipelineOrchestrator, generate_signals
-from trancit.config import PipelineConfig, PipelineOptions, DetectionParams, CausalParams
+from trancit.config import (
+    PipelineConfig, PipelineOptions, DetectionParams, 
+    CausalParams, BicParams, OutputParams
+)
 
 # Generate data
 data, _, _ = generate_signals(T=1200, Ntrial=20, h=0.1, 
                              gamma1=0.5, gamma2=0.5, 
                              Omega1=1.0, Omega2=1.2)
 original_signal = np.mean(data, axis=2)
-detection_signal = original_signal * 1.5
+
+# Create detection signal: use second variable which often has clearer peaks
+# The detection signal must be 2D with shape (2, T)
+detection_var = original_signal[1, :]
+detection_signal = np.vstack([detection_var, detection_var])
 
 # Configure pipeline
 config = PipelineConfig(
     options=PipelineOptions(detection=True, causal_analysis=True),
-    detection=DetectionParams(thres_ratio=2.0, align_type="peak", 
+    detection=DetectionParams(thres_ratio=1.2, align_type="peak", 
                             l_extract=150, l_start=75),
+    bic=BicParams(morder=4),
     causal=CausalParams(ref_time=75, estim_mode="OLS"),
+    output=OutputParams(file_keyword="example"),
 )
 
 # Run analysis
 orchestrator = PipelineOrchestrator(config)
-result = orchestrator.run(original_signal, detection_signal)
-
-# Access results
-if result.results.get("CausalOutput"):
-    dcs_values = result.results["CausalOutput"]["OLS"]["DCS"]
-    te_values = result.results["CausalOutput"]["OLS"]["TE"]
-    print(f"DCS shape: {dcs_values.shape}")
+try:
+    result = orchestrator.run(original_signal, detection_signal)
+    
+    # Access results
+    if result.results.get("CausalOutput"):
+        dcs_values = result.results["CausalOutput"]["OLS"]["DCS"]
+        te_values = result.results["CausalOutput"]["OLS"]["TE"]
+        print(f"DCS shape: {dcs_values.shape}")
+    else:
+        print("No events detected. Try adjusting thres_ratio or use real data.")
+except Exception as e:
+    print(f"Pipeline failed: {e}")
+    print("Note: Event detection may fail with synthetic data. ")
+    print("For reliable results, use real data or adjust detection parameters.")
 ```
 
-### Model Selection and Validation
+### VAR Model Estimation
 
 ```python
 import numpy as np
-from trancit import VAREstimator, BICSelector, ModelValidator
+from trancit import VAREstimator
 
 # Generate sample data
 data = np.random.randn(2, 1000, 20)  # (n_vars, n_obs, n_trials)
 
-# BIC model selection
-bic_selector = BICSelector(max_order=6, mode="biased")
-bic_results = bic_selector.compute_multi_trial_BIC(data, {"Params": {"BIC": {"momax": 6, "mode": "biased"}}, "EstimMode": "OLS"})
-
 # VAR estimation
 estimator = VAREstimator(model_order=4, time_mode="inhomo")
-coefficients, residuals, log_likelihood, hessian_sum = estimator.estimate_var_coefficients(
-    data, model_order=4, max_model_order=6, time_mode="inhomo", lag_mode="infocrit"
+coefficients, residuals, log_likelihood, hessian_sum = (
+    estimator.estimate_var_coefficients(
+        data, model_order=4, max_model_order=6, 
+        time_mode="inhomo", lag_mode="infocrit"
+    )
 )
 
-# Model validation
-validator = ModelValidator()
-validation_result = validator.validate(coefficients, residuals, data)
-print(f"Model stable: {validation_result.model_stability}")
+print(f"Coefficients shape: {coefficients.shape}")
+print(f"Log-likelihood: {log_likelihood:.4f}")
 ```
 
 ## 📚 Documentation & Examples
@@ -142,7 +158,8 @@ For comprehensive documentation, tutorials, and API reference:
 
 This package implements methods from:
 
-- **Shao et al. (2023)**: Information theoretic measures of causal influences during transient neural events
+- **Shao et al. (2023)**: Information theoretic measures of causal influences
+  during transient neural events
 - **Granger Causality**: Linear causality detection in time series
 - **Transfer Entropy**: Information-theoretic causality measures
 
