@@ -151,7 +151,7 @@ For comprehensive documentation, tutorials, and API reference:
 ### Examples
 
 - **[Basic Usage](https://github.com/CMC-lab/TranCIT/blob/main/examples/basic_usage.py)**: Simple causality analysis
-- **[LFP Pipeline](https://github.com/CMC-lab/TranCIT/blob/main/examples/lfp_pipeline.py)**: Local field potential analysis
+- **[CA3-CA1 Causality Analysis](https://github.com/CMC-lab/TranCIT/blob/main/examples/compute_ca3_ca1_causality.py)**: Local field potential causality analysis
 - **[DCS Introduction](https://github.com/CMC-lab/TranCIT/blob/main/examples/dcs_introduction.ipynb)**: Interactive tutorial
 
 ## 🔬 Scientific Background
