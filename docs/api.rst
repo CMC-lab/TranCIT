@@ -46,13 +46,27 @@ Base Classes
    
    .. code-block:: python
    
-      from trancit.core.base import BaseAnalyzer
+      from trancit.core.base import BaseAnalyzer, BaseResult
       import numpy as np
       
+      # Define a custom result class
+      class MyResult(BaseResult):
+          """Custom result class for demonstration."""
+          pass
+      
+      # Define a custom analyzer
       class MyAnalyzer(BaseAnalyzer):
           def analyze(self, data):
               # Your analysis implementation here
               return MyResult(result=data.sum())
+      
+      # Generate sample data
+      data = np.random.randn(2, 100, 10)  # 2 vars, 100 time points, 10 trials
+      
+      # Use the analyzer
+      analyzer = MyAnalyzer()
+      result = analyzer.analyze(data)
+      print(f"Analysis result: {result.result}")
 
 .. autoclass:: BaseResult
    :members:
@@ -70,7 +84,19 @@ Base Classes
    .. code-block:: python
    
       from trancit.core.base import BaseResult
+      import numpy as np
       
+      # Define a custom result class
+      class MyResult(BaseResult):
+          """Custom result class for demonstration."""
+          pass
+      
+      # Generate sample data arrays
+      n_time = 100
+      cs_array = np.random.randn(n_time, 2)  # Causal strength array
+      te_array = np.random.randn(n_time, 2)  # Transfer entropy array
+      
+      # Create result object
       result = MyResult(causal_strength=cs_array, transfer_entropy=te_array)
       print(result.causal_strength.shape)
       result_dict = result.to_dict()
@@ -80,6 +106,28 @@ Base Classes
    :show-inheritance:
    
    Base class for configuration objects. Provides parameter validation and default value handling.
+   
+   **Example:**
+   
+   .. code-block:: python
+   
+      from trancit.core.base import BaseConfig
+      
+      # Define a custom configuration class
+      class MyConfig(BaseConfig):
+          """Custom configuration class for demonstration."""
+          pass
+      
+      # Create configuration object
+      config = MyConfig(param1=10, param2="value", param3=True)
+      
+      # Access parameters
+      print(f"param1: {config.param1}")
+      print(f"param2: {config.param2}")
+      
+      # Convert to dictionary
+      config_dict = config.to_dict()
+      print(f"Config as dict: {config_dict}")
 
 Exception Classes
 =================
@@ -384,8 +432,18 @@ Pipeline Orchestration
    
    .. code-block:: python
    
-      from trancit import PipelineOrchestrator
+      from trancit import PipelineOrchestrator, generate_signals
       from trancit.config import PipelineConfig, PipelineOptions, DetectionParams, CausalParams
+      import numpy as np
+      
+      # Generate sample data
+      data, _, _ = generate_signals(T=800, Ntrial=15, h=0.1,
+                                    gamma1=0.4, gamma2=0.6,
+                                    Omega1=0.9, Omega2=1.3)
+      
+      # Prepare signals for pipeline
+      original_signal = np.mean(data, axis=2)  # Average across trials
+      detection_signal = original_signal * 1.5  # Amplified for detection
       
       # Configure pipeline
       config = PipelineConfig(
@@ -468,6 +526,36 @@ Individual pipeline stages can be used independently for custom workflows.
 .. code-block:: python
 
    from trancit.pipeline.stages import InputValidationStage, EventDetectionStage, CausalityAnalysisStage
+   from trancit import generate_signals
+   from trancit.config import PipelineConfig, PipelineOptions, DetectionParams, CausalParams
+   import numpy as np
+   
+   # Generate sample data
+   data, _, _ = generate_signals(T=800, Ntrial=15, h=0.1,
+                                 gamma1=0.4, gamma2=0.6,
+                                 Omega1=0.9, Omega2=1.3)
+   
+   # Prepare signals
+   original_signal = np.mean(data, axis=2)
+   detection_signal = original_signal * 1.5
+   
+   # Configure pipeline
+   config = PipelineConfig(
+       options=PipelineOptions(
+           detection=True,
+           causal_analysis=True,
+           bootstrap=False
+       ),
+       detection=DetectionParams(
+           thres_ratio=2.0,
+           l_extract=100,
+           l_start=50
+       ),
+       causal=CausalParams(
+           ref_time=50,
+           estim_mode="OLS"
+       )
+   )
    
    # Create individual stages
    validation_stage = InputValidationStage(config)
@@ -623,9 +711,25 @@ VAR Model Estimation
    .. code-block:: python
    
       from trancit.models import VAREstimator
+      import numpy as np
       
-      estimator = VAREstimator(model_order=4, method="OLS")
-      coefficients, residuals = estimator.fit(data)
+      # Generate sample data
+      data = np.random.randn(2, 1000, 20)  # 2 vars, 1000 time points, 20 trials
+      
+      # Create estimator
+      estimator = VAREstimator(model_order=4, time_mode="inhomo")
+      
+      # Estimate VAR coefficients
+      coefficients, residual_covariance, log_likelihood, hessian_sum = (
+          estimator.estimate_var_coefficients(
+              data, model_order=4, max_model_order=6,
+              time_mode="inhomo", lag_mode="infocrit"
+          )
+      )
+      
+      print(f"Coefficients shape: {coefficients.shape}")
+      print(f"Residual covariance shape: {residual_covariance.shape}")
+      print(f"Log-likelihood: {log_likelihood:.4f}")
 
 BIC Model Selection
 ===================
@@ -642,11 +746,34 @@ BIC Model Selection
    
    .. code-block:: python
    
-      from trancit.models import BICSelector
+      from trancit.models import BICSelector, select_model_order
+      from trancit.config import PipelineConfig, PipelineOptions, BicParams
+      import numpy as np
       
-      selector = BICSelector(max_order=10, mode="OLS")
-      bic_results = selector.compute_multi_trial_BIC(data, params)
-      optimal_order = bic_results['morder']
+      # Generate sample data
+      data = np.random.randn(2, 500, 20)  # 2 vars, 500 time points, 20 trials
+      
+      # Configure pipeline with BIC parameters
+      config = PipelineConfig(
+          options=PipelineOptions(bic=True),
+          bic=BicParams(
+              morder=4,
+              momax=10,
+              mode="biased"
+          )
+      )
+      
+      # Option 1: Use BICSelector (requires event data from pipeline)
+      # selector = BICSelector(config)
+      # bic_results = selector._compute_multi_trial_bic(event_data_max_order)
+      
+      # Option 2: Use high-level select_model_order function (simpler)
+      bic_scores, optimal_orders, log_likelihoods, penalty_terms = (
+          select_model_order(data, max_model_order=10, time_mode="inhomo")
+      )
+      
+      print(f"Optimal model orders: {optimal_orders}")
+      print(f"BIC scores shape: {bic_scores.shape}")
 
 Model Validation
 ================
@@ -744,8 +871,16 @@ Data Processing
    .. code-block:: python
    
       from trancit.utils.preprocess import normalize_data
+      import numpy as np
       
+      # Generate sample data
+      data = np.random.randn(2, 500, 20)  # 2 vars, 500 time points, 20 trials
+      
+      # Normalize data
       normalized_data = normalize_data(data, method="zscore", axis=1)
+      
+      print(f"Original data mean: {data.mean():.4f}, std: {data.std():.4f}")
+      print(f"Normalized data mean: {normalized_data.mean():.4f}, std: {normalized_data.std():.4f}")
 
 .. autofunction:: check_data_quality
 
@@ -804,8 +939,17 @@ Visualization
    .. code-block:: python
    
       from trancit.utils.plotting import plot_causality_results
+      from trancit import DCSCalculator
+      import numpy as np
       
-      # Assuming 'result' is a DCSResult object
+      # Generate sample data
+      data = np.random.randn(2, 500, 20)  # 2 vars, 500 time points, 20 trials
+      
+      # Perform DCS analysis
+      calculator = DCSCalculator(model_order=4, time_mode="inhomo")
+      result = calculator.analyze(data)
+      
+      # Plot results
       plot_causality_results(
           result.causal_strength,
           result.transfer_entropy,
