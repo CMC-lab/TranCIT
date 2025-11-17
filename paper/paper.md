@@ -79,7 +79,7 @@ While many statistical methods focus on correlation, the ability to infer direct
 
 ## Example
 
-We validated `trancit` by replicating key results from @shao2023transient. As shown in \autoref{fig:causality}, our simulation illustrates the "synchrony pitfall," where TE fails during high-synchronization periods, while DCS correctly identifies the underlying causal link.
+We validated `trancit` by replicating key results from @shao2023transient. As shown in \autoref{fig:causality}, our simulation illustrates the "synchrony pitfall," where TE fails during high-synchronization periods, while DCS correctly identifies the underlying causal link. The code to reproduce these simulation results is available in the `examples/dcs_introduction.ipynb` Jupyter notebook in the repository.
 
 ![Replication of @shao2023transient Figure 4 using `trancit` package. Shows successful detection of directed influence from X to Y using simulated data and causality measures (e.g., TE, DCS) implemented in the package. \label{fig:causality}](figures/3_dcs_example.pdf "Figure 1: Causality detection on simulated data")
 
@@ -93,7 +93,7 @@ To demonstrate its utility on real-world scientific data, `trancit` is used to a
 
 ## Acknowledgments
 
-We acknowledge the foundational work by Kaidi Shao, Nikos Logothetis, and Michel Besserve [@shao2023transient] on the dynamic causal strength methodology. KS acknowledges the support from the Shanghai Municipal Science and Technology Major Project (Grant No. 2019SHZDZX02) and the Max Planck Society (including the Max Planck Institute for Biological Cybernetics and the Graduate School of Neural and Behavioral Sciences).
-SS acknowledges the support from the Max Planck Society and an add-on fellowship from the Joachim Herz Foundation.
+We acknowledge the foundational work by Kaidi Shao, Nikos Logothetis, and Michel Besserve [@shao2023transient] on the dynamic causal strength methodology. Kaidi Shao (KS) acknowledges the support from the Shanghai Municipal Science and Technology Major Project (Grant No. 2019SHZDZX02) and the Max Planck Society (including the Max Planck Institute for Biological Cybernetics and the Graduate School of Neural and Behavioral Sciences).
+Shervin Safavi (SS) acknowledges the support from the Max Planck Society and an add-on fellowship from the Joachim Herz Foundation.
 
 ## References
