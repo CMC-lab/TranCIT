@@ -60,9 +60,9 @@ The package offers an integrated solution for end-to-end causal analysis, includ
 
 While many statistical methods focus on correlation, the ability to infer directed causal relationships offers deeper, more mechanistic insights into how complex systems function [@Seth2015]. A critical challenge is analyzing transient dynamics where interactions occur in brief, intense bursts. Existing methods are primarily implemented in proprietary software, such as MATLAB [@shao2023transient], which limits accessibility.
 
-`trancit` bridges this gap with a fully open-source Python implementation. While general-purpose causality libraries, such as `causal-learn` [@zheng2024causal] and `tigramite` [@runge2022jakobrunge], exist, they lack specialized features for analyzing transient, event-related data, including integrated event detection and alignment workflows.
+`trancit` bridges this gap with a fully open-source Python implementation. While packages like `statsmodels` [@seabold2010statsmodels] and `TransferEntropy` [@TransferEntropy_pkg] offer standard methods (GC and TE), and general-purpose libraries such as `causal-learn` [@zheng2024causal] and `tigramite` [@runge2022jakobrunge] focus on causal discovery, they all lack specialized features for analyzing transient, event-related data—specifically, integrated event detection and alignment workflows.
 
-`trancit` provides a tailored solution that implements GC, TE, DCS, and rDCS, with configurations for non-stationary signals. This promotes reproducible research, lowers barriers to advanced causal inference, and supports applications in neuroscience, climatology, and economics.
+Furthermore, unlike discovery libraries that often assume stationary dynamics, `trancit` provides a tailored solution that implements GC, TE, DCS, and rDCS, with configurations for non-stationary signals. This promotes reproducible research, lowers barriers to advanced causal inference, and supports applications in neuroscience, climatology, and economics.
 
 ## Functionality
 
@@ -75,7 +75,7 @@ While many statistical methods focus on correlation, the ability to infer direct
 - **Dynamic Causal Strength (DCS):** SCM-based method overcoming the "synchrony pitfall" where TE fails during high synchronization periods. Since it quantifies time-varying causal influence through a principled interventional approach.
 - **relative Dynamic Causal Strength (rDCS):** Event-based extension quantifying causal effects relative to baseline periods. It quantifies causal effects relative to a pre-defined baseline or reference period, making it exceptionally sensitive to the deterministic shifts in signal dynamics that often characterize event-related data.
 
-`trancit` provides integrated preprocessing for event detection, data alignment, and artifact rejection, as well as simulation tools for generating synthetic AR data with known causal structures for validation and education.
+`trancit` provides integrated preprocessing for event detection, data alignment, and artifact rejection, as well as simulation tools for generating synthetic AR data with known causal structures for validation and education [@nouri2025trancit].
 
 ## Example
 
