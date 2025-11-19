@@ -75,7 +75,7 @@ Furthermore, unlike discovery libraries that often assume stationary dynamics, `
 - **Dynamic Causal Strength (DCS):** SCM-based method overcoming the "synchrony pitfall" where TE fails during high synchronization periods. Since it quantifies time-varying causal influence through a principled interventional approach.
 - **relative Dynamic Causal Strength (rDCS):** Event-based extension quantifying causal effects relative to baseline periods. It quantifies causal effects relative to a pre-defined baseline or reference period, making it exceptionally sensitive to the deterministic shifts in signal dynamics that often characterize event-related data.
 
-`trancit` provides integrated preprocessing for event detection, data alignment, and artifact rejection, as well as simulation tools for generating synthetic AR data with known causal structures for validation and education [@nouri2025trancit].
+`trancit` provides integrated preprocessing for event detection, data alignment, and artifact rejection, as well as simulation tools for generating synthetic AR data with known causal structures for validation and education [@nouri2025trancit][Event Detection Preprocessing](../docs/event_detection_preprocessing.rst).
 
 ## Example
 
