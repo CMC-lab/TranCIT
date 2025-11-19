@@ -142,6 +142,25 @@ print(f"Coefficients shape: {coefficients.shape}")
 print(f"Log-likelihood: {log_likelihood:.4f}")
 ```
 
+### Controlling Logging Verbosity
+
+By default, TranCIT uses `INFO`-level logging, which provides detailed progress information during analysis. If you find the logging output too verbose for your use case, you can reduce it:
+
+```python
+import logging
+
+# Reduce logging to show only warnings and errors
+logging.getLogger("trancit").setLevel(logging.WARNING)
+
+# Or set to ERROR for minimal output
+logging.getLogger("trancit").setLevel(logging.ERROR)
+
+# For more detail, use DEBUG
+logging.getLogger("trancit").setLevel(logging.DEBUG)
+```
+
+**Note:** The examples above will show INFO-level logging by default. To reduce verbosity, add the logging configuration at the beginning of your script. For debugging purposes, you can increase verbosity using `logging.DEBUG`.
+
 ## 📚 Documentation & Examples
 
 For comprehensive documentation, tutorials, and API reference:
