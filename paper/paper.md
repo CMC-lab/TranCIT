@@ -91,7 +91,7 @@ Code snippets and detailed instructions for reproducing these figures and their 
 
 ## Implementation details
 
-`trancit` is distributed under the BSD-2 license. The package features a modular architecture separating causality, modeling, simulation, and utilities [@nouri_2025_trancit_package; @nouri2025trancit]. It includes robust error handling, a comprehensive `pytest` test suite, and GitHub Actions continuous integration. Community contributions are welcome with detailed guidelines in the repository.
+`trancit` is distributed under the BSD-2-Clause license. The package features a modular architecture separating causality, modeling, simulation, and utilities [@nouri_2025_trancit_package; @nouri2025trancit]. It includes robust error handling, a comprehensive `pytest` test suite, and GitHub Actions continuous integration. Detailed information about the software architecture, dependencies, and design choices is available in the package documentation (see `docs/software_architecture.rst` in the repository).
 
 ## Acknowledgments
 

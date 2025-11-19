@@ -339,13 +339,7 @@ The pipeline includes comprehensive error handling:
 - **Detailed Logging:** All stages log their progress and any issues encountered
 - **Exception Propagation:** Errors are caught, logged, and re-raised with context
 
-Performance Considerations
-----------------------------
-
-- **Vectorized Operations:** Uses NumPy vectorization for efficient array operations
-- **Memory Efficiency:** Processes data in-place where possible
-- **Lazy Evaluation:** Optional stages (BIC, bootstrap) are only executed when enabled
-- **Parallelization Ready:** Stage-based design allows for future parallel execution of independent stages
+**Note:** General performance considerations for the TranCIT package are documented in :doc:`software_architecture`.
 
 Integration with Causality Analysis
 ====================================
