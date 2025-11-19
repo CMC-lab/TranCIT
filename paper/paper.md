@@ -79,13 +79,15 @@ Furthermore, unlike discovery libraries that often assume stationary dynamics, `
 
 ## Example
 
-We validated `trancit` by replicating key results from @shao2023transient. As shown in \autoref{fig:causality}, our simulation illustrates the "synchrony pitfall," where TE fails during high-synchronization periods, while DCS correctly identifies the underlying causal link. The code to reproduce these simulation results is available in the `examples/dcs_introduction.ipynb` Jupyter notebook in the repository.
+We validated `trancit` by replicating key results from @shao2023transient. As shown in \autoref{fig:causality}, our simulation illustrates the "synchrony pitfall," where TE fails during high-synchronization periods, while DCS correctly identifies the underlying causal link.
 
 ![Replication of @shao2023transient Figure 4 using `trancit` package. Shows successful detection of directed influence from X to Y using simulated data and causality measures (e.g., TE, DCS) implemented in the package. \label{fig:causality}](figures/3_dcs_example.pdf "Figure 1: Causality detection on simulated data")
 
 To demonstrate its utility on real-world scientific data, `trancit` is used to analyze hippocampal LFP recordings during sharp wave-ripple events. As shown in **\autoref{fig:ca1_ca3_analysis}**, rDCS correctly identifies transient information flow from CA3 to CA1, demonstrating the importance of proper event alignment facilitated by our package.
 
 ![Demonstration of `trancit` on real-world LFP data showing directed causality from hippocampal area CA3 to CA1. The analysis successfully identifies transient information flow during sharp-wave ripple events using the package's built-in rDCS method. \label{fig:ca1_ca3_analysis}](figures/4_ca3_ca1_analysis.pdf "Figure 2: Event-based causal analysis of hippocampal LFP data. The plot shows a transient increase in directed influence from CA3 to CA1, computed using rDCS.")
+
+Code snippets and detailed instructions for reproducing these figures and their simulation results are available in [`examples/README.md`](../examples/README.md) in the repository.
 
 ## Implementation details
 
