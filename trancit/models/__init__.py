@@ -22,9 +22,10 @@ Example
 >>> data = np.random.randn(2, 1000, 20)  # (n_vars, n_obs, n_trials)
 >>>
 >>> # Estimate VAR coefficients
->>> coefficients, residuals, log_likelihood, hessian_sum = estimator.estimate_var_coefficients(
-...     data, max_model_order=4
-... )
+>>> coefficients, residuals, log_likelihood, hessian_sum = (
+...     estimator.estimate_var_coefficients(
+...         data, max_model_order=4
+...     )
 >>>
 >>> # Select optimal model order
 >>> bic_scores, optimal_orders, log_likelihoods, penalty_terms = select_model_order(

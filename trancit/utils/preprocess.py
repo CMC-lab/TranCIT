@@ -1,8 +1,9 @@
 """
 Preprocessing utilities for Dynamic Causal Strength (DCS).
 
-This module provides functions for data cleaning, artifact removal, and matrix regularization.
-These utilities ensure data quality and numerical stability for the DCS pipeline.
+This module provides functions for data cleaning, artifact removal, and matrix
+regularization. These utilities ensure data quality and numerical stability for
+the DCS pipeline.
 """
 
 import logging
@@ -22,9 +23,9 @@ def remove_artifact_trials(
     """
     Remove trials from event data where the signal drops below a specified threshold.
 
-    This function identifies and removes trials where any value in the first two variables
-    of the event data falls below the given lower threshold. It also removes the corresponding
-    locations from the `locations` array.
+    This function identifies and removes trials where any value in the first two
+    variables of the event data falls below the given lower threshold. It also
+    removes the corresponding locations from the `locations` array.
 
     Parameters
     ----------
@@ -54,7 +55,9 @@ def remove_artifact_trials(
     >>> import numpy as np
     >>> event_data = np.random.randn(2, 100, 10)  # (vars, time, trials)
     >>> locations = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900, 1000])
-    >>> cleaned_data, cleaned_locs = remove_artifact_trials(event_data, locations, -15000)
+    >>> cleaned_data, cleaned_locs = remove_artifact_trials(
+    ...     event_data, locations, -15000
+    ... )
     >>> print(f"Original trials: {event_data.shape[2]}")
     >>> print(f"Cleaned trials: {cleaned_data.shape[2]}")
     """
@@ -105,7 +108,8 @@ def remove_artifact_trials(
         updated_locations = np.delete(locations, trials_to_remove)
 
         logger.info(
-            f"Removed {len(trials_to_remove)} artifact trials (threshold: {lower_threshold})"
+            f"Removed {len(trials_to_remove)} artifact trials "
+            f"(threshold: {lower_threshold})"
         )
         logger.info(f"Remaining trials: {updated_event_data.shape[2]}")
 
@@ -123,9 +127,11 @@ def regularize_if_singular(
     threshold: float = 1e-4,
 ) -> np.ndarray:
     """
-    Check if a matrix is singular and regularize it by adding epsilon to the diagonal if needed.
+    Check if a matrix is singular and regularize it by adding epsilon to the
+    diagonal if needed.
 
-    This function checks if the determinant of the matrix is below a specified threshold.
+    This function checks if the determinant of the matrix is below a specified
+    threshold.
     If it is, the matrix is considered singular, and a small value (epsilon)
     is added to its diagonal
     to make it invertible. Otherwise, the original matrix is returned.
@@ -139,7 +145,8 @@ def regularize_if_singular(
     epsilon : float, optional
         Small value to add to the diagonal if the matrix is singular. Default is 1e-6.
     threshold : float, optional
-        Determinant threshold below which the matrix is considered singular. Default is 1e-6.
+        Determinant threshold below which the matrix is considered singular.
+        Default is 1e-6.
 
     Returns
     -------
@@ -197,7 +204,8 @@ def regularize_if_singular(
                     return regularized_matrix
                 except Exception as e:
                     logger.warning(
-                        f"Ledoit-Wolf regularization failed: {e}, using diagonal regularization"
+                        f"Ledoit-Wolf regularization failed: {e}, using "
+                        f"diagonal regularization"
                     )
 
             regularized_matrix = matrix + epsilon * np.eye(matrix.shape[0])
@@ -320,9 +328,11 @@ def normalize_data(
     data : np.ndarray
         Input data to normalize.
     method : str, optional
-        Normalization method: 'zscore', 'minmax', 'robust', or 'none'. Default is 'zscore'.
+        Normalization method: 'zscore', 'minmax', 'robust', or 'none'. Default
+        is 'zscore'.
     axis : Optional[int], optional
-        Axis along which to normalize. If None, normalize over all axes. Default is None.
+        Axis along which to normalize. If None, normalize over all axes.
+        Default is None.
 
     Returns
     -------

@@ -11,8 +11,10 @@ def estimate_residuals(event_stats: Dict) -> Tuple[np.ndarray, np.ndarray, np.nd
     ----------
     event_stats : Dict
         Dictionary containing:
-        - 'OLS': Sub-dictionary with 'At' (coefficients), shape (L, nvar, nvar * morder).
-        - 'Sigma': Covariance matrices, shape (L, nvar * (morder + 1), nvar * (morder + 1)).
+        - 'OLS': Sub-dictionary with 'At' (coefficients), shape (L, nvar,
+          nvar * morder).
+        - 'Sigma': Covariance matrices, shape (L, nvar * (morder + 1),
+          nvar * (morder + 1)).
         - 'mean': Mean values, shape (nvar * (morder + 1), L).
 
     Returns
@@ -61,7 +63,8 @@ def get_residuals(event_data: np.ndarray, stats: Dict) -> np.ndarray:
         Event matrix, shape (nvar * (morder + 1), L, ntrials).
     stats : Dict
         Dictionary containing:
-        - 'OLS': Sub-dictionary with 'At' (coefficients), shape (L, nvar, nvar * morder).
+        - 'OLS': Sub-dictionary with 'At' (coefficients), shape (L, nvar,
+          nvar * morder).
 
     Returns
     -------

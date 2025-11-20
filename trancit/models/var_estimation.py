@@ -65,12 +65,14 @@ class VAREstimator:
         Supports both inhomogeneous ('inhomo') and homogeneous ('homo') time modes.
 
         Args:
-            time_series_data (np.ndarray): Data array, shape (n_vars, n_observations, n_trials).
+            time_series_data (np.ndarray): Data array, shape (n_vars,
+                n_observations, n_trials).
             model_order (int): Model order for the VAR process.
             max_model_order (int): Maximum model order for lag_mode 'infocrit'.
             time_mode (str): 'inhomo' or 'homo'.
             lag_mode (str): 'infocrit' or 'var' to determine lag structure.
-            epsilon (float, optional): Regularization term for singular matrices. Defaults to 1e-8.
+            epsilon (float, optional): Regularization term for singular matrices.
+                Defaults to 1e-8.
 
         Returns:
             Tuple[np.ndarray, np.ndarray, float, float]:
@@ -145,7 +147,8 @@ class VAREstimator:
 
         if time_series_data.ndim != 3:
             raise ValidationError(
-                "time_series_data must be 3-dimensional (n_vars, n_observations, n_trials)",
+                "time_series_data must be 3-dimensional (n_vars, "
+                "n_observations, n_trials)",
                 "time_series_data_ndim",
                 time_series_data.ndim,
             )

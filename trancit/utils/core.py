@@ -42,8 +42,8 @@ def extract_event_windows(
     Returns
     -------
     np.ndarray
-        2D array of shape (window_length, len(centers)) containing the extracted windows.
-        Invalid windows are filled with NaN.
+        2D array of shape (window_length, len(centers)) containing the
+        extracted windows. Invalid windows are filled with NaN.
 
     Raises
     ------
@@ -57,7 +57,9 @@ def extract_event_windows(
     >>> import numpy as np
     >>> signal = np.random.randn(1000)
     >>> centers = np.array([100, 200, 300])
-    >>> windows = extract_event_windows(signal, centers, start_offset=50, window_length=100)
+    >>> windows = extract_event_windows(
+    ...     signal, centers, start_offset=50, window_length=100
+    ... )
     >>> print(f"Windows shape: {windows.shape}")  # (100, 3)
     """
     if not isinstance(signal, np.ndarray) or signal.ndim != 1:
@@ -137,11 +139,13 @@ def compute_event_statistics(
     -------
     Dict[str, Union[np.ndarray, Dict]]
         Dictionary containing the conditional statistics:
-            - 'mean': Mean of the events (shape: (nvar * (model_order + 1), time_points))
-            - 'Sigma': Covariance matrices
-              (shape: (time_points, nvar * (model_order + 1), nvar * (model_order + 1)))
+            - 'mean': Mean of the events (shape: (nvar * (model_order + 1),
+              time_points))
+            - 'Sigma': Covariance matrices (shape: (time_points,
+              nvar * (model_order + 1), nvar * (model_order + 1)))
             - 'OLS': Dictionary with:
-                - 'At': OLS coefficients (shape: (time_points, nvar, nvar * model_order))
+                - 'At': OLS coefficients (shape: (time_points, nvar,
+                  nvar * model_order))
                 - 'bt': Residual biases
                 - 'Sigma_Et': Residual covariance
                 - 'sigma_Et': Residual standard deviation
@@ -504,7 +508,8 @@ def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray,
 
             valid_locs = temp_loc.copy()
             # valid_locs = valid_locs[
-            #     inputs.original_signal.shape[0] - valid_locs >= inputs.l_extract - inputs.l_start
+            #     inputs.original_signal.shape[0] - valid_locs >=
+            #     inputs.l_extract - inputs.l_start
             # ]
             # valid_locs = valid_locs[
             #     valid_locs - inputs.l_start - (inputs.morder * inputs.tau) >= 0
@@ -626,7 +631,8 @@ def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray,
             nvar_actual = inputs.event_stats["OLS"]["At"].shape[1]
         except (KeyError, AttributeError, IndexError):
             raise ValidationError(
-                "Could not determine 'nvar_actual' from inputs.event_stats['OLS']['At']",
+                "Could not determine 'nvar_actual' from "
+                "inputs.event_stats['OLS']['At']",
                 "ols_at_structure",
                 None,
             )
@@ -648,7 +654,8 @@ def perform_desnap_analysis(inputs: DeSnapParams) -> Dict[str, Union[np.ndarray,
                 Sigma_xx_uncond_reg = regularize_if_singular(Sigma_xx_uncond)
                 if not np.allclose(Sigma_xx_uncond, Sigma_xx_uncond_reg):
                     logger.warning(
-                        f"DeSnap: Applied regularization to Sigma_xx_uncond at time step {t}"
+                        f"DeSnap: Applied regularization to Sigma_xx_uncond "
+                        f"at time step {t}"
                     )
 
                 DeSnap_results["event_stats_uncond"]["OLS"]["At"][t, :, :] = (

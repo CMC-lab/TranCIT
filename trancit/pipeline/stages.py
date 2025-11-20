@@ -96,7 +96,8 @@ class EventDetectionStage(PipelineStage):
             ) + self.config.detection.thres_ratio * np.nanstd(D_for_detection)
             temp_locs = np.where(D_for_detection >= d0_threshold)[0]
             logger.info(
-                f"Initial detection: {len(temp_locs)} points above threshold {d0_threshold:.2f}"
+                f"Initial detection: {len(temp_locs)} points above "
+                f"threshold {d0_threshold:.2f}"
             )
 
             align_type = self.config.detection.align_type
@@ -115,17 +116,20 @@ class EventDetectionStage(PipelineStage):
                         D_for_detection, temp_locs_shrink, temp_locs
                     )
                     logger.info(
-                        f"Used pooled alignment with shrinking, found {len(locs)} locations."
+                        f"Used pooled alignment with shrinking, "
+                        f"found {len(locs)} locations."
                     )
                 else:
                     locs = temp_locs
                     logger.info(
-                        f"Used pooled alignment (no shrinking), using {len(locs)} locations."
+                        f"Used pooled alignment (no shrinking), "
+                        f"using {len(locs)} locations."
                     )
         else:
             if self.config.detection.locs is None:
                 raise ValueError(
-                    "config.detection.locs cannot be None when config.options.detection is False"
+                    "config.detection.locs cannot be None when "
+                    "config.options.detection is False"
                 )
             locs = np.array(self.config.detection.locs, dtype=int)
 
@@ -150,7 +154,8 @@ class BorderRemovalStage(PipelineStage):
 
         if len(locs) < original_length:
             logger.info(
-                f"Removed {original_length - len(locs)} locations too close to signal borders."
+                f"Removed {original_length - len(locs)} locations "
+                f"too close to signal borders."
             )
 
         self._log_stage_complete("border removal")
@@ -200,7 +205,8 @@ class BICSelectionStage(PipelineStage):
                         logger.info(f"BIC selected model order: {morder}")
                     else:
                         logger.warning(
-                            "BIC calculation resulted in NaN optimal order. Using default morder."
+                            "BIC calculation resulted in NaN optimal order. "
+                            "Using default morder."
                         )
                 else:
                     logger.error(

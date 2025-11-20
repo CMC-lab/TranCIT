@@ -101,7 +101,8 @@ class BaseAnalyzer(ABC):
     def _log_analysis_start(self, data_shape: tuple) -> None:
         """Log the start of analysis."""
         print(
-            f"Starting {self.__class__.__name__} analysis on data with shape {data_shape}"
+            f"Starting {self.__class__.__name__} analysis on data with shape "
+            f"{data_shape}"
         )
 
     def _log_analysis_complete(self) -> None:

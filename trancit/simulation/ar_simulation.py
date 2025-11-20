@@ -26,7 +26,8 @@ def simulate_ar_event_bootstrap(
     Yt_event : np.ndarray
         Original event data of shape (nvar * (morder + 1), L, trials).
     Yt_stats : dict
-        Dictionary containing OLS coefficients under `OLS.At` of shape (L, nvar, nvar * morder).
+        Dictionary containing OLS coefficients under `OLS.At` of shape
+        (L, nvar, nvar * morder).
     Et : np.ndarray
         Residuals of shape (nvar, L, trials).
 

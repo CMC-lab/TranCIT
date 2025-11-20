@@ -200,6 +200,8 @@ Documentation
    
    examples
    api
+   event_detection_preprocessing
+   software_architecture
    
 .. toctree::
    :maxdepth: 2

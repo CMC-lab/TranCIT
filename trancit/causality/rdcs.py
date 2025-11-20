@@ -106,7 +106,8 @@ class RelativeDCSCalculator(BaseAnalyzer):
             Event data array of shape (nvar * (model_order + 1), nobs, ntrials)
         stats : Dict
             Model statistics with keys:
-            - 'OLS' or 'RLS': Sub-dict with 'At' (coefficients) and 'Sigma_Et' (residual covariance)
+            - 'OLS' or 'RLS': Sub-dict with 'At' (coefficients) and 'Sigma_Et'
+              (residual covariance)
             - 'Sigma': Covariance matrices
             - 'mean': Mean values
         **kwargs
@@ -203,9 +204,10 @@ def time_varying_causality(
     """
     Compute time-varying causality measures for bivariate signals.
 
-    Calculates Transfer Entropy (TE), Dynamic Causal Strength (DCS), and Relative Dynamic Causal
-    Strength (rDCS) based on a VAR model. This function maintains exact mathematical alignment
-    with the previous implementation while providing enhanced error handling and validation.
+    Calculates Transfer Entropy (TE), Dynamic Causal Strength (DCS), and Relative
+    Dynamic Causal Strength (rDCS) based on a VAR model. This function maintains
+    exact mathematical alignment with the previous implementation while providing
+    enhanced error handling and validation.
 
     Parameters
     ----------
@@ -214,7 +216,8 @@ def time_varying_causality(
         Must be bivariate (nvar = 2).
     stats : Dict
         Model statistics with keys:
-        - 'OLS' or 'RLS': Sub-dict with 'At' (coefficients) and 'Sigma_Et' (residual covariance).
+        - 'OLS' or 'RLS': Sub-dict with 'At' (coefficients) and 'Sigma_Et'
+          (residual covariance).
         - 'Sigma': Covariance matrices of shape
           (nobs, nvar * (model_order + 1), nvar * (model_order + 1)).
         - 'mean': Mean values of shape (nvar * (model_order + 1), nobs).
@@ -230,8 +233,10 @@ def time_varying_causality(
     -------
     Dict[str, np.ndarray]
         Causality measures:
-        - 'TE': Transfer Entropy, shape (nobs, 2) where [:, 0] is Y->X, [:, 1] is X->Y.
-        - 'DCS': Dynamic Causal Strength, shape (nobs, 2) where [:, 0] is Y->X, [:, 1] is X->Y.
+        - 'TE': Transfer Entropy, shape (nobs, 2) where [:, 0] is Y->X,
+          [:, 1] is X->Y.
+        - 'DCS': Dynamic Causal Strength, shape (nobs, 2) where [:, 0] is
+          Y->X, [:, 1] is X->Y.
         - 'rDCS': Relative Dynamic Causal Strength, shape (nobs, 2)
           where [:, 0] is Y->X, [:, 1] is X->Y.
 
@@ -247,7 +252,8 @@ def time_varying_causality(
     - The function assumes bivariate data (nvar = 2).
     - Transfer Entropy (TE) measures directed information flow.
     - Dynamic Causal Strength (DCS) measures direct causal influence.
-    - Relative Dynamic Causal Strength (rDCS) measures causal influence relative to a baseline.
+    - Relative Dynamic Causal Strength (rDCS) measures causal influence
+      relative to a baseline.
     - All measures are computed using the Structural Causal Model (SCM) framework.
 
     Examples
@@ -281,7 +287,8 @@ def time_varying_causality(
     old_version = causal_params["old_version"]
 
     logger.info(
-        f"Computing time-varying causality: mode={estim_mode}, morder={morder}, ref_time={ref_time}"
+        f"Computing time-varying causality: mode={estim_mode}, "
+        f"morder={morder}, ref_time={ref_time}"
     )
 
     causality_measures = {

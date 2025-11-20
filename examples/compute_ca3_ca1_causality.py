@@ -1,3 +1,31 @@
+"""
+Compute CA3-CA1 Causality Analysis
+
+This script processes hippocampal LFP recordings to compute causality measures
+between CA3 and CA1 regions during sharp wave-ripple events. It applies the
+TranCIT pipeline to analyze causal relationships using multiple methods (TE, DCS, rDCS).
+
+The data used in this analysis is from the CRCNS HC-3 dataset:
+https://crcns.org/data-sets/hc/hc-3/about-hc-3
+
+The script:
+1. Loads CA3 and CA1 LFP signals from .mat files
+2. Applies bandpass filtering (140-230 Hz) to extract ripple frequency band
+3. Detects sharp wave-ripple events
+4. Runs causality analysis for each channel pair and alignment condition
+5. Saves results as .npz files for visualization
+
+The saved results can be visualized using plot_ca3_ca1_dcs_results.py
+
+Usage:
+    python compute_ca3_ca1_causality.py
+
+Output:
+    Saves .npz files with causality results in the current directory:
+    - ca3_ca1_{sess_name}_chpair_{n}_{align}_model_causality.npz
+    - ca3_ca1_{sess_name}_chpair_{n}_{align}_bootstrap_sample_{m}.npz (if bootstrap enabled)
+"""
+
 import os
 
 import numpy as np
@@ -78,10 +106,7 @@ config = PipelineConfig(
 print("--- Pipeline Configuration ---")
 print(config)
 
-event_rdcs_dir = (
-    "/Users/sali/Documents/Projects/cmcLab/repos/rtdac/localdata/"
-    "causal_analysis/event_rdcs/"
-)
+event_rdcs_dir = "event_rdcs"
 sess_name = "vvp01_2006-4-9_18-43-47"
 ca3_mat_path = os.path.join(event_rdcs_dir, f"{sess_name}_CA3.mat")
 ca1_mat_path = os.path.join(event_rdcs_dir, f"{sess_name}_CA1.mat")
