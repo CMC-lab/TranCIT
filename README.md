@@ -105,13 +105,13 @@ config = PipelineConfig(
 # Run analysis
 orchestrator = PipelineOrchestrator(config)
 try:
-    result = orchestrator.run(original_signal, detection_signal)
-    
-    # Access results
-    if result.results.get("CausalOutput"):
-        dcs_values = result.results["CausalOutput"]["OLS"]["DCS"]
-        te_values = result.results["CausalOutput"]["OLS"]["TE"]
-        print(f"DCS shape: {dcs_values.shape}")
+result = orchestrator.run(original_signal, detection_signal)
+
+# Access results
+if result.results.get("CausalOutput"):
+    dcs_values = result.results["CausalOutput"]["OLS"]["DCS"]
+    te_values = result.results["CausalOutput"]["OLS"]["TE"]
+    print(f"DCS shape: {dcs_values.shape}")
     else:
         print("No events detected. Try adjusting thres_ratio or use real data.")
 except Exception as e:
@@ -135,7 +135,7 @@ coefficients, residuals, log_likelihood, hessian_sum = (
     estimator.estimate_var_coefficients(
         data, model_order=4, max_model_order=6, 
         time_mode="inhomo", lag_mode="infocrit"
-    )
+)
 )
 
 print(f"Coefficients shape: {coefficients.shape}")
