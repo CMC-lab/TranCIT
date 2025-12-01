@@ -53,7 +53,7 @@ We present `trancit` (Transient Causal Interaction Toolbox), an open-source Pyth
 The package offers an integrated solution for causal effect estimation and analysis, including:
 
 - **Advanced causal analysis methods:** GC, TE, robust Structural Causal Model(SCM)-based Dynamic Causal Strength (DCS), and relative Dynamic Causal Strength (rDCS).
-- **Event-based preprocessing:** Automated event detection, data alignment, and artefact rejection pipeline.
+- **Event-based preprocessing:** Automated event detection, data alignment, and artifact rejection pipeline.
 - **Simulation tools:** Synthetic autoregressive (AR) time-series data generation with known causal structures for validation and exploring scenarios.
 
 TranCIT primarily estimates directed causal effects in multivariate time series. Because these effects are zero when no causation exists, testing against zero also enables causal discovery. However, our primary focus is quantifying and tracking these effects over time, not proposing a discovery method.
@@ -77,7 +77,7 @@ TranCIT employs four primary methods to detect and quantify causal relationships
 - **Dynamic Causal Strength (DCS):** SCM-based method overcoming the "synchrony pitfall" where TE fails during high synchronization periods. Since it quantifies time-varying causal influence through a principled interventional approach.
 - **relative Dynamic Causal Strength (rDCS):** Event-based extension quantifying causal effects relative to baseline periods. It quantifies causal effects relative to a pre-defined baseline or reference period, making it exceptionally sensitive to the deterministic shifts in signal dynamics that often characterize event-related data.
 
-TranCIT provides integrated preprocessing for event detection using threshold-based methods with peak or pooled alignment, data alignment, and artefact rejection, as well as simulation tools for generating synthetic AR data with known causal structures for validation and education [@nouri2025trancit][Event Detection Preprocessing](../docs/event_detection_preprocessing.rst).
+TranCIT provides integrated preprocessing for event detection using threshold-based methods with peak or pooled alignment, data alignment, and artifact rejection, as well as simulation tools for generating synthetic AR data with known causal structures for validation and education [@nouri2025trancit][Event Detection Preprocessing](../docs/event_detection_preprocessing.rst).
 
 ## Example
 
