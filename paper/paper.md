@@ -77,7 +77,7 @@ TranCIT employs four primary methods to detect and quantify causal relationships
 - **Dynamic Causal Strength (DCS):** SCM-based method overcoming the "synchrony pitfall" where TE fails during high synchronization periods. Since it quantifies time-varying causal influence through a principled interventional approach.
 - **relative Dynamic Causal Strength (rDCS):** Event-based extension quantifying causal effects relative to baseline periods. It quantifies causal effects relative to a pre-defined baseline or reference period, making it exceptionally sensitive to the deterministic shifts in signal dynamics that often characterize event-related data.
 
-TranCIT provides integrated preprocessing for event detection using threshold-based methods with peak or pooled alignment, data alignment, and artifact rejection, as well as simulation tools for generating synthetic AR data with known causal structures for validation and education [@nouri2025trancit][Event Detection Preprocessing](../docs/event_detection_preprocessing.rst).
+TranCIT provides integrated preprocessing for event detection using threshold-based methods with peak or pooled alignment, data alignment, and artifact rejection, as well as simulation tools for generating synthetic AR data with known causal structures for validation and education [@nouri2025trancit] [Event Detection Preprocessing](https://trancit.readthedocs.io/en/latest/event_detection_preprocessing.html).
 
 ## Example
 
