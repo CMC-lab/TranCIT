@@ -1,8 +1,9 @@
 """
 Helper functions for Dynamic Causal Strength (DCS).
 
-This module provides utility functions for covariance computation, coefficient estimation,
-and multi-variable linear regression. These functions support the core DCS algorithms.
+This module provides utility functions for covariance computation, coefficient
+estimation, and multi-variable linear regression. These functions support the
+core DCS algorithms.
 """
 
 import logging
@@ -22,14 +23,16 @@ def compute_covariances(
     """
     Compute covariance matrices for lagged data.
 
-    This function computes covariance matrices for each time step using NumPy's `np.cov`.
-    It assumes two variables (Y and X) and processes their lagged data accordingly.
+    This function computes covariance matrices for each time step using NumPy's
+    `np.cov`. It assumes two variables (Y and X) and processes their lagged data
+    accordingly.
 
     Parameters
     ----------
     lagged_data_array : np.ndarray
         Lagged data array of shape (variables, model_order, time_steps, trials).
-        The first dimension corresponds to variables, with index 0 as Y and index 1 as X.
+        The first dimension corresponds to variables, with index 0 as Y and
+        index 1 as X.
     n_time_steps : int
         Number of time steps.
     model_order : int
@@ -44,9 +47,11 @@ def compute_covariances(
         - cov_Yp : np.ndarray
             Covariance of Y past (shape: (time_steps, model_order, model_order)).
         - C_XYp : np.ndarray
-            Cross-covariance X past to Y past (shape: (time_steps, model_order, model_order)).
+            Cross-covariance X past to Y past (shape: (time_steps, model_order,
+            model_order)).
         - C_YXp : np.ndarray
-            Cross-covariance Y past to X past (shape: (time_steps, model_order, model_order)).
+            Cross-covariance Y past to X past (shape: (time_steps, model_order,
+            model_order)).
 
     Raises
     ------

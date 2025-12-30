@@ -28,5 +28,7 @@ def morlet(start: float, end: float, num_points: int) -> np.ndarray:
     wavelet = (
         (1 / np.sqrt(sigma)) * np.exp(1j * w0 * t) * np.exp(-(t**2) / (2 * (sigma**2)))
     )
-    # wavelet = np.exp(1j * start * t) * np.exp(-t ** 2 / (2 * (end ** 2))) # For perturbation
+    # wavelet = np.exp(1j * start * t) * np.exp(
+    #     -t ** 2 / (2 * (end ** 2))
+    # )  # For perturbation
     return np.real(wavelet)

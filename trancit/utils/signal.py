@@ -16,9 +16,9 @@ def find_best_shrinked_locations(
     """
     Find the best subset of shrinked locations by minimizing histogram distance.
 
-    Computes the histogram of the full set of locations (`all_locations`) and compares it to
-    histograms of subsets of `shrinked_locations` using Euclidean distance. Returns the subset
-    that minimizes this distance.
+    Computes the histogram of the full set of locations (`all_locations`) and compares
+    it to histograms of subsets of `shrinked_locations` using Euclidean distance.
+    Returns the subset that minimizes this distance.
 
     Args:
         signal (np.ndarray): 1D array of signal or data values.
@@ -28,8 +28,10 @@ def find_best_shrinked_locations(
 
     Returns:
         Tuple[np.ndarray, np.ndarray]:
-            - best_locations: Subset of `shrinked_locations` with minimal histogram distance.
-            - distances: Array of distances for each subset size, with NaN for sizes < 100.
+            - best_locations: Subset of `shrinked_locations` with minimal histogram
+              distance.
+            - distances: Array of distances for each subset size, with NaN for sizes
+              < 100.
 
     Raises:
         ValueError: If input arrays are empty or incompatible with `num_bins`.
@@ -68,7 +70,8 @@ def shrink_locations_resample_uniform(
     """
     Uniformly resample locations with a minimum distance between points.
 
-    Iteratively selects locations randomly, ensuring each new location is at least `min_distance`
+    Iteratively selects locations randomly, ensuring each new location is at least
+    `min_distance`
     away from previously selected ones, until no more can be added.
 
     Args:
@@ -92,7 +95,8 @@ def shrink_locations_resample_uniform(
     available_locations = locations.copy()
     max_number_generation = len(available_locations)
     logger.debug(
-        f"Starting resampling with {len(locations)} locations and min_distance {min_distance}."
+        f"Starting resampling with {len(locations)} locations and "
+        f"min_distance {min_distance}."
     )
 
     while len(selected_locations) < max_number_generation:
@@ -116,8 +120,8 @@ def find_peak_locations(
     """
     Refine peak locations by grouping candidates and local maximization.
 
-    Groups candidate locations within `window_size`, finds the maximum in each group, and refines
-    the peak within a local window around each maximum.
+    Groups candidate locations within `window_size`, finds the maximum in each group,
+    and refines the peak within a local window around each maximum.
 
     Args:
         signal (np.ndarray): 1D array of signal data.

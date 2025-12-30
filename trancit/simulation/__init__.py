@@ -1,8 +1,8 @@
 """
 Simulation module for the TranCIT package.
 
-This module provides various simulation functions for generating synthetic time series data
-for testing and demonstration purposes.
+This module provides various simulation functions for generating synthetic
+time series data for testing and demonstration purposes.
 
 Submodules:
 - ar_simulation: Autoregressive process simulations
