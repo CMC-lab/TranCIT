@@ -52,7 +52,7 @@ We present `trancit` (Transient Causal Interaction Toolbox), an open-source Pyth
 
 The package offers an integrated solution for causal effect estimation and analysis, including:
 
-- **Advanced causal analysis methods:** GC, TE, robust Structural Causal Model(SCM)-based Dynamic Causal Strength (DCS), and relative Dynamic Causal Strength (rDCS).
+- **Advanced causal analysis methods:** GC, TE, robust Structural Causal Model (SCM)-based Dynamic Causal Strength (DCS), and relative Dynamic Causal Strength (rDCS).
 - **Event-based preprocessing:** Automated event detection, data alignment, and artifact rejection pipeline.
 - **Simulation tools:** Synthetic autoregressive (AR) time-series data generation with known causal structures for validation and exploring scenarios.
 
