@@ -48,7 +48,7 @@ url: "https://trancit.readthedocs.io/en/latest/"
 
 The study of complex systems, particularly neural circuits and cognitive functions, requires understanding causal interactions during brief, transient events [@logothetisHippocampalCorticalInteraction2012; @womelsdorfBurstFiringSynchronizes2014; @nitzanBrainwideInteractionsHippocampal2022; @safaviBrainComplexSystem2022; @safaviUncoveringOrganizationNeural2023; @lundqvistBetaBurstsCognition2024]. Traditional causality methods, such as Granger causality (GC) [@granger1969investigating] and Transfer Entropy (TE) [@Schreiber2000], assume stationarity and require long data segments, making them suboptimal for event-driven analysis [@mitra2007observed].
 
-We present `trancit` (Transient Causal Interaction Toolbox), an open-source Python package for causal inference in multivariate time series, emphasising the quantification of directed causal interactions during transient dynamics[@nouri_2025_trancit_package; @nouri2025trancit]. TranCIT provides a comprehensive pipeline for dynamic causal analysis, translating the robust causal learning algorithm originally introduced in MATLAB [@shao2023transient] to Python and extending it with a modular pipeline architecture, improved error handling, and enhanced integration with modern data science workflows. Built on NumPy [@harris2020array] and SciPy [@virtanen2020fundamental], TranCIT integrates seamlessly into modern data science workflows.
+We present `trancit` (Transient Causal Interaction Toolbox), an open-source Python package for causal inference in multivariate time series, emphasising the quantification of directed causal interactions during transient dynamics [@nouri_2025_trancit_package; @nouri2025trancit]. TranCIT provides a comprehensive pipeline for dynamic causal analysis, translating the robust causal learning algorithm originally introduced in MATLAB [@shao2023transient] to Python and extending it with a modular pipeline architecture, improved error handling, and enhanced integration with modern data science workflows. Built on NumPy [@harris2020array] and SciPy [@virtanen2020fundamental], TranCIT integrates seamlessly into modern data science workflows.
 
 The package offers an integrated solution for causal effect estimation and analysis, including:
 
@@ -89,7 +89,7 @@ To demonstrate its utility on real-world scientific data, TranCIT is used to ana
 
 ![Demonstration of `trancit` on real-world LFP data showing directed causality from hippocampal area CA3 to CA1. The analysis successfully identifies transient information flow during sharp-wave ripple events using the package's built-in rDCS method. \label{fig:ca1_ca3_analysis}](figures/4_ca3_ca1_analysis.pdf "Figure 2: Event-based causal analysis of hippocampal LFP data. The plot shows a transient increase in directed influence from CA3 to CA1, computed using rDCS.")
 
-Code snippets and detailed instructions for reproducing these figures and their simulation results are available in [`examples/README.md`](../examples/README.md) in the repository.
+Code snippets and detailed instructions for reproducing these figures and their simulation results are available in [`examples/README.md`](https://trancit.readthedocs.io/en/latest/examples.html) in the repository.
 
 ## Implementation details
 
