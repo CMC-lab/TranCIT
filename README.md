@@ -6,7 +6,8 @@
 [![CI](https://github.com/CMC-lab/TranCIT/actions/workflows/ci.yml/badge.svg)](https://github.com/CMC-lab/TranCIT/actions/workflows/ci.yml)
 [![Documentation](https://readthedocs.org/projects/trancit/badge/?version=latest)](https://trancit.readthedocs.io/en/latest/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16998396.svg)](https://doi.org/10.5281/zenodo.16998396)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18098917.svg)](https://doi.org/10.5281/zenodo.18098917)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.09302/status.svg)](https://doi.org/10.21105/joss.09302)
 
 TranCIT (Transient Causal Interaction Toolbox) is a Python package for quantifying
 causal relationships in multivariate time series data. It provides methods for
@@ -226,6 +227,18 @@ If you use **TranCIT** in your research, please cite:
   publisher={Frontiers Media SA}
 }
 
+@article{nouri2025trancit_joss,
+  title={TranCIT: Transient Causal Interaction Toolbox},
+  author={Nouri, Salar and Shao, Kaidi and Safavi, Shervin},
+  journal={Journal of Open Source Software},
+  volume={10},
+  number={116},
+  pages={9302},
+  year={2025},
+  doi={10.21105/joss.09302},
+  url={https://doi.org/10.21105/joss.09302}
+}
+
 @article{nouri2025trancit, 
       title={TranCIT: Transient Causal Interaction Toolbox},  
       author={Nouri, Salar and Shao, Kaidi and Safavi, Shervin}, 
@@ -246,8 +259,8 @@ And cite this software package:
   month        = aug,
   year         = 2025,
   publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.16998396},
-  url          = {https://doi.org/10.5281/zenodo.16998396},
+  doi          = {10.5281/zenodo.18098917},
+  url          = {https://doi.org/10.5281/zenodo.18098917},
 }
 ```
 
